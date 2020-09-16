@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DfxParser", "DfxParser\DfxParser.vcxproj", "{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BryxParser", "BryxParser\BryxParser.vcxitems", "{EFEFD3EE-DF52-413B-AF1C-DFA52564E464}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		BryxParser\BryxParser.vcxitems*{2108b78d-591e-4507-9a41-a2ec1fae7fa2}*SharedItemsImports = 4
+		BryxParser\BryxParser.vcxitems*{efefd3ee-df52-413b-af1c-dfa52564e464}*SharedItemsImports = 9
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Debug|x64.ActiveCfg = Debug|x64
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Debug|x64.Build.0 = Debug|x64
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Debug|x86.ActiveCfg = Debug|Win32
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Debug|x86.Build.0 = Debug|Win32
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Release|x64.ActiveCfg = Release|x64
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Release|x64.Build.0 = Release|x64
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Release|x86.ActiveCfg = Release|Win32
+		{2108B78D-591E-4507-9A41-A2EC1FAE7FA2}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6DDB671B-AA34-480E-B20D-6190CEAF14B9}
+	EndGlobalSection
+EndGlobal

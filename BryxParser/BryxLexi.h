@@ -1,0 +1,441 @@
+#pragma once
+
+// "Bryx" stands for "Bryan Exchange". It's my own file format. It has the same
+// structure as Json, in fact, there is a one to one mapping by design. But Bryx
+// simplifies some of the syntax. In most places, you don't need quotes in field
+// names and keys unless you have white space in them, or some other non-alphanumeric
+// characters, or you start the field with a digit when a number is not expected.
+// (This is to keep one-to-one design mapping with Json.)
+// We also use '=' instead of ':' for property - value separators. It's 
+// is simply easier to see than ':',  which is easy to miss.
+// Because the mapping is one-to-one, there are routines built-in to go back and
+// forth between JSON and Bryx. There is one restriction with Bryx files that 
+// differ from JSON files. Some elements can only be allowed on one line.
+
+#include <iostream>
+#include <sstream>
+#include <istream>
+#include <string>
+
+//using namespace std;
+
+namespace bryx
+{
+
+	enum class TokenEnum
+	{
+		// Low level
+
+		Alpha,
+		LeftBrace,
+		RightBrace,
+		LeftSquareBracket,
+		RightSquareBracket,
+		NVSeparator,      // determine at file parse time or via SyntaxMode flag. can be one of ':' or '='
+		TrialNVSeparator, // Can be either ':' or '='
+		WhiteSpace,
+		DoubleQuote,
+		Zero,
+		Digit,
+		OneNine,
+		HexDigit,
+		Period,
+		PlusSign,
+		MinusSign,
+		Exponent,
+		Comma,
+		Escape,
+		OtherChar,
+
+		// higher level sequences
+
+		QuotedChars,     // sequence of characters surrounded by double quotes
+		UnquotedChars,   // sequence of characters that are either alphanumeric, or a select set of characters (esp no ws or quotes or =)
+		WholeNumber,     // sequence of characters that are digits only, with optional sign prefix
+		FloatingNumber,  // sequence of characters that has valid floating point syntax
+		NumberWithUnits, // sequence of characters that has valid whole number or floating point syntax, with option alpha unit characters
+		True,            // the sequence of characters 'true', no quotes
+		False,           // the sequence of characters 'false', no quotes
+		Null,            // the sequence of characters 'null', no quotes
+		Empty,           // A default token, with no data
+		SOT,             // signal start of tokens (ie., we haven't read any in yet)
+		EOT,             // signal end of tokens
+		ERROR            // signal error
+	};
+
+	extern std::string to_string(TokenEnum e);
+
+	inline bool IndicatesEnd(TokenEnum t)
+	{
+		return t == TokenEnum::EOT;
+	}
+
+
+	inline bool IndicatesError(TokenEnum t)
+	{
+		return t == TokenEnum::ERROR;
+	}
+
+	inline bool IndicatesQuit(TokenEnum t)
+	{
+		return t == TokenEnum::ERROR || t == TokenEnum::EOT;
+	}
+
+	inline bool IsNumeric(TokenEnum t)
+	{
+		return t == TokenEnum::WholeNumber ||
+			t == TokenEnum::FloatingNumber ||
+			t == TokenEnum::NumberWithUnits;
+	}
+	// ////////////////////////////////////////////////////////////////////////////////
+
+	struct TokenExtent
+	{
+		int srow; // starting row of token
+		int erow; // ending row of token
+		int scol; // starting col of token
+		int ecol; // one past ending col of token
+
+		// In the below, we default to a one row extent, but a zero sized column extent
+
+		TokenExtent() : srow(1), erow(2), scol(1), ecol(1) { }
+		TokenExtent(int srow_, int scol_) : srow(srow_), erow(srow_+1), scol(scol_), ecol(scol_) { }
+		TokenExtent(int srow_, int scol_, int ecol_) : srow(srow_), erow(srow_ + 1), scol(scol_), ecol(ecol_) { }
+		TokenExtent(const TokenExtent& other) : srow(other.srow), erow(other.erow), scol(other.scol), ecol(other.ecol) { }
+		TokenExtent& operator=(const TokenExtent& other) { srow = other.srow; erow = other.erow, scol = other.scol; ecol = other.ecol; return *this; }
+		void Clear() { srow = 1; erow = 2, scol = 1; ecol = 1; }
+		void Bump(int n = 1) { ecol += n; }
+		void CopyStart(const TokenExtent & other) { srow = other.srow; erow = other.erow; }
+		void MakeSingleLineExtent(int posn) { srow = 1; erow = 1; scol = 1; ecol = posn + 1; }
+	};
+
+	// ////////////////////////////////////////////////////////////////////////////////
+
+
+	enum class LexiResult
+	{
+		NoError,
+		UnexpectedChar,
+		UnhandledState,
+		UnterminatedString,
+		UnexpectedDecimalPoint,
+		InvalidEscapedChar,
+		InvalidStartingToken,
+		Unsupported,
+		UnexpectedEOF
+	};
+
+	extern std::string to_string(LexiResult r);
+
+	// //////////////////////////////////////////////////////////////////////////////////
+
+	constexpr const char* MetricPrefixes[] = { "femto", "pico", "nano", "micro", "milli", "", "kilo", "Mega", "Giga", "Tera", "Peta" };
+	constexpr char MetricPrefixMonikerChars[]{ 'f', 'p', 'n', 'u', 'm', '\0', 'k', 'M', 'G', 'T', 'P' };
+	constexpr int MetricExps[]{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+
+	constexpr const char* ratioUnits[] = { "dB", "X", "%" };
+
+	class LexiNumberTraits {
+	public:
+
+		int decimal_point_locn; // -1 if no decimal point
+		int exponent_locn;      // -1 if no exponent
+		int ratio_units_locn;   // -1 if none
+		int metric_pfx_locn;    // -1 if none
+		int generic_units_locn; // -1 if no other kind of units
+		int end_locn;
+		bool could_be_a_number; // even if quoted, it could be valid number if quotes were removed
+
+	public:
+
+		LexiNumberTraits() { clear(); }
+
+		void clear()
+		{
+			decimal_point_locn = -1;
+			exponent_locn = -1;
+			ratio_units_locn = -1;
+			metric_pfx_locn = -1;
+			generic_units_locn = -1;
+			could_be_a_number = false;
+		}
+
+		bool HasDecimal() const { return decimal_point_locn >= 1; }
+		bool HasExponent() const { return exponent_locn >= 2; }
+		bool IsWholeNumber() const { return !HasDecimal() && !HasExponent(); }
+		bool IsFloatingNumber() const { return HasDecimal() || HasExponent(); }
+		bool HasUnits() const { return HasRatioUnits() || HasGenericUnits(); }
+		bool HasRatioUnits() const { return ratio_units_locn != -1; }
+		bool HasMetricPrefix() const { return metric_pfx_locn > 4; }
+		bool HasGenericUnits() const { return generic_units_locn != -1; }
+	};
+
+	// //////////////////////////////////////////////////////////////////////////////////
+
+	class LexiResultPkg {
+	public:
+		std::string msg;
+		LexiResult code;
+		TokenExtent extent;
+	public:
+
+		LexiResultPkg();
+		LexiResultPkg(std::string msg_, LexiResult code_, const TokenExtent &extent_);
+		LexiResultPkg(const LexiResultPkg& other);
+		LexiResultPkg(LexiResultPkg&& other) noexcept;
+
+		LexiResultPkg& operator=(const LexiResultPkg& other);
+		LexiResultPkg& operator=(LexiResultPkg&& other) noexcept;
+
+		void Clear();
+		void ResetMsg();
+		void Print(std::ostream& sout) const;
+	};
+
+
+	// ////////////////////////////////////////////////////////////////////////////////
+
+	class Token {
+	public:
+
+		TokenEnum type;
+		TokenExtent extent;         
+		std::string text;                // Will get instantiated with text from the source
+		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
+		LexiResultPkg result_pkg;        // Will get filled in for error tokens
+
+		static const TokenExtent def_extent;
+
+	public:
+
+		Token(TokenEnum type_, std::string text_, const TokenExtent &extent_);
+		Token(TokenEnum type_, std::string text_);
+		explicit Token(TokenEnum type_);
+		Token(const Token& other);
+		Token(Token&& other) noexcept;
+
+		virtual ~Token() {  }
+
+		Token& operator=(const Token& other);
+		Token& operator=(Token&& other) noexcept;
+
+		void AddResult(const LexiResultPkg& rp);
+
+	public:
+
+		void seek_to(std::streambuf& sb, size_t p) const
+		{
+			sb.pubseekoff(p, std::ios_base::beg);
+		}
+
+	public:
+
+		virtual std::string to_string(std::streambuf& sb) const;
+
+		bool IsEndToken() const
+		{
+			return bryx::IndicatesEnd(type);
+		}
+
+		bool IsErrorToken() const
+		{
+			return bryx::IndicatesError(type);
+		}
+
+		bool IsQuitToken() const
+		{
+			return bryx::IndicatesQuit(type);
+		}
+
+	public:
+
+		void Print(std::ostream& sout) const;
+	};
+
+
+	// ///////////////////////////////////////////////////////////////////////////////////////////////
+	// Lexi
+	// ////////////////////////////////////////////////////////////////////////////////////////////////
+
+	enum class SyntaxModeEnum
+	{
+		Json,
+		Bryx
+	};
+
+	class Lexi {
+	public:
+
+		std::istream src;
+
+		std::ostringstream temp_buf;
+
+		LexiResultPkg last_lexical_error;
+
+		Token prev_token;
+		Token curr_token;
+
+		TokenExtent lexi_posn;  // NOTE: We are just using scol and srow of this for positioning info
+
+		int token_cnt;
+
+		bool preserve_white_space;
+
+		SyntaxModeEnum syntax_mode;
+		bool auto_detect_syntax;
+		bool debug_mode;
+
+	public:
+
+		Lexi();
+		explicit Lexi(std::streambuf* sb_);
+
+		virtual ~Lexi() { };
+
+		void SetStreamBuf(std::streambuf* sb_)
+		{
+			src.rdbuf(sb_);
+		}
+
+		void SetSyntaxMode(SyntaxModeEnum mode_)
+		{
+			syntax_mode = mode_;
+		}
+
+	public:
+
+		inline static bool IsAlpha(int c)
+		{
+			// Not doing unicode right now
+			return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) ? true : false;
+		}
+
+		inline static bool IsWhiteSpace(int c)
+		{
+			return (c == ' ' || c == '\r' || c == '\n' || c == '\t') ? true : false;
+		}
+
+		inline static bool IsZero(int c)
+		{
+			return c == '0';
+		}
+
+		inline static bool IsOneNine(int c)
+		{
+			return (c >= '1' && c <= '9');
+		}
+
+		inline static bool IsDigit(int c)
+		{
+			return IsZero(c) || IsOneNine(c);
+		}
+
+		inline static bool IsHexDigit(int c)
+		{
+			return ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) ? true : false;
+		}
+
+		inline static bool IsBackSlash(int c)
+		{
+			return c == '\\';
+		}
+
+		inline static bool IsExponentMarker(int c)
+		{
+			return c == 'e' || c == 'E';
+		}
+
+		inline static bool IsSign(int c)
+		{
+			return c == '+' || c == '-';
+		}
+
+		bool IsNVSeparator(int c)
+		{
+			return syntax_mode == SyntaxModeEnum::Bryx ? c == '=' : c == ':';
+		}
+
+		static bool IsTrialNVSeparator(int c)
+		{
+			return c == '=' || c == ':';
+		}
+
+		char NVSeparator()
+		{
+			return syntax_mode == SyntaxModeEnum::Bryx ? '=' : ':';
+		}
+
+		SyntaxModeEnum NVSeparatorType(int c)
+		{
+			return c == '=' ? SyntaxModeEnum::Bryx : SyntaxModeEnum::Json;
+		}
+
+		bool StringNeedsQuotes(const std::string& s) const;
+
+		bool NeedsQuotes(const Token& tkn) const;
+
+	protected:
+
+		void LogError(LexiResult result_, std::string msg_, const TokenExtent &eztent_);
+
+		inline void ClearTempBuff()
+		{
+			std::ostringstream().swap(temp_buf); // swap with a default constructed stringstream
+		}
+
+		inline void AppendChar(int c)
+		{
+			//temp_buf.sputc(c);
+			temp_buf.put(c);
+		}
+
+		int GetFilteredChar();
+
+		inline int NextPeek()
+		{
+			// Rather than peek at the current char, we advance past
+			// it and peek at the next char.
+			GetFilteredChar();
+			return src.peek();
+		}
+
+
+		inline int AppendAbsorbPeek(int c)
+		{
+			AppendChar(c);
+			return NextPeek();
+		}
+
+		TokenExtent WhereAreWe();
+
+		int SkipWhiteSpace();
+
+	public:
+
+		Token& Start();
+
+		Token& Peek()
+		{
+			return curr_token;
+		}
+
+		Token& Next();
+
+		void AcceptToken(Token& tkn, bool advance);
+
+	protected:
+
+		LexiResult PerformSanityCheck();
+		LexiResult CollectSingleCharToken(TokenEnum type, int c);
+		LexiResult CollectQuotedChars();
+		int HandleEscapedChar(int c);
+		LexiResult CollectUnquotedChars();
+		LexiResult CollectNumber();
+
+	public:
+
+		static LexiResult CollectQuotedNumber(const std::string text, LexiNumberTraits &number_traits);
+
+	};
+
+}; // end of namespace
