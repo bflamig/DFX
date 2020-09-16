@@ -106,6 +106,8 @@ namespace bryx
 			return errcnt;
 		}
 
+#if 0
+
 		const object_map_type* GetKit(std::string name) const
 		{
 			const object_map_type* omp = GetObjectProperty(root_map, name);
@@ -141,6 +143,8 @@ namespace bryx
 			}
 		}
 
+#endif
+
 	public:
 
 		bool Verify();
@@ -164,7 +168,9 @@ namespace bryx
 		DfxVerifyResult LogError(const std::string prop, DfxVerifyResult err);
 		void EndLog();
 
-		void WriteFont(std::ostream& sout);
+		void WriteDfx(std::ostream& sout);
+		void WriteDfx(std::ostream& sout, SyntaxModeEnum synmode);
+
 	};
 
 }; // end of namespace

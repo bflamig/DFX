@@ -845,9 +845,15 @@ namespace bryx
 
 	/////////////////////////////////////////////////////////////////////
 
-
-	void DfxParser::WriteFont(std::ostream& sout)
+	void DfxParser::WriteDfx(std::ostream& sout)
 	{
+		WriteDfx(sout, lexi.syntax_mode);
+	}
+
+	void DfxParser::WriteDfx(std::ostream& sout, SyntaxModeEnum synmode)
+	{
+		lexi.syntax_mode = synmode;
+
 		if (lexi.syntax_mode == SyntaxModeEnum::Bryx)
 		{
 			sout << file_moniker << " = \n";

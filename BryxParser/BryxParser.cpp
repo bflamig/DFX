@@ -1227,49 +1227,6 @@ namespace bryx
 
 	static constexpr int indent_amt = 3;
 
-	//auto jelly_fred = std::unordered_multimap<const std::string, std::shared_ptr<Value>>();
-
-
-
-	void Parser::PrintWalkPair(std::ostream& sout, const nv_type& pair, int indent)
-	{
-		if (lexi.StringNeedsQuotes(pair.first))
-		{
-			sout << '"' << pair.first << '"';  // the name
-		}
-		else
-		{
-			sout << pair.first;  // the name
-		}
-
-		sout << ' ' << lexi.NVSeparator() << ' ';
-
-		const auto& valley = pair.second;
-
-		PrintWalk(sout, *valley, indent + indent_amt);
-	}
-
-#if 0
-	void Parser::PrintWalkPair(std::ostream& sout, const std::pair<std::string, std::shared_ptr<Value>>& pair, int indent)
-	// @@ THIS IS A HACK FOR vector type Object mapping. Notice not const keyword on std::string above!
-	{
-		if (lexi.StringNeedsQuotes(pair.first))
-		{
-			sout << '"' << pair.first << '"';  // the name
-		}
-		else
-		{
-			sout << pair.first;  // the name
-		}
-
-		sout << ' ' << lexi.NVSeparator() << ' ';
-
-		const auto& valley = pair.second;
-
-		PrintWalk(sout, *valley, indent + indent_amt);
-	}
-#endif
-
 	void Parser::PrintWalk(std::ostream& sout, const Value& jv, int indent)
 	{
 		switch (jv.type)
@@ -1464,6 +1421,24 @@ namespace bryx
 		{
 			sout << ' ';
 		}
+	}
+
+	void Parser::PrintWalkPair(std::ostream& sout, const nv_type& pair, int indent)
+	{
+		if (lexi.StringNeedsQuotes(pair.first))
+		{
+			sout << '"' << pair.first << '"';  // the name
+		}
+		else
+		{
+			sout << pair.first;  // the name
+		}
+
+		sout << ' ' << lexi.NVSeparator() << ' ';
+
+		const auto& valley = pair.second;
+
+		PrintWalk(sout, *valley, indent + indent_amt);
 	}
 
 }; // end of namespace

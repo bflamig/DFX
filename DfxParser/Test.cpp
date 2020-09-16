@@ -34,7 +34,7 @@ std::shared_ptr<DfxParser> OpeningCredits(SyntaxModeEnum syntax_mode)
 	}
 	else
 	{
-		df->WriteFont(std::cout);
+		df->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
 		std::cout << std::endl;
 		return df;
 	}
@@ -42,7 +42,7 @@ std::shared_ptr<DfxParser> OpeningCredits(SyntaxModeEnum syntax_mode)
 	return nullptr;
 }
 
-int explore3()
+int explore()
 {
 	auto df = OpeningCredits(SyntaxModeEnum::Bryx);
 
@@ -72,8 +72,6 @@ int explore3()
 
 int main()
 {
-	//explore1();
-	//explore2();
-	explore3();
+	explore();
 	return 0;
 }
