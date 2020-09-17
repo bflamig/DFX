@@ -12,11 +12,9 @@
  * of sample levels to achieve a unified, pleasing mix of sounds. Mechanisms
  * such as velocity layers and round robins are supported for this purpose.
  *
- * This exchange format has a nested syntax with a one to one mapping to the
- * Json syntax widely used on the web, but simplified to be easier to read and
- * write. Because of the one-to-one mapping, it's easy to translate DFX files
- * into Json files that can be processed by any software that supports Json
- * syntax.
+ * This exchange format has a one to one mapping to the widely used Json syntax,
+ * simplified to be easier to read and write. It is easy to translate DFX files
+ * into Json files that can be processed by any software supporting Json syntax.
  *
  ******************************************************************************
  *
@@ -35,7 +33,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
-
 
 enum class MapTypeEnum
 {
