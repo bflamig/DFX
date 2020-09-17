@@ -47,8 +47,8 @@ namespace bryx
 		NoError,
 		FileNotFound,
 		InvalidFileType,
-		PathMustBeSpecified,
-		PathMustBeString,
+		MustBeSpecified,
+		MustBeString,
 		NoteMissing,
 		NoteMustBeWholeNumber,
 		KitsMissing,
@@ -197,6 +197,7 @@ namespace bryx
 		bool VerifyVelocityLayer(const std::string zzz, std::shared_ptr<Value>& vlayer_sh_ptr);
 		bool VerifyRobins(const std::string zzz, const object_map_type* parent_map_ptr);
 		bool VerifyRobin(const std::string zzz, std::shared_ptr<NameValue>& robin_nv_ptr);
+		bool VerifyFname(const std::string zzz, const object_map_type* parent_map, bool must_be_specified);
 		bool VerifyOffset(const std::string zzz, const object_map_type* parent_map, bool offset_must_be_specified);
 		bool VerifyPeak(const std::string zzz, const object_map_type* parent_map, bool peak_must_be_specified);
 		bool VerifyRMS(const std::string zzz, const object_map_type* parent_map, bool rms_must_be_specified);

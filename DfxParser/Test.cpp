@@ -45,13 +45,13 @@ using namespace bryx;
 
 std::shared_ptr<DfxParser> OpeningCredits(SyntaxModeEnum syntax_mode)
 {
-	std::string filename;
+	std::string filename = "../TestFiles/Test1.dfx";
 
-	if (syntax_mode == SyntaxModeEnum::Bryx)
-	{
-		filename = "C:/users/bryan/onedrive/documents/DrumFont2.bryx";
-	}
-	else filename = "C:/users/bryan/onedrive/documents/DrumFont2.json";
+	//if (syntax_mode == SyntaxModeEnum::Bryx)
+	//{
+	//	filename = "C:/users/bryan/onedrive/documents/Test1.dfx";
+	//}
+	//else filename = "C:/users/bryan/onedrive/documents/DrumFont2.json";
 
 	auto df = std::make_shared<DfxParser>();
 

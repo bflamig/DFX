@@ -49,8 +49,8 @@ namespace bryx
 			case DfxVerifyResult::NoError: s = "NoError"; break;
 			case DfxVerifyResult::FileNotFound: s = "File not found"; break;
 			case DfxVerifyResult::InvalidFileType: s = "Invalid file type"; break;
-			case DfxVerifyResult::PathMustBeSpecified: s = "Path must be specified"; break;
-			case DfxVerifyResult::PathMustBeString: s = "Path must be a double quoted string"; break;
+			case DfxVerifyResult::MustBeSpecified: s = "Must be specified"; break;
+			case DfxVerifyResult::MustBeString: s = "Must be a double quoted string"; break;
 			case DfxVerifyResult::NoteMissing: s = "Drum note missing"; break;
 			case DfxVerifyResult::NoteMustBeWholeNumber: s = "Note must be whole number"; break;
 			case DfxVerifyResult::KitsMissing: s = "Kits are missing"; break;
@@ -238,7 +238,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyPath(const std::string zzz, const object_map_type* parent_map, bool path_must_be_specified)
+	bool DfxParser::VerifyPath(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -268,19 +268,19 @@ namespace bryx
 				}
 				else
 				{
-					LogError(new_zzz, DfxVerifyResult::PathMustBeString);
+					LogError(new_zzz, DfxVerifyResult::MustBeString);
 				}
 			}
 			else
 			{
-				LogError(new_zzz, DfxVerifyResult::PathMustBeString);
+				LogError(new_zzz, DfxVerifyResult::MustBeString);
 			}
 		}
 		else
 		{
-			if (path_must_be_specified)
+			if (must_be_specified)
 			{
-				LogError(new_zzz, DfxVerifyResult::PathMustBeSpecified);
+				LogError(new_zzz, DfxVerifyResult::MustBeSpecified);
 			}
 		}
 
@@ -520,8 +520,8 @@ namespace bryx
 			auto nrobins = robins_arr_ptr->size();
 			if (nrobins > 0)
 			{
-				// Walk thru the robins. Each robin is
-				// represented as a name-value pair.
+				// Walk thru the robins. Each robin is represented as a
+				// name-value pair.
 
 				for (auto robin_sh_ptr : *robins_arr_ptr)
 				{
@@ -555,18 +555,18 @@ namespace bryx
 	{
 		int save_errcnt = errcnt;
 
-		// The name of a robin should be a valid file name (no paths please)
+		// The name of a robin is arbitrary, but it must start with an "r".
+		// @@ TODO: why? it doesn't really matter what it's called.
 
-		auto& fname = robin_nv_ptr->pair.first;
+		auto& robin_name = robin_nv_ptr->pair.first;
 
-		// @@ TODO: Check for valid file name
 
 		// Then:
 
-		auto new_zzz = zzz + '/' + fname;
+		auto new_zzz = zzz + '/' + robin_name;
 
-		// The body of a robin must be a {}-list having the following
-		// three optional items: offset, peak, and rms.
+		// The body of a robin must be a {}-list having the file name to
+		// the robin, plus three optional items: offset, peak, and rms.
 
 		auto& robin_body = robin_nv_ptr->pair.second;
 
@@ -574,7 +574,15 @@ namespace bryx
 
 		if (robin_body_map_ptr)
 		{
-			bool must_be_specified = false;
+			bool must_be_specified = true;
+			VerifyFname(zzz, robin_body_map_ptr, must_be_specified);
+
+			// The name of a robin should be a valid file name (no paths please)
+			//auto& fname = robin_nv_ptr->pair.first;
+			// @@ TODO: Check for valid file name
+
+
+			must_be_specified = false;
 			VerifyOffset(new_zzz, robin_body_map_ptr, must_be_specified);
 			VerifyPeak(new_zzz, robin_body_map_ptr, must_be_specified);
 			VerifyRMS(new_zzz, robin_body_map_ptr, must_be_specified);
@@ -587,6 +595,55 @@ namespace bryx
 			// Should never reach here, cause we alerady verified earlier
 			// it's a name value
 			LogError(zzz, DfxVerifyResult::RobinMustBeNameValue);
+		}
+
+		return errcnt == save_errcnt;
+	}
+
+	bool DfxParser::VerifyFname(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	{
+		int save_errcnt = errcnt;
+
+		// Check for a possibly optional filename.
+		// If we find such a property, we make sure the value 
+		// is a valid fname.
+
+		auto new_zzz = zzz + '/' + "fname";
+
+		auto vp = PropertyExists(parent_map, "fname");
+
+		if (vp)
+		{
+			// Well, there is an fname property. Is it the right type? 
+			// Ie. a simple string value?
+
+			auto svp = ToSimpleValue(vp);
+
+			if (svp)
+			{
+				// Okay, it's a simple value. Is it a set of quoted characters?
+				// Or unquoted characters?
+
+				if (svp->tkn.type == TokenEnum::QuotedChars || svp->tkn.type == TokenEnum::UnquotedChars)
+				{
+					// @@ TODO: Does it look like a fname?
+				}
+				else
+				{
+					LogError(new_zzz, DfxVerifyResult::MustBeString);
+				}
+			}
+			else
+			{
+				LogError(new_zzz, DfxVerifyResult::MustBeString);
+			}
+		}
+		else
+		{
+			if (must_be_specified)
+			{
+				LogError(new_zzz, DfxVerifyResult::MustBeSpecified);
+			}
 		}
 
 		return errcnt == save_errcnt;
@@ -989,7 +1046,7 @@ namespace bryx
 	DfxVerifyResult DfxParser::LogError(const std::string prop, DfxVerifyResult err)
 	{
 		std::ostream & sl = *slog;
-		sl << "In property " << prop << ": ";
+		sl << "Property " << prop << ": ";
 		sl << to_string(err) << std::endl;
 		++errcnt;
 		return err;
