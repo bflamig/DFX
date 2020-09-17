@@ -1,10 +1,10 @@
-drum_font = 
+dfx = 
 {
 	mydrumkit =
 	{
 		path = "rogers",
 
-		stuff = {},
+		stuff = [{}, {}],
 	
 		instruments = 
 		{
