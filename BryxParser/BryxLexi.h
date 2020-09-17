@@ -1,5 +1,41 @@
 #pragma once
 
+/******************************************************************************\
+ * DFX - "Drum font exchange format" - source code
+ *
+ * Copyright (c) 2020 by Bryan Flamig
+ *
+ * This software helps facilitate the real-time playing of multi-layered drum
+ * samples, by implementing a language that specifies a master directory of the
+ * the sample wave files for a drum kit: where the samples are, what they are
+ * for, and a summary of their properties. The DFX format allows modifications
+ * of sample levels to be specified to achieve a unified, pleasing mix of
+ * sounds. Velocity layers and round robins are supported for this purpose.
+ *
+ * This exchange format has a nested syntax with a one to one mapping to the
+ * Json syntax widely used on the web, but simplified to be easier to read and
+ * write. Because of the one-to-one mapping, it's easy to translate DFX files
+ * into Json files that can be processed by any software that supports Json
+ * syntax.
+ *
+ ******************************************************************************
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ *
+\******************************************************************************/
+
 // "Bryx" stands for "Bryan Exchange". It's my own file format. It has the same
 // structure as Json, in fact, there is a one to one mapping by design. But Bryx
 // simplifies some of the syntax. In most places, you don't need quotes in field
@@ -7,17 +43,15 @@
 // characters, or you start the field with a digit when a number is not expected.
 // (This is to keep one-to-one design mapping with Json.)
 // We also use '=' instead of ':' for property - value separators. It's 
-// is simply easier to see than ':',  which is easy to miss.
+// is simply easier to see than ':'.
 // Because the mapping is one-to-one, there are routines built-in to go back and
-// forth between JSON and Bryx. There is one restriction with Bryx files that 
-// differ from JSON files. Some elements can only be allowed on one line.
+// forth between Json and Bryx. There is one restriction with Bryx files that 
+// differ from Json files: Some elements can not span multiple lines.
 
 #include <iostream>
 #include <sstream>
 #include <istream>
 #include <string>
-
-//using namespace std;
 
 namespace bryx
 {
@@ -31,7 +65,7 @@ namespace bryx
 		RightBrace,
 		LeftSquareBracket,
 		RightSquareBracket,
-		NVSeparator,      // determine at file parse time or via SyntaxMode flag. can be one of ':' or '='
+		NVSeparator,      // determined at file parse time or via SyntaxMode flag. Can be one of ':' or '='
 		TrialNVSeparator, // Can be either ':' or '='
 		WhiteSpace,
 		DoubleQuote,
@@ -52,12 +86,12 @@ namespace bryx
 		QuotedChars,     // sequence of characters surrounded by double quotes
 		UnquotedChars,   // sequence of characters that are either alphanumeric, or a select set of characters (esp no ws or quotes or =)
 		WholeNumber,     // sequence of characters that are digits only, with optional sign prefix
-		FloatingNumber,  // sequence of characters that has valid floating point syntax
-		NumberWithUnits, // sequence of characters that has valid whole number or floating point syntax, with option alpha unit characters
+		FloatingNumber,  // sequence of characters that has a valid floating point syntax
+		NumberWithUnits, // sequence of characters that has a valid whole number or floating point syntax, with optional alpha unit characters
 		True,            // the sequence of characters 'true', no quotes
 		False,           // the sequence of characters 'false', no quotes
 		Null,            // the sequence of characters 'null', no quotes
-		Empty,           // A default token, with no data
+		Empty,           // a default token, with no data
 		SOT,             // signal start of tokens (ie., we haven't read any in yet)
 		EOT,             // signal end of tokens
 		ERROR            // signal error
@@ -69,7 +103,6 @@ namespace bryx
 	{
 		return t == TokenEnum::EOT;
 	}
-
 
 	inline bool IndicatesError(TokenEnum t)
 	{

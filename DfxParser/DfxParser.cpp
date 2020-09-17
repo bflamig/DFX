@@ -1,3 +1,40 @@
+/******************************************************************************\
+ * DFX - "Drum font exchange format" - source code
+ *
+ * Copyright (c) 2020 by Bryan Flamig
+ *
+ * This software helps facilitate the real-time playing of multi-layered drum
+ * samples, by implementing a language that specifies a master directory of the
+ * the sample wave files for a drum kit: where the samples are, what they are
+ * for, and a summary of their properties. The DFX format allows modifications
+ * of sample levels to achieve a unified, pleasing mix of sounds. Mechanisms
+ * such as velocity layers and round robins are supported for this purpose.
+ *
+ * This exchange format has a nested syntax with a one to one mapping to the
+ * Json syntax widely used on the web, but simplified to be easier to read and
+ * write. Because of the one-to-one mapping, it's easy to translate DFX files
+ * into Json files that can be processed by any software that supports Json
+ * syntax.
+ *
+ ******************************************************************************
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ *
+\******************************************************************************/
+
+
 #include "DfxParser.h"
 
 namespace bryx
@@ -603,6 +640,8 @@ namespace bryx
 	{
 		int save_errcnt = errcnt;
 
+		auto new_zzz = zzz + '/' + "peak";
+
 		// Check for a possibly optional peak specification.
 		// If we find such a property, we make sure the value it's a number, 
 		// whole or floating point doesn't matter. It may have an optional 
@@ -626,11 +665,45 @@ namespace bryx
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
 
-					VerifyWavePropertyRatio(zzz + '/' + "peak", svp->tkn);
+					VerifyWavePropertyRatio(new_zzz, svp->tkn);
 				}
 				else
 				{
-					LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
+					// @@ TODO: It might be a number in a quoted string. (This would happen
+					// in json syntax, for sure, but also allowed in bryx syntax).
+
+					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
+					// so we're probably okay here.
+
+					if (is_Bryx_string(svp->type))
+					{
+						LexiNumberTraits number_traits;
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.text, number_traits);
+
+						if (rv == LexiResult::NoError)
+						{
+							//Token t(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
+							// t.number_traits = number_traits;
+
+							auto extent = TokenExtent(0, 0, number_traits.end_locn);
+
+							// @@ Token type below is not correct all the time. But for what we're
+							// doing here, it's fine.
+
+							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.text, extent);
+							t.number_traits = number_traits;
+
+							VerifyWavePropertyRatio(new_zzz, t);
+						}
+						else
+						{
+							LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
+						}
+					}
+					else
+					{
+						LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
+					}
 				}
 			}
 			else
@@ -658,6 +731,8 @@ namespace bryx
 		// whole or floating point doesn't matter. It may have an optional 
 		// db unit on it.
 
+		auto new_zzz = zzz + '/' + "rms";
+
 		auto vp = PropertyExists(parent_map, "rms");
 
 		if (vp)
@@ -676,11 +751,45 @@ namespace bryx
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
 
-					VerifyWavePropertyRatio(zzz + '/' + "rms", svp->tkn);
+					VerifyWavePropertyRatio(new_zzz, svp->tkn);
 				}
 				else
 				{
-					LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+					// @@ TODO: It might be a number in a quoted string. (This would happen
+					// in json syntax, for sure, but also allowed in bryx syntax).
+
+					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
+					// so we're probably okay here.
+
+					if (is_Bryx_string(svp->type)) 
+					{
+						LexiNumberTraits number_traits;
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.text, number_traits);
+
+						if (rv == LexiResult::NoError)
+						{
+							//Token t(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
+							// t.number_traits = number_traits;
+
+							auto extent = TokenExtent(0, 0, number_traits.end_locn);
+
+							// @@ Token type below is not correct all the time. But for what we're
+							// doing here, it's fine.
+
+							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.text, extent);
+							t.number_traits = number_traits;
+
+							VerifyWavePropertyRatio(new_zzz, t);
+						}
+						else
+						{
+							LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+						}
+					}
+					else
+					{
+						LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+					}
 				}
 			}
 			else
