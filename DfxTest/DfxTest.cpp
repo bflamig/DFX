@@ -41,15 +41,9 @@
 
 using namespace bryx;
 
-std::shared_ptr<DfxParser> OpeningCredits(SyntaxModeEnum syntax_mode)
+std::shared_ptr<DfxParser> OpeningCredits()
 {
 	std::string filename = "../TestFiles/Test1.dfx";
-
-	//if (syntax_mode == SyntaxModeEnum::Bryx)
-	//{
-	//	filename = "C:/users/bryan/onedrive/documents/Test1.dfx";
-	//}
-	//else filename = "C:/users/bryan/onedrive/documents/DrumFont2.json";
 
 	auto df = std::make_shared<DfxParser>();
 
@@ -80,7 +74,7 @@ std::shared_ptr<DfxParser> OpeningCredits(SyntaxModeEnum syntax_mode)
 
 int explore()
 {
-	auto df = OpeningCredits(SyntaxModeEnum::Json);
+	auto df = OpeningCredits();
 
 	if (df != nullptr)
 	{

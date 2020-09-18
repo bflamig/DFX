@@ -290,6 +290,7 @@ namespace bryx
 
 	enum class SyntaxModeEnum
 	{
+		AutoDetect,
 		Json,
 		Bryx
 	};
@@ -313,7 +314,6 @@ namespace bryx
 		bool preserve_white_space;
 
 		SyntaxModeEnum syntax_mode;
-		bool auto_detect_syntax;
 		bool debug_mode;
 
 	public:
@@ -383,6 +383,9 @@ namespace bryx
 
 		bool IsNVSeparator(int c)
 		{
+			// WARNING: May not work properly if auto_detect_syntax
+			// mode is still in effect.
+
 			return syntax_mode == SyntaxModeEnum::Bryx ? c == '=' : c == ':';
 		}
 
@@ -393,6 +396,9 @@ namespace bryx
 
 		char NVSeparator()
 		{
+			// WARNING: May not work properly if auto_detect_syntax
+			// mode is still in effect.
+
 			return syntax_mode == SyntaxModeEnum::Bryx ? '=' : ':';
 		}
 

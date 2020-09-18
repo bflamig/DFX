@@ -200,7 +200,8 @@ namespace bryx
 	, root_map{}
 	, file_moniker{}
 	, curr_token_index{ -1 }
-	, debug_mode(false)
+	, dfx_mode{ true }
+	, debug_mode{ false }
 	{
 		lexi.preserve_white_space = false; // This will save our sanity
 	}
@@ -603,14 +604,15 @@ namespace bryx
 
 				if (result != ParserResult::NoError) return result;
 
-				// We're still sitting on the nv separator. Let's advance past that where we expect to
-				// see a left-brace.
+				// We're still sitting on the nv separator. Let's advance past that.
+				// Now, in dfx mode we expect to see a left-brace. Otherwise, we don't
+				// care.
 
 				result = AdvanceToken();
 
 				if (result != ParserResult::NoError) return result;
 
-				if (lexi.curr_token.type != TokenEnum::LeftBrace)
+				if (dfx_mode && lexi.curr_token.type != TokenEnum::LeftBrace)
 				{
 					// Well, ain't that the deal. We gots ourselves the wrong token.
 					result = ParserResult::WrongToken;
@@ -620,14 +622,22 @@ namespace bryx
 			{
 				// No nv separator. If auto-detect was turned on, then we're in a pickle as we have
 				// no way of knowing what the syntax_mode should be. 
-				result = ParserResult::CannotDetermineSyntaxMode;
+
+				if (lexi.syntax_mode == SyntaxModeEnum::AutoDetect)
+				{
+					result = ParserResult::CannotDetermineSyntaxMode;
+				}
 			}
 		}
 		else
 		{
 			// We didn't have a name to start off with, so we better not be in auto-detect
 			// mode, because we have no way to determine what the syntax mode is.
-			result = ParserResult::CannotDetermineSyntaxMode;
+
+			if (lexi.syntax_mode == SyntaxModeEnum::AutoDetect)
+			{
+				result = ParserResult::CannotDetermineSyntaxMode;
+			}
 		}
 		return result;
 	}
@@ -640,13 +650,15 @@ namespace bryx
 
 		if (result != ParserResult::NoError)
 		{
-			// Log error, blah blah blah @@ TODO
+			std::ostringstream msg;
+			msg << "Preparse(): Invalid file start -- " << to_string(lexi.curr_token.type);
+			LogError(result, msg.str(), curr_token_index);
 			return result;
 		}
 
 		if (NotAtEnd())
 		{
-			if (!file_moniker.empty())
+			if (dfx_mode && !file_moniker.empty())
 			{
 				// This implies we have a name-value pair. Collect the value part
 				// of that pair which should have an object type.
@@ -938,6 +950,10 @@ namespace bryx
 
 	ParserResult Parser::CollectMembers(std::shared_ptr<Value>& head_ptr)
 	{
+		// Collect a {}-list. By definition, such lists are implemented as maps,
+		// and as such, each element MUST be in name-value form. No other type
+		// of member is allowed.
+
 		auto result = ParserResult::NoError;
 
 		auto lp = std::make_unique<Object>(MapTypeEnum::Unordered_Map);

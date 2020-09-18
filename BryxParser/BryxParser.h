@@ -314,6 +314,8 @@ namespace bryx
 
 		int curr_token_index;
 
+		bool dfx_mode;
+
 		bool debug_mode;
 
 	public:
@@ -331,6 +333,11 @@ namespace bryx
 		void SetSyntaxMode(SyntaxModeEnum mode_)
 		{
 			lexi.SetSyntaxMode(mode_);
+		}
+
+		void SetDfxMode(bool dfx_mode_)
+		{
+			dfx_mode = dfx_mode_;
 		}
 
 	public:

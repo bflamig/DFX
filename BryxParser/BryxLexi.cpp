@@ -327,8 +327,7 @@ namespace bryx
 	, lexi_posn()
 	, token_cnt(0)
 	, preserve_white_space(true)
-	, syntax_mode(SyntaxModeEnum::Bryx)
-	, auto_detect_syntax(true)
+	, syntax_mode(SyntaxModeEnum::AutoDetect)
 	, debug_mode(false)
 	{
 
@@ -371,6 +370,9 @@ namespace bryx
 
 	bool Lexi::NeedsQuotes(const Token& tkn) const
 	{
+		// WARNING: This function may not work properly if auto-synatx-mode 
+		// is still in effect.
+
 		if (tkn.type == TokenEnum::QuotedChars || tkn.type == TokenEnum::UnquotedChars)
 		{
 			return StringNeedsQuotes(tkn.text);
@@ -535,10 +537,9 @@ namespace bryx
 			{
 				result = CollectSingleCharToken(TokenEnum::Comma, c);
 			}
-			else if (IsTrialNVSeparator(c) && auto_detect_syntax)
+			else if (IsTrialNVSeparator(c) && syntax_mode == SyntaxModeEnum::AutoDetect)
 			{
 				// This will kick us out of auto detect mode
-				auto_detect_syntax = false;
 
 				if (c == ':')
 				{

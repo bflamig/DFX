@@ -35,6 +35,7 @@
 // A test file
 
 #include <iostream>
+#include <sstream>
 #include <cmath>
 #include "EngrNum.h"
 
@@ -319,5 +320,6 @@ int main()
 	//testf();
 	//testg();
 	//testh();
+
 	testdb();
 }
