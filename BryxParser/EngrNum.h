@@ -80,11 +80,10 @@ namespace bryx
 		std::string msg;
 		EngrNumResult code;
 		int posn;
-		//TokenExtent extent;
 	public:
 
 		EngrNumResultPkg();
-		EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn); //  const TokenExtent& extent_);
+		EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn);
 		EngrNumResultPkg(const EngrNumResultPkg& other);
 		EngrNumResultPkg(EngrNumResultPkg&& other) noexcept;
 
@@ -102,6 +101,9 @@ namespace bryx
 
 	class EngrNum {
 	public:
+
+		// NOTE: Mantissa here can also have a decimal point. So it's not quite what you think
+		// a mantissa would be. Here, the mantissa is "the number without the exponent part."
 
 		char* mantissa;            // Skips the leading sign. Will have mantissa < 1000 when normalized.
 		int ndigits_reserved;      // How many digits do we allow (including decimal point apparently), but not including sign or null terminator
@@ -139,7 +141,7 @@ namespace bryx
 
 		virtual void process_num_from_lexi(std::ostream& serr, const char* src, const LexiNumberTraits& number_traits);
 
-		void LogError(std::ostream &serr, EngrNumResult result_, std::string msg_, int posn_); // const TokenExtent& extent_)
+		void LogError(std::ostream &serr, EngrNumResult result_, std::string msg_, int posn_);
 
 	private:
 

@@ -80,7 +80,7 @@ namespace bryx
 	{
 	}
 
-	EngrNumResultPkg::EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn_) // const TokenExtent& extent_)
+	EngrNumResultPkg::EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn_)
 	: EngrNumResultPkg()
 	{
 		msg = msg_;

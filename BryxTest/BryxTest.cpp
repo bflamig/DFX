@@ -115,7 +115,8 @@ std::vector<TestDataType> test_data
 	{14, R"([{}, {}])"},
 	{15, R"(dfx = { mydrumKit = { path = "", stuff = {} }})"},
 	{16, R"("dfx" = { mydrumKit = { path = "", stuff = {} }})"},
-	{17, R"("dfx" = { mydrumKit = { path = fred/abc, stuff = {} }})"}
+	{17, R"("dfx" = { mydrumKit = { path = "fred/abc", stuff = {} }})"},
+	{18, R"("dfx" = { mydrumKit = { path = fred/abc, stuff = {} }})"}
 
 };
 

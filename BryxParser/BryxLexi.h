@@ -56,7 +56,7 @@ namespace bryx
 
 	enum class TokenEnum
 	{
-		// Low level
+		// Low level, single character tokens
 
 		Alpha,
 		LeftBrace,
@@ -79,7 +79,7 @@ namespace bryx
 		Escape,
 		OtherChar,
 
-		// higher level sequences
+		// higher level sequences of character tokens
 
 		QuotedChars,     // sequence of characters surrounded by double quotes
 		UnquotedChars,   // sequence of characters that are either alphanumeric, or a select set of characters (esp no ws or quotes or =)
@@ -191,13 +191,13 @@ namespace bryx
 			could_be_a_number = false;
 		}
 
-		bool HasDecimal() const { return decimal_point_locn >= 1; }
-		bool HasExponent() const { return exponent_locn >= 2; }
+		bool HasDecimal() const { return decimal_point_locn != -1; } // >= 1;	}
+		bool HasExponent() const { return exponent_locn != -1; } //  >= 2;	}
 		bool IsWholeNumber() const { return !HasDecimal() && !HasExponent(); }
 		bool IsFloatingNumber() const { return HasDecimal() || HasExponent(); }
 		bool HasUnits() const { return HasRatioUnits() || HasGenericUnits(); }
 		bool HasRatioUnits() const { return ratio_units_locn != -1; }
-		bool HasMetricPrefix() const { return metric_pfx_locn > 4; }
+		bool HasMetricPrefix() const { return metric_pfx_locn != -1; } //  > 4;	}
 		bool HasGenericUnits() const { return generic_units_locn != -1; }
 	};
 
