@@ -149,23 +149,20 @@ namespace bryx
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////
 
-	EngrNum::EngrNum(int ndigits_reserved_, int MEXP_MULT_)
-	: mantissa(new char[ndigits_reserved_ + 1]) // room for null terminator (decimal point part of ndigits_reserved)
-	, ndigits_reserved(ndigits_reserved_)
-	, sign(1)
+	EngrNum::EngrNum(int MEXP_MULT_)
+	: sign(1)
 	, engr_exp(0)
 	, MEXP_MULT(MEXP_MULT_)
 	, tens_exp(0)
 	, error_code(EngrNumResult::NoError)
 	, value_flag(EngrNumFlags::Ordinary)
 	{
-		// some redundancies in this call. C'est la vie.
-		//clear();
+		mantissa[0] = 0;
+		text_units[0] = 0;
 	}
 
 	EngrNum::~EngrNum()
 	{
-		delete[] mantissa;
 	}
 
 	void EngrNum::clear()
@@ -629,7 +626,7 @@ namespace bryx
 			// Now, if the overall exponent is a multiple of three, we are done!
 			// If not, scan right, swapping as we go, looping till we are at an
 			// multiple of three for the exponent. It shouldn't take more than two
-			// more swaps. We have safety check for pointers running out of bound
+			// more swaps. We have safety check for pointers running out of bounds
 			// too.
 
 			int overall_exp = engr_exp * MEXP_MULT + tens_exp;

@@ -228,14 +228,14 @@ void testg()
 
 void testengr(const char *src)
 {
-	EngrNum engr_num(64, 3);
+	EngrNum engr_num;
 	engr_num.parse(std::cout, src);
 	std::cout << src << " --> " << engr_num << std::endl;
 }
 
 void testh()
 {
-	EngrNum engr_num(64, 3);
+	//EngrNum engr_num;
 
 	//engr_num.Parse("-1234.56789e23");
 
@@ -319,7 +319,7 @@ int main()
 	//testd();
 	//testf();
 	//testg();
-	//testh();
+	testh();
 
-	testdb();
+	//testdb();
 }
