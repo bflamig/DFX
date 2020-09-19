@@ -254,7 +254,7 @@ namespace bryx
 
 		if (tkn.type == TokenEnum::FloatingNumber || tkn.type == TokenEnum::NumberWithUnits || tkn.type == TokenEnum::WholeNumber)
 		{
-			process_num_from_lexi(serr, tkn.text.c_str(), tkn.number_traits);
+			process_num_from_lexi(serr, tkn.to_string().c_str(), tkn.number_traits);
 		}
 		else if (tkn.type == TokenEnum::Zero)
 		{

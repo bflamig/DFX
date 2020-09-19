@@ -187,12 +187,18 @@ namespace bryx
 		}
 		else
 		{
-			std::cout << "Token: " << bryx::to_string(type) << ", text = \"" << text << "\"" << '\n';
+			std::cout << "Token: " << bryx::to_string(type) << ", text = \"" << to_string() << "\"" << '\n';
 		}
 		std::cout << "on row " << extent.srow << ", near col " << extent.scol << " (note: a tab char counts as one column) \n";
 	}
 
+	const std::string Token::to_string() const
+	{
+		return text;
+	}
 
+
+#if 0
 	std::string Token::to_string(std::streambuf& sb) const
 	{		
 		std::stringbuf dest;
@@ -212,7 +218,9 @@ namespace bryx
 		}
 
 		return dest.str();
-	} 
+	}
+
+#endif
 
 
 
@@ -375,7 +383,7 @@ namespace bryx
 
 		if (tkn.type == TokenEnum::QuotedChars || tkn.type == TokenEnum::UnquotedChars)
 		{
-			return StringNeedsQuotes(tkn.text);
+			return StringNeedsQuotes(tkn.to_string());
 		}
 		else if (tkn.type == TokenEnum::NumberWithUnits)
 		{
@@ -384,7 +392,6 @@ namespace bryx
 
 		return false;
 	}
-
 
 	void Lexi::LogError(LexiResult result_, std::string msg_, const TokenExtent &extent_)
 	{
@@ -515,7 +522,7 @@ namespace bryx
 				if (result == LexiResult::NoError)
 				{
 					// See if we're one of the special atoms, 'true', 'false', or 'null'
-					auto s = curr_token.text;
+					auto &s = curr_token.to_string();
 					if (s == "true") curr_token.type = TokenEnum::True;
 					else if (s == "false") curr_token.type = TokenEnum::False;
 					else if (s == "null") curr_token.type = TokenEnum::Null;

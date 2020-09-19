@@ -227,11 +227,14 @@ namespace bryx
 	// ////////////////////////////////////////////////////////////////////////////////
 
 	class Token {
+	protected:
+		std::string text; // Will get instantiated with text from the source
 	public:
+
+		friend class Lexi;
 
 		TokenEnum type;
 		TokenExtent extent;         
-		std::string text;                // Will get instantiated with text from the source
 		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
 		LexiResultPkg result_pkg;        // Will get filled in for error tokens
 
@@ -261,7 +264,9 @@ namespace bryx
 
 	public:
 
+#if 0
 		virtual std::string to_string(std::streambuf& sb) const;
+#endif
 
 		bool IsEndToken() const
 		{
@@ -279,6 +284,12 @@ namespace bryx
 		}
 
 	public:
+
+#if 1
+
+		virtual const std::string to_string() const;
+
+#endif
 
 		void Print(std::ostream& sout) const;
 	};

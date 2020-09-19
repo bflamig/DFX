@@ -732,7 +732,7 @@ namespace bryx
 					if (is_Bryx_string(svp->type))
 					{
 						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.text, number_traits);
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.to_string(), number_traits);
 
 						if (rv == LexiResult::NoError)
 						{
@@ -744,7 +744,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.text, extent);
+							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.to_string(), extent);
 							t.number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
@@ -818,7 +818,7 @@ namespace bryx
 					if (is_Bryx_string(svp->type)) 
 					{
 						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.text, number_traits);
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.to_string(), number_traits);
 
 						if (rv == LexiResult::NoError)
 						{
@@ -830,7 +830,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.text, extent);
+							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.to_string(), extent);
 							t.number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
@@ -899,7 +899,8 @@ namespace bryx
 				int col = 0;
 				int ecol = traits.ratio_units_locn > -1 ? traits.ratio_units_locn : traits.end_locn;
 
-				auto p = tkn.text.c_str();
+				auto& txt = tkn.to_string();
+				auto p = txt.c_str();
 				auto q = p;
 
 				int sign = 1;

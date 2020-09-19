@@ -340,7 +340,7 @@ namespace bryx
 			auto shptr = parent_map_ptr->at(prop_name);
 			auto qq = std::dynamic_pointer_cast<SimpleValue>(shptr);
 			auto svptr = qq.get();
-			return svptr->tkn.text;
+			return svptr->tkn.to_string();
 		}
 		catch (...)
 		{
@@ -591,7 +591,7 @@ namespace bryx
 				// The name is stored in the prev_token at this point in time. We'll copy it to the 
 				// file_moniker for safe keeping.
 
-				file_moniker = lexi.prev_token.text;
+				file_moniker = lexi.prev_token.to_string();
 				
 				// Now, if we are using json syntax as determined by the kind of nv separator, then the
 				// name in the file MUST have been quoted.
@@ -859,7 +859,7 @@ namespace bryx
 				// that we might be throwing this copy away if we don't have name value pair after all.
 				// C'est la vie.
 
-				std::string saved_name = lexi.curr_token.text;
+				std::string saved_name = lexi.curr_token.to_string();
 
 				// Advance over the chars token. Note that it becomes "prev_token", which we may be
 				// taking advantage of shortly.
@@ -1090,7 +1090,7 @@ namespace bryx
 			{
 				// Gots us a name token, so make copy the quoted characters for posterity
 
-				std::string saved_name = lexi.curr_token.text;  // @@ TODO: Could use prev_token.text after AdvanceToken(); UPDATE: Didn't work.
+				std::string saved_name = lexi.curr_token.to_string();  // @@ TODO: Could use prev_token.text after AdvanceToken(); UPDATE: Didn't work.
 
 				// Advance over the name
 
@@ -1285,54 +1285,60 @@ namespace bryx
 			case ValueEnum::QuotedString:   // Bryx string
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				if (lexi.StringNeedsQuotes(sv.tkn.text))
+				auto& txt = sv.tkn.to_string();
+
+				if (lexi.StringNeedsQuotes(txt))
 				{
-					sout << '"' << sv.tkn.text << '"';
+					sout << '"' << txt << '"';
 				}
 				else
 				{
-					sout << sv.tkn.text;
+					sout << txt;
 				}
 			}
 			break;
 			case ValueEnum::UnquotedString:   // Bryx string
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				if (lexi.StringNeedsQuotes(sv.tkn.text)) // @@ Don't techinically need this here
+				auto& txt = sv.tkn.to_string();
+				if (lexi.StringNeedsQuotes(txt)) // @@ Don't techinically need this here
 				{
-					sout << '"' << sv.tkn.text << '"';
+					sout << '"' << txt << '"';
 				}
 				else
 				{
-					sout << sv.tkn.text;
+					sout << txt;
 				}
 			}
 			break;
 			case ValueEnum::WholeNumber:    // Bryx number with no floating point syntax
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				sout << sv.tkn.text;
+				auto& txt = sv.tkn.to_string();
+				sout << txt;
 			}
 			break;
 			case ValueEnum::FloatingNumber: // Bryx number with floating point syntax
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				sout << sv.tkn.text;
+				auto& txt = sv.tkn.to_string();
+				sout << txt;
 			}
 			break;
 			case ValueEnum::NumberWithUnits: // Bryx number with units too.
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
+				auto& txt = sv.tkn.to_string();
 
 				// depends on what mode we're in whether we need quotes or not
 
 				if (lexi.NeedsQuotes(sv.tkn))
 				{
-					sout << '"' << sv.tkn.text << '"';
+					sout << '"' << txt << '"';
 				}
 				else
 				{
-					sout << sv.tkn.text;
+					sout << txt;
 				}
 
 			}
