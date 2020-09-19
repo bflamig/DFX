@@ -44,12 +44,11 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "ValDesc.h"
+//#include "ValDesc.h"
 
-#if 0
-
-namespace RcdUtils
+namespace bryx
 {
+	struct ValDesc; // forw decl
 
 	class Units {
 	public:
@@ -92,21 +91,24 @@ namespace RcdUtils
 
 		enum class VoltEnum
 		{
-			Vpeak, // Must be in this order for unit choices display index to work properly. Also, Vpeak is the native units
+			// Must be in this order for unit choices display index to work properly. Also, Vpeak is the native unit.
+			Vpeak,
 			Vrms,
 			Vpp
 		};
 
 		enum class AmpEnum
 		{
-			Apeak, // Must be in this order for unit choices display index to work properly. Also, Apeak is the native units
+			// Must be in this order for unit choices display index to work properly. Also, Apeak is the native unit.
+			Apeak,
 			Arms,
 			App
 		};
 
 		enum class ChargeEnum
 		{
-			Cpeak, // Must be in this order for unit choices display index to work properly. Also, Cpeak is the native units
+			// Must be in this order for unit choices display index to work properly. Also, Cpeak is the native unit.
+			Cpeak,
 			Crms,
 			Cpp
 		};
@@ -125,6 +127,56 @@ namespace RcdUtils
 			Tera,
 			Peta
 		};
+
+		enum class UnitsEnum
+		{
+			None,
+			RatioDB,
+			RatioDBm,
+			RatioPPM,
+			PercentDB,
+			PercentNum,
+			Angle,
+			Volt,
+			Amp,
+			Charge,
+			Metric
+		};
+
+
+		struct GenericEnum {
+		public:
+
+			union
+			{
+				int None;
+				RatioDBEnum ratioDB;
+				RatioDBmEnum ratioDBm;
+				RatioPPMEnum ratioPPM;
+				PercentDBEnum percentDB;
+				PercentNumEnum percentNum;
+				AngleEnum angle;
+				VoltEnum volt;
+				AmpEnum amp;
+				ChargeEnum charge;
+				Metric metric;
+			};
+
+			UnitsEnum tag;
+
+			GenericEnum() : None(0), tag(UnitsEnum::None) { };
+			GenericEnum(RatioDBEnum x) : ratioDB(x), tag(UnitsEnum::RatioDB) { };
+			GenericEnum(RatioDBmEnum x) : ratioDBm(x), tag(UnitsEnum::RatioDBm) { };
+			GenericEnum(RatioPPMEnum x) : ratioPPM(x), tag(UnitsEnum::RatioPPM) { };
+			GenericEnum(PercentDBEnum x) : percentDB(x), tag(UnitsEnum::PercentDB) { };
+			GenericEnum(PercentNumEnum x) : percentNum(x), tag(UnitsEnum::PercentNum) { };
+			GenericEnum(AngleEnum x) : angle(x), tag(UnitsEnum::Angle) { };
+			GenericEnum(VoltEnum x) : volt(x), tag(UnitsEnum::Volt) { };
+			GenericEnum(AmpEnum x) : amp(x), tag(UnitsEnum::Amp) { };
+			GenericEnum(ChargeEnum x) : charge(x), tag(UnitsEnum::Charge) { };
+			GenericEnum(Metric x) : metric(x), tag(UnitsEnum::Metric) { };
+		};
+
 
 		static constexpr std::string_view MetricPrefixes[] = { "femto", "pico", "nano", "micro", "milli", "", "kilo", "Mega", "Giga", "Tera", "Peta" };
 
@@ -150,70 +202,65 @@ namespace RcdUtils
 
 		// ////////////////////////////////////////////////////
 
-		static double peta(double v)
+		static constexpr double peta(double v)
 		{
 			return v * 1.0e+15;
 		}
 
-		static double tera(double v)
+		static constexpr double tera(double v)
 		{
 			return v * 1.0e+12;
 		}
 
-		static double giga(double v)
+		static constexpr double giga(double v)
 		{
 			return v * 1.0e+9;
 		}
 
-		static double mega(double v)
+		static constexpr double mega(double v)
 		{
 			return v * 1.0e+6;
 		}
 
-		static double kilo(double v)
+		static constexpr double kilo(double v)
 		{
 			return v * 1.0e+3;
 		}
 
-		static double none(double v)
+		static constexpr double none(double v)
 		{
 			return v;
 		}
 
-		static double milli(double v)
+		static constexpr double milli(double v)
 		{
 			return v * 1.0e-3;
 		}
 
-		static double micro(double v)
+		static constexpr double micro(double v)
 		{
 			return v * 1.0e-6;
 		}
 
-		static double nano(double v)
+		static constexpr double nano(double v)
 		{
 			return v * 1.0e-9;
 		}
 
-		static double pico(double v)
+		static constexpr double pico(double v)
 		{
 			return v * 1.0e-12;
 		}
 
-		static double femto(double v) 
+		static constexpr double femto(double v) 
 		{
 			return v * 1.0e-15;
 		}
 
-#if 0
-		static bool IsMetricUnit(Enum unit)
+		static bool IsMetricUnit(GenericEnum unit)
 		{
-			Type a = typeof(Units.Metric);
-			Type b = unit.GetType();
-
-			return a.Equals(b);
+			return unit.tag == UnitsEnum::Metric;
 		}
-#endif
 
 		// ////////////////////////////////////////////////////
 
@@ -235,55 +282,17 @@ namespace RcdUtils
 			return (Metric)(NoPrefixIndex + mexp);
 		}
 
-		static std::vector<std::string> GetPrefixMonikers()
-		{
-			std::vector<std::string> list;
+		static std::vector<std::string> GetPrefixMonikers();
 
-			for(auto &sv : MetricPrefixMonikers)
-			{
-				list.push_back(move(std::string(sv)));
-			}
+		static std::vector<std::string> FormUnitMonikers(const std::string units);
 
-			return list;
-		}
-
-		static std::vector<std::string> FormUnitMonikers(std::string units)
-		{
-			std::vector<std::string> list;
-
-			for(auto &sv : MetricPrefixMonikers)
-			{
-				std::string s(sv);
-				list.push_back(move(s + units));
-			}
-
-			return list;
-		}
-
-#if 1
-
-		static std::unique_ptr<std::vector<ValDesc>> FormUnitDescriptions(std::string units)
-		{
-			auto list = std::make_unique<std::vector<ValDesc>>();
-
-			for (auto pfx : Units::MetricPrefixMonikers)
-			{
-				list.push_back(ValDesc(e, FmtUnits(pfx, units)));
-			}
-		}
-
+#if 0
+		static std::unique_ptr<std::vector<ValDesc>> FormUnitDescriptions(std::string units);
 #endif
 
-		static std::string FmtUnits(Metric pfx, std::string units)
-		{
-			if (pfx == Metric::None)
-			{
-				return units;
-			}
-			else return std::string(MetricPrefixMonikers[(int)pfx]) + units;
-		}
+		static std::string FmtUnits(Metric pfx, const std::string units);
 
-#if 1
+#if 0
 
 		///////////////////////////////////////////////////////////////////////
 
@@ -317,167 +326,12 @@ namespace RcdUtils
 			return n.SciFmt(fmt, unit_desc, spacing);
 		}
 
-		// Support for converting betweenxt the common voltage types, (peak, peak-to-peak, rms)
-
-		static double ConvertVoltageType(double old_val, Units::VoltEnum old_u, Units::VoltEnum new_u)
-		{
-			double new_val = old_val;
-
-			constexpr double sqrt2 = std::sqrt(2.0);
-
-			if (old_u == Units::VoltEnum::Vpeak)
-			{
-				switch (new_u)
-				{
-					case Units::VoltEnum::Vpp:
-					new_val = 2.0 * old_val;
-					break;
-					case Units::VoltEnum::Vrms:
-					new_val = old_val / sqrt2;
-					break;
-				}
-			}
-			else if (old_u == Units::VoltEnum::Vpp)
-			{
-				switch (new_u)
-				{
-					case Units::VoltEnum::Vpeak:
-					new_val = old_val / 2.0;
-					break;
-					case Units::VoltEnum::Vrms:
-					new_val = old_val / (2.0 * sqrt2);
-					break;
-				}
-
-			}
-			else // old_vu == Units.VoltEnum.Vrms
-			{
-				switch (new_u)
-				{
-					case Units::VoltEnum::Vpeak:
-					new_val = old_val * sqrt2;
-
-					break;
-					case Units::VoltEnum::Vpp:
-					new_val = old_val * 2.0 * sqrt2;
-					break;
-
-				}
-			}
-
-			return new_val;
-		}
-
-
-		// Support for converting betweenxt the common amperage types, (peak, peak-to-peak, rms)
-
-		static double ConvertAmperageType(double old_val, Units::AmpEnum old_u, Units::AmpEnum new_u)
-		{
-			double new_val = old_val;
-
-			constexpr double sqrt2 = std::sqrt(2.0);
-
-			if (old_u == Units::AmpEnum::Apeak)
-			{
-				switch (new_u)
-				{
-					case Units::AmpEnum::App:
-					new_val = 2.0 * old_val;
-					break;
-					case Units::AmpEnum::Arms:
-					new_val = old_val / sqrt2;
-					break;
-				}
-			}
-			else if (old_u == Units::AmpEnum::App)
-			{
-				switch (new_u)
-				{
-					case Units::AmpEnum::Apeak:
-					new_val = old_val / 2.0;
-					break;
-					case Units::AmpEnum::Arms:
-					new_val = old_val / (2.0 * sqrt2);
-					break;
-				}
-
-			}
-			else // old_u == Units.AmpEnum.Arms
-			{
-				switch (new_u)
-				{
-					case Units::AmpEnum::Apeak:
-					new_val = old_val * sqrt2;
-
-					break;
-					case Units::AmpEnum::App:
-					new_val = old_val * 2.0 * sqrt2;
-					break;
-
-				}
-
-			}
-
-			return new_val;
-		}
-
-		// Support for converting betweenxt the common charge types, (peak, peak-to-peak, rms)
-
-		static double ConvertChargeType(double old_val, Units::ChargeEnum old_u, Units::ChargeEnum new_u)
-		{
-			double new_val = old_val;
-
-			constexpr double sqrt2 = std::sqrt(2.0);
-
-			if (old_u == Units::ChargeEnum::Cpeak)
-			{
-				switch (new_u)
-				{
-					case Units::ChargeEnum::Cpp:
-					new_val = 2.0 * old_val;
-					break;
-					case Units::ChargeEnum::Crms:
-					new_val = old_val / sqrt2;
-					break;
-				}
-			}
-			else if (old_u == Units::ChargeEnum::Cpp)
-			{
-				switch (new_u)
-				{
-					case Units::ChargeEnum::Cpeak:
-					new_val = old_val / 2.0;
-					break;
-					case Units::ChargeEnum::Crms:
-					new_val = old_val / (2.0 * sqrt2);
-					break;
-				}
-
-			}
-			else // old_u == Units.AmpEnum.Arms
-			{
-				switch (new_u)
-				{
-					case Units::ChargeEnum::Cpeak:
-					new_val = old_val * sqrt2;
-
-					break;
-					case Units::ChargeEnum::Cpp:
-					new_val = old_val * 2.0 * sqrt2;
-					break;
-
-				}
-
-			}
-
-			return new_val;
-		}
-
 #endif
+
+		double ConvertVoltageType(double old_val, VoltEnum old_u, VoltEnum new_u);
+		double ConvertAmperageType(double old_val, AmpEnum old_u, AmpEnum new_u);
+		double ConvertChargeType(double old_val, ChargeEnum old_u, ChargeEnum new_u);
 
 	};
 
 }
-
-
-#endif

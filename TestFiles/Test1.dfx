@@ -12,6 +12,7 @@ dfx =
 			{ 
 				note = 60,
 				path = "kick/gretch",
+				velcurve = {type = logexp, knee = 0.6, gain = 6dB},
 				velocities =
 				[
 					v32 = 

@@ -32,10 +32,6 @@
  *
 \******************************************************************************/
 
-
-// DfxTest.cpp : This file contains the 'main' function. Program execution begins
-// and ends there.
-
 #include <iostream> 
 #include "DfxParser.h"
 
@@ -89,11 +85,11 @@ int explore()
 
 		if (zebra)
 		{
-			std::cout << "Drum font schema check VERIFIED." << std::endl;
+			std::cout << "Dfx schema check VERIFIED." << std::endl;
 		}
 		else
 		{
-			std::cout << "Drum font FAILED schema check." << std::endl;
+			std::cout << "Dfx FAILED schema check." << std::endl;
 		}
 	}
 

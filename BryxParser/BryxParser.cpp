@@ -1128,6 +1128,8 @@ namespace bryx
 
 	ParserResult Parser::CollectElements(std::shared_ptr<Value>& head_ptr)
 	{
+		// Collect a []-list
+
 		auto result = ParserResult::NoError;
 
 		auto lp = std::make_unique<Array>();

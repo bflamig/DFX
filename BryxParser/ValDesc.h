@@ -38,19 +38,18 @@
 // will be slowly added over time. Right now, it's in a rough, beginning state
 // and as such is mostly commented out for now. Think of this file as a placeholder.
 
-
 #include <string>
+#include "UnitPrefixes.h"
 
-namespace RcdUtils
+namespace bryx
 {
-
-	using GenericEnum = int;
+	//using GenericEnum = int;
 
 	// Used in creating lists of enumerated values and their descriptions
 
 	struct ValDesc
 	{
-		GenericEnum Val;
+		Units::GenericEnum Val;
 		std::string Desc;
 	};
 
