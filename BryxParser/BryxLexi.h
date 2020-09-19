@@ -226,47 +226,36 @@ namespace bryx
 
 	// ////////////////////////////////////////////////////////////////////////////////
 
-	class Token {
-	protected:
-		std::string text; // Will get instantiated with text from the source
+	class TokenBase {
 	public:
-
-		friend class Lexi;
-
 		TokenEnum type;
-		TokenExtent extent;         
-		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
+		TokenExtent extent;
 		LexiResultPkg result_pkg;        // Will get filled in for error tokens
 
 		static const TokenExtent def_extent;
 
 	public:
 
-		Token(TokenEnum type_, std::string text_, const TokenExtent &extent_);
-		Token(TokenEnum type_, std::string text_);
-		explicit Token(TokenEnum type_);
-		Token(const Token& other);
-		Token(Token&& other) noexcept;
+		TokenBase(TokenEnum type_, const TokenExtent& extent_);
+		explicit TokenBase(TokenEnum type_);
+		TokenBase(const TokenBase& other);
+		TokenBase(TokenBase&& other) noexcept;
 
-		virtual ~Token() {  }
+		virtual ~TokenBase() {  }
 
-		Token& operator=(const Token& other);
-		Token& operator=(Token&& other) noexcept;
+		TokenBase& operator=(const TokenBase& other);
+		TokenBase& operator=(TokenBase&& other) noexcept;
+
+	public:
 
 		void AddResult(const LexiResultPkg& rp);
 
-	public:
-
-		void seek_to(std::streambuf& sb, size_t p) const
-		{
-			sb.pubseekoff(p, std::ios_base::beg);
-		}
+		//void seek_to(std::streambuf& sb, size_t p) const
+		//{
+		//	sb.pubseekoff(p, std::ios_base::beg);
+		//}
 
 	public:
-
-#if 0
-		virtual std::string to_string(std::streambuf& sb) const;
-#endif
 
 		bool IsEndToken() const
 		{
@@ -285,13 +274,39 @@ namespace bryx
 
 	public:
 
-#if 1
+		virtual const std::string to_string() const = 0;
+
+		void Print(std::ostream& sout) const;
+	};
+
+	// Ordinary simple tokens
+
+	class Token : public TokenBase {
+	protected:
+		std::string text; // Will get instantiated with text from the source
+	public:
+
+		friend class Lexi;
+
+		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
+
+	public:
+
+		Token(TokenEnum type_, std::string text_, const TokenExtent &extent_);
+		Token(TokenEnum type_, std::string text_);
+		explicit Token(TokenEnum type_);
+		Token(const Token& other);
+		Token(Token&& other) noexcept;
+
+		virtual ~Token() {  }
+
+		Token& operator=(const Token& other);
+		Token& operator=(Token&& other) noexcept;
+			
+	public:
 
 		virtual const std::string to_string() const;
 
-#endif
-
-		void Print(std::ostream& sout) const;
 	};
 
 

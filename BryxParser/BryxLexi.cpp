@@ -87,65 +87,50 @@ namespace bryx
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
+	// TokenBase
 
-
-	Token::Token(TokenEnum type_, std::string text_, const TokenExtent &extent_)
-	: type(type_), text(text_), extent(extent_), number_traits(), result_pkg()
+	TokenBase::TokenBase(TokenEnum type_, const TokenExtent& extent_)
+	: type(type_), extent(extent_), result_pkg()
 	{
 	}
 
-	Token::Token(TokenEnum type_, std::string text_)
-	: type(type_), text(text_), extent(), number_traits(), result_pkg()
+	TokenBase::TokenBase(TokenEnum type_)
+	: type(type_), extent(), result_pkg()
 	{
 	}
 
-	Token::Token(TokenEnum type_)
-	: type(type_), text(), extent(), number_traits(), result_pkg()
-	{
-	}
-
-
-	Token::Token(const Token& other)
-	: Token(other.type, other.text, other.extent)
+	TokenBase::TokenBase(const TokenBase& other)
+	: TokenBase(other.type, other.extent)
 	{
 		// Copy constructor
-		number_traits = other.number_traits;
 		result_pkg = other.result_pkg;
 	}
 
-	Token::Token(Token&& other) noexcept
-	: Token(other.type, move(other.text), other.extent)
+	TokenBase::TokenBase(TokenBase&& other) noexcept
+	: TokenBase(other.type, other.extent)
 	{
 		// Move constructor. Note argument is *not* const
 		other.extent.Clear();
-
-		//other.text.clear();
-
-		number_traits = other.number_traits;
-
-		other.number_traits.clear();
 
 		//other.result_pkg.msg = "foofoo";
 
 		result_pkg = std::move(other.result_pkg);
 	}
 
-	Token& Token::operator=(const Token& other)
+	TokenBase& TokenBase::operator=(const TokenBase& other)
 	{
 		// Copy assignment
 		if (this != &other)
 		{
 			type = other.type;
 			extent = other.extent;
-			text = other.text;
-			number_traits = other.number_traits;
 			result_pkg = other.result_pkg;
 		}
 
 		return *this;
 	}
 
-	Token& Token::operator=(Token&& other) noexcept
+	TokenBase& TokenBase::operator=(TokenBase&& other) noexcept
 	{
 		// Move assignment. Note argument is *not* const
 
@@ -153,19 +138,10 @@ namespace bryx
 		{
 			type = other.type;
 			extent = other.extent;
-			number_traits = other.number_traits;
-
-			//other.text = "foofoo";
-
-			// I guess std::strings have move function template
-			text = move(other.text); // other.text;
 
 			other.extent.Clear();
-			//other.text.Clear();
 
-			other.number_traits.clear();
-
-			other.result_pkg.msg = "foofoo";
+			//other.result_pkg.msg = "foofoo";
 
 			result_pkg = std::move(other.result_pkg);
 		}
@@ -173,13 +149,13 @@ namespace bryx
 		return *this;
 	}
 
-	void Token::AddResult(const LexiResultPkg& rp)
+	void TokenBase::AddResult(const LexiResultPkg& rp)
 	{
 		result_pkg = rp;
 	}
 
 
-	void Token::Print(std::ostream& sout) const
+	void TokenBase::Print(std::ostream& sout) const
 	{
 		if (IsErrorToken())
 		{
@@ -192,36 +168,104 @@ namespace bryx
 		std::cout << "on row " << extent.srow << ", near col " << extent.scol << " (note: a tab char counts as one column) \n";
 	}
 
+	// /////////////////////////////////////////////////////////////////////////////
+	// Ordinary simple tokens
+
+	Token::Token(TokenEnum type_, std::string text_, const TokenExtent &extent_)
+	: TokenBase(type_, extent_)
+	, text(text_), number_traits()
+	{
+	}
+
+	Token::Token(TokenEnum type_, std::string text_)
+	: TokenBase(type_)
+	, text(text_), number_traits()
+	{
+	}
+
+	Token::Token(TokenEnum type_)
+	: TokenBase(type_)
+	, text(), number_traits()
+	{
+	}
+
+
+	Token::Token(const Token& other)
+	: TokenBase(other) // (other.type, other.text, other.extent)
+	{
+		// Copy constructor
+		number_traits = other.number_traits;
+		//result_pkg = other.result_pkg;
+	}
+
+	Token::Token(Token&& other) noexcept
+	: TokenBase(other)
+	//: Token(other.type, move(other.text), other.extent)
+	, text(move(other.text))
+	{
+		// Move constructor. Note argument is *not* const
+		//other.extent.Clear();
+
+		//other.text.clear();
+
+		number_traits = other.number_traits;
+
+		other.number_traits.clear();
+
+		//other.result_pkg.msg = "foofoo";
+
+		//result_pkg = std::move(other.result_pkg);
+	}
+
+	Token& Token::operator=(const Token& other)
+	{
+		// Copy assignment
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			//type = other.type;
+			//extent = other.extent;
+			text = other.text;
+			number_traits = other.number_traits;
+			//result_pkg = other.result_pkg;
+		}
+
+		return *this;
+	}
+
+	Token& Token::operator=(Token&& other) noexcept
+	{
+		// Move assignment. Note argument is *not* const
+
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			//type = other.type;
+			//extent = other.extent;
+			number_traits = other.number_traits;
+
+			//other.text = "foofoo";
+
+			// I guess std::strings have move function template
+			text = move(other.text); // other.text;
+
+			//other.extent.Clear();
+			//other.text.Clear();
+
+			other.number_traits.clear();
+
+			//other.result_pkg.msg = "foofoo";
+
+			//result_pkg = std::move(other.result_pkg);
+		}
+
+		return *this;
+	}
+
 	const std::string Token::to_string() const
 	{
 		return text;
 	}
-
-
-#if 0
-	std::string Token::to_string(std::streambuf& sb) const
-	{		
-		std::stringbuf dest;
-
-		// The below assumes token resides only on one row
-
-		auto p = extent.scol;
-
-		if (p < extent.ecol)
-		{
-			seek_to(sb, p);
-			while (p < extent.ecol)
-			{
-				dest.sputc(sb.sgetc());
-				++p;
-			}
-		}
-
-		return dest.str();
-	}
-
-#endif
-
 
 
 	// /////////////////////////////////////////////////////////////////////////////
