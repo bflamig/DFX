@@ -279,7 +279,36 @@ namespace bryx
 		void Print(std::ostream& sout) const;
 	};
 
+	// Single char tokens
+
 	// Ordinary simple tokens
+
+	class CharToken : public TokenBase {
+	protected:
+		char text[2]; // Allow null byte too
+	public:
+
+		friend class Lexi;
+
+	public:
+
+		CharToken(TokenEnum type_, char text_, const TokenExtent& extent_);
+		CharToken(TokenEnum type_, char text_);
+		explicit CharToken(TokenEnum type_);
+		CharToken(const CharToken& other);
+		CharToken(CharToken&& other) noexcept;
+
+		virtual ~CharToken() {  }
+
+		CharToken& operator=(const CharToken& other);
+		CharToken& operator=(CharToken&& other) noexcept;
+
+	public:
+
+		virtual const std::string to_string() const;
+
+	};
+
 
 	class SimpleToken : public TokenBase {
 	protected:

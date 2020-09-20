@@ -169,6 +169,80 @@ namespace bryx
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
+	// Char simple tokens
+
+	CharToken::CharToken(TokenEnum type_, char text_, const TokenExtent& extent_)
+	: TokenBase(type_, extent_)
+	{
+		text[0] = text_;
+		text[1] = 0;
+	}
+
+	CharToken::CharToken(TokenEnum type_, char text_)
+	: TokenBase(type_)
+	{
+		text[0] = text_; 
+		text[1] = 0;
+	}
+
+	CharToken::CharToken(TokenEnum type_)
+	: TokenBase(type_)
+	{
+		text[0] = 0; 
+		text[1] = 0;
+	}
+
+
+	CharToken::CharToken(const CharToken& other)
+	: TokenBase(other) // (other.type, other.text, other.extent)
+	{
+		// Copy constructor
+		text[0] = other.text[0];
+		text[1] = other.text[1];
+	}
+
+	CharToken::CharToken(CharToken&& other) noexcept
+	: TokenBase(other)
+	{
+		// Move constructor. Note argument is *not* const
+		text[0] = other.text[0];
+		text[1] = other.text[1];
+	}
+
+	CharToken& CharToken::operator=(const CharToken& other)
+	{
+		// Copy assignment
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			text[0] = other.text[0];
+			text[1] = other.text[1];
+		}
+
+		return *this;
+	}
+
+	CharToken& CharToken::operator=(CharToken&& other) noexcept
+	{
+		// Move assignment. Note argument is *not* const
+
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			text[0] = other.text[0];
+			text[1] = other.text[1];
+		}
+
+		return *this;
+	}
+
+	const std::string CharToken::to_string() const
+	{
+		return std::string(text);
+	}
+
+
+	// /////////////////////////////////////////////////////////////////////////////
 	// Ordinary simple tokens
 
 	SimpleToken::SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_)
@@ -466,8 +540,8 @@ namespace bryx
 	: src(0)
 	, temp_buf()
 	, last_lexical_error()
-	, prev_token(std::make_shared<SimpleToken>(TokenEnum::Null))
-	, curr_token(std::make_shared<SimpleToken>(TokenEnum::SOT))
+	, prev_token(std::make_shared<CharToken>(TokenEnum::Null))
+	, curr_token(std::make_shared<CharToken>(TokenEnum::SOT))
 	, lexi_posn()
 	, token_cnt(0)
 	, preserve_white_space(true)
@@ -601,8 +675,8 @@ namespace bryx
 	token_ptr Lexi::Start()
 	{
 		token_cnt = 0; lexi_posn.Clear();
-		prev_token = std::make_shared<SimpleToken>(TokenEnum::Null);
-		curr_token = std::make_shared<SimpleToken>(TokenEnum::SOT);
+		prev_token = std::make_shared<CharToken>(TokenEnum::Null);
+		curr_token = std::make_shared<CharToken>(TokenEnum::SOT);
 		return curr_token;
 	}
 
@@ -701,9 +775,9 @@ namespace bryx
 				auto extent = WhereAreWe();
 				extent.Bump();
 				auto ch = unsigned char(c);
-				std::string s; s.push_back(ch);
+				//std::string s; s.push_back(ch);
 				auto type = TokenEnum::EOT; // Forces quit
-				auto t = std::make_shared<SimpleToken>(type, s, extent);
+				auto t = std::make_shared<CharToken>(type, ch, extent);
 				AcceptToken(t, false); // false: don't absorb character to preserve stream position for debugging purposes
 			}
 			else
@@ -746,8 +820,8 @@ namespace bryx
 		GetFilteredChar(); // We were peeking at this single character, so absorb it
 		extent.Bump();
 		auto ch = unsigned char(c);
-		std::string s; s.push_back(ch);
-		auto t = std::make_shared<SimpleToken>(type, s, extent);
+		//std::string s; s.push_back(ch);
+		auto t = std::make_shared<CharToken>(type, ch, extent);
 		AcceptToken(t, false);  // true: don't absorb character again
 		return LexiResult::NoError;
 	}
