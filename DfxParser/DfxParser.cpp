@@ -744,7 +744,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = std::make_shared<SimpleToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							auto t = std::make_shared<NumberToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
 							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
@@ -830,7 +830,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = std::make_shared<SimpleToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							auto t = std::make_shared<NumberToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
 							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
@@ -875,7 +875,7 @@ namespace bryx
 
 		int save_errcnt = errcnt;
 
-		auto froglegs = std::dynamic_pointer_cast<SimpleToken>(tkn);  // @@ Someday it will be NumberToken
+		auto froglegs = std::dynamic_pointer_cast<NumberToken>(tkn);
 
 		auto& traits = froglegs->number_traits;
 

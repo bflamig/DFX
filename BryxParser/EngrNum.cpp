@@ -248,7 +248,7 @@ namespace bryx
 		}
 	}
 
-	void EngrNum::set_num(std::ostream& serr, const SimpleToken& tkn)
+	void EngrNum::set_num(std::ostream& serr, const NumberToken& tkn)
 	{
 		clear();
 

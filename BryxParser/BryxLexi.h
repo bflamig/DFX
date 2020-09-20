@@ -191,13 +191,13 @@ namespace bryx
 			could_be_a_number = false;
 		}
 
-		bool HasDecimal() const { return decimal_point_locn != -1; } // >= 1;	}
-		bool HasExponent() const { return exponent_locn != -1; } //  >= 2;	}
+		bool HasDecimal() const { return decimal_point_locn != -1; }
+		bool HasExponent() const { return exponent_locn != -1; }
 		bool IsWholeNumber() const { return !HasDecimal() && !HasExponent(); }
 		bool IsFloatingNumber() const { return HasDecimal() || HasExponent(); }
 		bool HasUnits() const { return HasRatioUnits() || HasGenericUnits(); }
 		bool HasRatioUnits() const { return ratio_units_locn != -1; }
-		bool HasMetricPrefix() const { return metric_pfx_locn != -1; } //  > 4;	}
+		bool HasMetricPrefix() const { return metric_pfx_locn != -1; }
 		bool HasGenericUnits() const { return generic_units_locn != -1; }
 	};
 
@@ -288,8 +288,6 @@ namespace bryx
 
 		friend class Lexi;
 
-		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
-
 	public:
 
 		SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_);
@@ -307,6 +305,35 @@ namespace bryx
 
 		virtual const std::string to_string() const;
 
+	};
+
+	// Number tokens
+
+	class NumberToken : public TokenBase {
+	protected:
+		std::string text; // Will get instantiated with text from the source
+	public:
+
+		friend class Lexi;
+
+		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
+
+	public:
+
+		NumberToken(TokenEnum type_, std::string text_, const TokenExtent& extent_);
+		NumberToken(TokenEnum type_, std::string text_);
+		explicit NumberToken(TokenEnum type_);
+		NumberToken(const NumberToken& other);
+		NumberToken(NumberToken&& other) noexcept;
+
+		virtual ~NumberToken() {  }
+
+		NumberToken& operator=(const NumberToken& other);
+		NumberToken& operator=(NumberToken&& other) noexcept;
+
+	public:
+
+		virtual const std::string to_string() const;
 	};
 
 

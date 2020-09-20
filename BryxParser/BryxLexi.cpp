@@ -173,19 +173,19 @@ namespace bryx
 
 	SimpleToken::SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_)
 	: TokenBase(type_, extent_)
-	, text(text_), number_traits()
+	, text(text_)
 	{
 	}
 
 	SimpleToken::SimpleToken(TokenEnum type_, std::string text_)
 	: TokenBase(type_)
-	, text(text_), number_traits()
+	, text(text_)
 	{
 	}
 
 	SimpleToken::SimpleToken(TokenEnum type_)
 	: TokenBase(type_)
-	, text(), number_traits()
+	, text()
 	{
 	}
 
@@ -194,7 +194,6 @@ namespace bryx
 	: TokenBase(other) // (other.type, other.text, other.extent)
 	{
 		// Copy constructor
-		number_traits = other.number_traits;
 		//result_pkg = other.result_pkg;
 	}
 
@@ -207,10 +206,6 @@ namespace bryx
 		//other.extent.Clear();
 
 		//other.text.clear();
-
-		number_traits = other.number_traits;
-
-		other.number_traits.clear();
 
 		//other.result_pkg.msg = "foofoo";
 
@@ -226,7 +221,6 @@ namespace bryx
 			//type = other.type;
 			//extent = other.extent;
 			text = other.text;
-			number_traits = other.number_traits;
 			//result_pkg = other.result_pkg;
 		}
 
@@ -234,6 +228,103 @@ namespace bryx
 	}
 
 	SimpleToken& SimpleToken::operator=(SimpleToken&& other) noexcept
+	{
+		// Move assignment. Note argument is *not* const
+
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			//type = other.type;
+			//extent = other.extent;
+
+			//other.text = "foofoo";
+
+			// I guess std::strings have move function template
+			text = move(other.text); // other.text;
+
+			//other.extent.Clear();
+			//other.text.Clear();
+
+			//other.result_pkg.msg = "foofoo";
+
+			//result_pkg = std::move(other.result_pkg);
+		}
+
+		return *this;
+	}
+
+	const std::string SimpleToken::to_string() const
+	{
+		return text;
+	}
+
+
+	// /////////////////////////////////////////////////////////////////////////////
+	// Number tokens
+
+	NumberToken::NumberToken(TokenEnum type_, std::string text_, const TokenExtent& extent_)
+	: TokenBase(type_, extent_)
+	, text(text_), number_traits()
+	{
+	}
+
+	NumberToken::NumberToken(TokenEnum type_, std::string text_)
+	: TokenBase(type_)
+	, text(text_), number_traits()
+	{
+	}
+
+	NumberToken::NumberToken(TokenEnum type_)
+	: TokenBase(type_)
+	, text(), number_traits()
+	{
+	}
+
+
+	NumberToken::NumberToken(const NumberToken& other)
+		: TokenBase(other) // (other.type, other.text, other.extent)
+	{
+		// Copy constructor
+		number_traits = other.number_traits;
+		//result_pkg = other.result_pkg;
+	}
+
+	NumberToken::NumberToken(NumberToken&& other) noexcept
+		: TokenBase(other)
+		//: NumberToken(other.type, move(other.text), other.extent)
+		, text(move(other.text))
+	{
+		// Move constructor. Note argument is *not* const
+		//other.extent.Clear();
+
+		//other.text.clear();
+
+		number_traits = other.number_traits;
+
+		other.number_traits.clear();
+
+		//other.result_pkg.msg = "foofoo";
+
+		//result_pkg = std::move(other.result_pkg);
+	}
+
+	NumberToken& NumberToken::operator=(const NumberToken& other)
+	{
+		// Copy assignment
+		if (this != &other)
+		{
+			TokenBase::operator=(other);
+			//type = other.type;
+			//extent = other.extent;
+			text = other.text;
+			number_traits = other.number_traits;
+			//result_pkg = other.result_pkg;
+		}
+
+		return *this;
+	}
+
+	NumberToken& NumberToken::operator=(NumberToken&& other) noexcept
 	{
 		// Move assignment. Note argument is *not* const
 
@@ -262,7 +353,7 @@ namespace bryx
 		return *this;
 	}
 
-	const std::string SimpleToken::to_string() const
+	const std::string NumberToken::to_string() const
 	{
 		return text;
 	}
@@ -1224,7 +1315,7 @@ namespace bryx
 			auto type = (number_traits.HasDecimal() || number_traits.HasExponent()) ? TokenEnum::FloatingNumber : TokenEnum::WholeNumber;
 			if (number_traits.HasUnits()) type = TokenEnum::NumberWithUnits;
 
-			auto t = std::make_shared<SimpleToken>(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
+			auto t = std::make_shared<NumberToken>(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
 			AcceptToken(t, false);  // false: don't advance buffer. We already have.
 		}
