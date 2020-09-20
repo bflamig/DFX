@@ -199,7 +199,7 @@ namespace bryx
 		bool VerifyOffset(const std::string zzz, const object_map_type* parent_map, bool offset_must_be_specified);
 		bool VerifyPeak(const std::string zzz, const object_map_type* parent_map, bool peak_must_be_specified);
 		bool VerifyRMS(const std::string zzz, const object_map_type* parent_map, bool rms_must_be_specified);
-		bool VerifyWavePropertyRatio(const std::string zzz, const Token& tkn);
+		bool VerifyWavePropertyRatio(const std::string zzz, const token_ptr& tkn);
 
 	public:
 

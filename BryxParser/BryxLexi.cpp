@@ -171,26 +171,26 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////////
 	// Ordinary simple tokens
 
-	Token::Token(TokenEnum type_, std::string text_, const TokenExtent &extent_)
+	SimpleToken::SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_)
 	: TokenBase(type_, extent_)
 	, text(text_), number_traits()
 	{
 	}
 
-	Token::Token(TokenEnum type_, std::string text_)
+	SimpleToken::SimpleToken(TokenEnum type_, std::string text_)
 	: TokenBase(type_)
 	, text(text_), number_traits()
 	{
 	}
 
-	Token::Token(TokenEnum type_)
+	SimpleToken::SimpleToken(TokenEnum type_)
 	: TokenBase(type_)
 	, text(), number_traits()
 	{
 	}
 
 
-	Token::Token(const Token& other)
+	SimpleToken::SimpleToken(const SimpleToken& other)
 	: TokenBase(other) // (other.type, other.text, other.extent)
 	{
 		// Copy constructor
@@ -198,9 +198,9 @@ namespace bryx
 		//result_pkg = other.result_pkg;
 	}
 
-	Token::Token(Token&& other) noexcept
+	SimpleToken::SimpleToken(SimpleToken&& other) noexcept
 	: TokenBase(other)
-	//: Token(other.type, move(other.text), other.extent)
+	//: SimpleToken(other.type, move(other.text), other.extent)
 	, text(move(other.text))
 	{
 		// Move constructor. Note argument is *not* const
@@ -217,7 +217,7 @@ namespace bryx
 		//result_pkg = std::move(other.result_pkg);
 	}
 
-	Token& Token::operator=(const Token& other)
+	SimpleToken& SimpleToken::operator=(const SimpleToken& other)
 	{
 		// Copy assignment
 		if (this != &other)
@@ -233,7 +233,7 @@ namespace bryx
 		return *this;
 	}
 
-	Token& Token::operator=(Token&& other) noexcept
+	SimpleToken& SimpleToken::operator=(SimpleToken&& other) noexcept
 	{
 		// Move assignment. Note argument is *not* const
 
@@ -262,7 +262,7 @@ namespace bryx
 		return *this;
 	}
 
-	const std::string Token::to_string() const
+	const std::string SimpleToken::to_string() const
 	{
 		return text;
 	}
@@ -367,6 +367,7 @@ namespace bryx
 
 	// /////////////////////////////////////////////////////////////////////////////
 	//
+	// OKAY, the main LEXI class
 	//
 	// /////////////////////////////////////////////////////////////////////////////
 
@@ -374,8 +375,8 @@ namespace bryx
 	: src(0)
 	, temp_buf()
 	, last_lexical_error()
-	, prev_token(TokenEnum::Null)
-	, curr_token(TokenEnum::SOT)
+	, prev_token(std::make_shared<SimpleToken>(TokenEnum::Null))
+	, curr_token(std::make_shared<SimpleToken>(TokenEnum::SOT))
 	, lexi_posn()
 	, token_cnt(0)
 	, preserve_white_space(true)
@@ -384,7 +385,6 @@ namespace bryx
 	{
 
 	}
-
 
 	Lexi::Lexi(std::streambuf* sb_)
 		: Lexi()
@@ -420,16 +420,16 @@ namespace bryx
 		return true;
 	}
 
-	bool Lexi::NeedsQuotes(const Token& tkn) const
+	bool Lexi::NeedsQuotes(const token_ptr &tkn) const
 	{
 		// WARNING: This function may not work properly if auto-synatx-mode 
 		// is still in effect.
 
-		if (tkn.type == TokenEnum::QuotedChars || tkn.type == TokenEnum::UnquotedChars)
+		if (tkn->type == TokenEnum::QuotedChars || tkn->type == TokenEnum::UnquotedChars)
 		{
-			return StringNeedsQuotes(tkn.to_string());
+			return StringNeedsQuotes(tkn->to_string());
 		}
-		else if (tkn.type == TokenEnum::NumberWithUnits)
+		else if (tkn->type == TokenEnum::NumberWithUnits)
 		{
 			return syntax_mode == SyntaxModeEnum::Json;
 		}
@@ -449,8 +449,8 @@ namespace bryx
 		TokenExtent extent(extent_);
 		extent.ecol = extent.scol + 1;
 
-		Token et(TokenEnum::ERROR, msg_, extent);
-		et.AddResult(last_lexical_error);
+		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
+		et->AddResult(last_lexical_error);
 
 		AcceptToken(et, false); // false: don't absorb character to preserve stream position for debugging purposes
 	}
@@ -507,15 +507,15 @@ namespace bryx
 		return c;
 	}
 
-	Token& Lexi::Start()
+	token_ptr Lexi::Start()
 	{
 		token_cnt = 0; lexi_posn.Clear();
-		prev_token = Token(TokenEnum::Null);
-		curr_token = Token(TokenEnum::SOT);
+		prev_token = std::make_shared<SimpleToken>(TokenEnum::Null);
+		curr_token = std::make_shared<SimpleToken>(TokenEnum::SOT);
 		return curr_token;
 	}
 
-	Token& Lexi::Next()
+	token_ptr Lexi::Next()
 	{
 		LexiResult result{ LexiResult::NoError };
 		last_lexical_error.Clear();
@@ -524,7 +524,7 @@ namespace bryx
 		// via break or return statement. If there's white space at the beginining,
 		// then two loops.
 
-		while (!curr_token.IsQuitToken())
+		while (!curr_token->IsQuitToken())
 		{
 			int c = src.peek();
 
@@ -537,7 +537,7 @@ namespace bryx
 					auto end_extent = WhereAreWe();
 					end_extent.CopyStart(start_extent);
 					auto type = TokenEnum::WhiteSpace;
-					Token t(type, temp_buf.str(), end_extent); // @@ TODO: NON-SENSICAL for printing
+					auto t = std::make_shared<SimpleToken>(type, temp_buf.str(), end_extent); // @@ TODO: NON-SENSICAL for printing
 					AcceptToken(t, false); // false = don't absorb current character (it's the one the failed the white space test)
 				}
 				else
@@ -566,10 +566,10 @@ namespace bryx
 				if (result == LexiResult::NoError)
 				{
 					// See if we're one of the special atoms, 'true', 'false', or 'null'
-					auto &s = curr_token.to_string();
-					if (s == "true") curr_token.type = TokenEnum::True;
-					else if (s == "false") curr_token.type = TokenEnum::False;
-					else if (s == "null") curr_token.type = TokenEnum::Null;
+					auto &s = curr_token->to_string();
+					if (s == "true") curr_token->type = TokenEnum::True;
+					else if (s == "false") curr_token->type = TokenEnum::False;
+					else if (s == "null") curr_token->type = TokenEnum::Null;
 				}
 			}
 			else if (IsDigit(c) || c == '-') // NOTE: Bryx numbers can't start with '+'
@@ -612,7 +612,7 @@ namespace bryx
 				auto ch = unsigned char(c);
 				std::string s; s.push_back(ch);
 				auto type = TokenEnum::EOT; // Forces quit
-				Token t(type, s, extent);
+				auto t = std::make_shared<SimpleToken>(type, s, extent);
 				AcceptToken(t, false); // false: don't absorb character to preserve stream position for debugging purposes
 			}
 			else
@@ -634,10 +634,12 @@ namespace bryx
 	}
 
 
-	void Lexi::AcceptToken(Token& tkn, bool absorb_char)
+	void Lexi::AcceptToken(token_ptr tkn, bool absorb_char)
 	{
+		// Careful here. We don't want the pointers crossed
 		prev_token = curr_token;
 		curr_token = tkn;
+
 		++token_cnt;
 
 		if (absorb_char)
@@ -654,7 +656,7 @@ namespace bryx
 		extent.Bump();
 		auto ch = unsigned char(c);
 		std::string s; s.push_back(ch);
-		Token t(type, s, extent);
+		auto t = std::make_shared<SimpleToken>(type, s, extent);
 		AcceptToken(t, false);  // true: don't absorb character again
 		return LexiResult::NoError;
 	}
@@ -743,7 +745,7 @@ namespace bryx
 		else
 		{
 			//auto end_extent = start_extent + extent;
-			Token t(TokenEnum::QuotedChars, temp_buf.str(), extent);
+			auto t = std::make_shared<SimpleToken>(TokenEnum::QuotedChars, temp_buf.str(), extent);
 			AcceptToken(t, false);  // false: don't advance buffer. We already have.
 		}
 
@@ -940,7 +942,7 @@ namespace bryx
 		else
 		{
 			//auto end_extent = start_extent + extent;
-			Token t(TokenEnum::UnquotedChars, temp_buf.str(), extent);
+			auto t = std::make_shared<SimpleToken>(TokenEnum::UnquotedChars, temp_buf.str(), extent);
 			AcceptToken(t, false);  // false: don't advance buffer. We already have.
 		}
 
@@ -1222,8 +1224,8 @@ namespace bryx
 			auto type = (number_traits.HasDecimal() || number_traits.HasExponent()) ? TokenEnum::FloatingNumber : TokenEnum::WholeNumber;
 			if (number_traits.HasUnits()) type = TokenEnum::NumberWithUnits;
 
-			Token t(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
-			t.number_traits = number_traits;
+			auto t = std::make_shared<SimpleToken>(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
+			t->number_traits = number_traits;
 			AcceptToken(t, false);  // false: don't advance buffer. We already have.
 		}
 

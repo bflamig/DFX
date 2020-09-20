@@ -259,7 +259,7 @@ namespace bryx
 				// Okay, it's a simple value. Is it a set of quoted characters?
 				// Or unquoted characters?
 
-				if (svp->tkn.type == TokenEnum::QuotedChars || svp->tkn.type == TokenEnum::UnquotedChars)
+				if (svp->tkn->type == TokenEnum::QuotedChars || svp->tkn->type == TokenEnum::UnquotedChars)
 				{
 					// @@ TODO: Does it look like a path?
 				}
@@ -364,7 +364,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a whole number?
 
-				if (svp->tkn.type == TokenEnum::WholeNumber)
+				if (svp->tkn->type == TokenEnum::WholeNumber)
 				{
 				}
 				else
@@ -621,7 +621,7 @@ namespace bryx
 				// Okay, it's a simple value. Is it a set of quoted characters?
 				// Or unquoted characters?
 
-				if (svp->tkn.type == TokenEnum::QuotedChars || svp->tkn.type == TokenEnum::UnquotedChars)
+				if (svp->tkn->type == TokenEnum::QuotedChars || svp->tkn->type == TokenEnum::UnquotedChars)
 				{
 					// @@ TODO: Does it look like a fname?
 				}
@@ -666,7 +666,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a whole number?
 
-				if (svp->tkn.type == TokenEnum::WholeNumber)
+				if (svp->tkn->type == TokenEnum::WholeNumber)
 				{
 				}
 				else
@@ -732,7 +732,7 @@ namespace bryx
 					if (is_Bryx_string(svp->type))
 					{
 						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.to_string(), number_traits);
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
 
 						if (rv == LexiResult::NoError)
 						{
@@ -744,8 +744,8 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.to_string(), extent);
-							t.number_traits = number_traits;
+							auto t = std::make_shared<SimpleToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
 						}
@@ -818,7 +818,7 @@ namespace bryx
 					if (is_Bryx_string(svp->type)) 
 					{
 						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn.to_string(), number_traits);
+						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
 
 						if (rv == LexiResult::NoError)
 						{
@@ -830,8 +830,8 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = Token(TokenEnum::NumberWithUnits, svp->tkn.to_string(), extent);
-							t.number_traits = number_traits;
+							auto t = std::make_shared<SimpleToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
 						}
@@ -862,7 +862,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyWavePropertyRatio(const std::string zzz, const Token& tkn)
+	bool DfxParser::VerifyWavePropertyRatio(const std::string zzz, const token_ptr& tkn)
 	{
 		// Here, we know it's a number. But is it a properly formed number
 		// that would serve as a wave file's peak or rms value? In these
@@ -875,7 +875,9 @@ namespace bryx
 
 		int save_errcnt = errcnt;
 
-		auto& traits = tkn.number_traits;
+		auto froglegs = std::dynamic_pointer_cast<SimpleToken>(tkn);  // @@ Someday it will be NumberToken
+
+		auto& traits = froglegs->number_traits;
 
 		if (traits.HasExponent() || traits.HasMetricPrefix())
 		{
@@ -899,7 +901,7 @@ namespace bryx
 				int col = 0;
 				int ecol = traits.ratio_units_locn > -1 ? traits.ratio_units_locn : traits.end_locn;
 
-				auto& txt = tkn.to_string();
+				auto& txt = tkn->to_string();
 				auto p = txt.c_str();
 				auto q = p;
 

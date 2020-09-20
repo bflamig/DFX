@@ -49,7 +49,7 @@ bool lexi_test(const std::string z, SyntaxModeEnum smode = SyntaxModeEnum::AutoD
 
 	auto t = sun.Start();
 
-	while (!IndicatesQuit(t.type))
+	while (!IndicatesQuit(t->type))
 	{
 		t = sun.Next();
 	}

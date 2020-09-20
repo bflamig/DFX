@@ -191,9 +191,9 @@ namespace bryx
 
 	struct SimpleValue : Value {
 	public:
-		Token tkn;
+		token_ptr tkn;
 	public:
-		explicit SimpleValue(ValueEnum type_, Token& tkn_);
+		explicit SimpleValue(ValueEnum type_, token_ptr tkn_);
 		virtual ~SimpleValue();
 	};
 
@@ -371,7 +371,7 @@ namespace bryx
 
 		bool NotAtEnd()
 		{
-			return !(lexi.curr_token.IsQuitToken());
+			return !(lexi.curr_token->IsQuitToken());
 		}
 
 		bool AtEnd()
@@ -379,9 +379,9 @@ namespace bryx
 			return AtEnd(lexi.curr_token);
 		}
 
-		bool AtEnd(Token& tkn)
+		bool AtEnd(token_ptr tkn)
 		{
-			return tkn.IsQuitToken();
+			return tkn->IsQuitToken();
 		}
 
 		bool AtErr()
@@ -389,12 +389,12 @@ namespace bryx
 			return AtErr(lexi.curr_token);
 		}
 
-		bool AtErr(Token& tkn)
+		bool AtErr(token_ptr tkn)
 		{
-			return tkn.type == TokenEnum::ERROR;
+			return tkn->type == TokenEnum::ERROR;
 		}
 
-		Token& Peek()
+		token_ptr Peek()
 		{
 			return lexi.curr_token;
 		}

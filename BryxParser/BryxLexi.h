@@ -281,7 +281,7 @@ namespace bryx
 
 	// Ordinary simple tokens
 
-	class Token : public TokenBase {
+	class SimpleToken : public TokenBase {
 	protected:
 		std::string text; // Will get instantiated with text from the source
 	public:
@@ -292,16 +292,16 @@ namespace bryx
 
 	public:
 
-		Token(TokenEnum type_, std::string text_, const TokenExtent &extent_);
-		Token(TokenEnum type_, std::string text_);
-		explicit Token(TokenEnum type_);
-		Token(const Token& other);
-		Token(Token&& other) noexcept;
+		SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_);
+		SimpleToken(TokenEnum type_, std::string text_);
+		explicit SimpleToken(TokenEnum type_);
+		SimpleToken(const SimpleToken& other);
+		SimpleToken(SimpleToken&& other) noexcept;
 
-		virtual ~Token() {  }
+		virtual ~SimpleToken() {  }
 
-		Token& operator=(const Token& other);
-		Token& operator=(Token&& other) noexcept;
+		SimpleToken& operator=(const SimpleToken& other);
+		SimpleToken& operator=(SimpleToken&& other) noexcept;
 			
 	public:
 
@@ -321,6 +321,8 @@ namespace bryx
 		Bryx
 	};
 
+	using token_ptr = std::shared_ptr<TokenBase>;
+
 	class Lexi {
 	public:
 
@@ -330,8 +332,8 @@ namespace bryx
 
 		LexiResultPkg last_lexical_error;
 
-		Token prev_token;
-		Token curr_token;
+		token_ptr prev_token;
+		token_ptr curr_token;
 
 		TokenExtent lexi_posn;  // NOTE: We are just using scol and srow of this for positioning info
 
@@ -435,7 +437,7 @@ namespace bryx
 
 		bool StringNeedsQuotes(const std::string& s) const;
 
-		bool NeedsQuotes(const Token& tkn) const;
+		bool NeedsQuotes(const token_ptr& tkn) const;
 
 	protected:
 
@@ -475,16 +477,16 @@ namespace bryx
 
 	public:
 
-		Token& Start();
+		token_ptr Start();
 
-		Token& Peek()
+		token_ptr Peek()
 		{
 			return curr_token;
 		}
 
-		Token& Next();
+		token_ptr Next();
 
-		void AcceptToken(Token& tkn, bool advance);
+		void AcceptToken(token_ptr tkn, bool advance);
 
 	protected:
 

@@ -126,7 +126,7 @@ namespace bryx
 		void clear();
 
 		virtual void set_num(std::ostream& serr, double d);
-		virtual void set_num(std::ostream& serr, const Token& tkn);
+		virtual void set_num(std::ostream& serr, const SimpleToken& tkn);
 		virtual void parse(std::ostream &serr, const char* src);
 
 		virtual double RawX() const;

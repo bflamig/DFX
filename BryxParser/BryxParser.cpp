@@ -139,8 +139,8 @@ namespace bryx
 
 	// /////////////////////////////////////////////////////////////////////////
 
-	SimpleValue::SimpleValue(ValueEnum type_, Token& tkn_)
-		: Value(type_), tkn(tkn_)
+	SimpleValue::SimpleValue(ValueEnum type_, token_ptr tkn_)
+	: Value(type_), tkn(tkn_) // @@ TODO: Should we be cloning this? Perhaps, perhaps, perhaps
 	{
 		//std::cout << "SimpleValue default ctor called\n";
 	}
@@ -340,7 +340,8 @@ namespace bryx
 			auto shptr = parent_map_ptr->at(prop_name);
 			auto qq = std::dynamic_pointer_cast<SimpleValue>(shptr);
 			auto svptr = qq.get();
-			return svptr->tkn.to_string();
+			auto &tkn = svptr->tkn;
+			return tkn->to_string();
 		}
 		catch (...)
 		{
@@ -362,14 +363,14 @@ namespace bryx
 	ParserResult Parser::AdvanceToken()
 	{
 		auto result = ParserResult::NoError;
-		auto& tkn = lexi.Next();
+		auto tkn = lexi.Next();
 
-		if (tkn.IsEndToken())
+		if (tkn->IsEndToken())
 		{
 			// We are at the end, my friend
 			//++curr_token_index; // @@ SHOULD WE? No because repeated calls means infinity
 		}
-		else if (tkn.IsErrorToken())
+		else if (tkn->IsErrorToken())
 		{
 			result = ParserResult::LexicalError;
 		}
@@ -379,7 +380,7 @@ namespace bryx
 			{
 				//std::cout << "At token index: " << curr_token_index << std::endl;
 				std::cout << "Encountered token: ";
-				lexi.curr_token.Print(std::cout);
+				lexi.curr_token->Print(std::cout);
 			}
 			// By defn, this means no lexical error, so ...
 			++curr_token_index;
@@ -422,7 +423,7 @@ namespace bryx
 
 		auto result = ParserResult::NoError;
 
-		auto& tkn_ref = Peek();
+		auto tkn_ref = Peek();
 
 		if (AtEnd(tkn_ref))
 		{
@@ -442,7 +443,7 @@ namespace bryx
 				}
 			}
 		}
-		else if (tkn_ref.type != tval)
+		else if (tkn_ref->type != tval)
 		{
 			// Okay, now look for token
 
@@ -468,7 +469,7 @@ namespace bryx
 
 		auto result = ParserResult::NoError;
 
-		auto& tkn_ref = Peek();
+		//auto tkn_ref = Peek();
 
 		bool expect_tokn = true;
 		bool silent_fail = true;
@@ -574,7 +575,7 @@ namespace bryx
 
 		// We start by seeing if we have the name of a name value pair.
 
-		if (lexi.curr_token.type == TokenEnum::QuotedChars || lexi.curr_token.type == TokenEnum::UnquotedChars)
+		if (lexi.curr_token->type == TokenEnum::QuotedChars || lexi.curr_token->type == TokenEnum::UnquotedChars)
 		{
 			// So far, so good. Let's advance the token where we might see an nv separator
 
@@ -585,18 +586,18 @@ namespace bryx
 			// Is the current token an nv-separator? Note that if auto-detect was turned on, it will automatically
 			// have set the syntax mode, and the test for NVSeparator() will now function as it should.
 
-			if (lexi.curr_token.type == TokenEnum::NVSeparator)
+			if (lexi.curr_token->type == TokenEnum::NVSeparator)
 			{
 				// With an nv separator, we have established that we should be a name value pair.
 				// The name is stored in the prev_token at this point in time. We'll copy it to the 
 				// file_moniker for safe keeping.
 
-				file_moniker = lexi.prev_token.to_string();
+				file_moniker = lexi.prev_token->to_string();
 				
 				// Now, if we are using json syntax as determined by the kind of nv separator, then the
 				// name in the file MUST have been quoted.
 
-				if (lexi.syntax_mode == SyntaxModeEnum::Json && lexi.prev_token.type != TokenEnum::QuotedChars)
+				if (lexi.syntax_mode == SyntaxModeEnum::Json && lexi.prev_token->type != TokenEnum::QuotedChars)
 				{
 					// OOPS!
 					result = ParserResult::InvalidStartingToken;
@@ -612,7 +613,7 @@ namespace bryx
 
 				if (result != ParserResult::NoError) return result;
 
-				if (dfx_mode && lexi.curr_token.type != TokenEnum::LeftBrace)
+				if (dfx_mode && lexi.curr_token->type != TokenEnum::LeftBrace)
 				{
 					// Well, ain't that the deal. We gots ourselves the wrong token.
 					result = ParserResult::WrongToken;
@@ -651,7 +652,7 @@ namespace bryx
 		if (result != ParserResult::NoError)
 		{
 			std::ostringstream msg;
-			msg << "Preparse(): Invalid file start -- " << to_string(lexi.curr_token.type);
+			msg << "Preparse(): Invalid file start -- " << to_string(lexi.curr_token->type);
 			LogError(result, msg.str(), curr_token_index);
 			return result;
 		}
@@ -678,7 +679,7 @@ namespace bryx
 						{
 							result = ParserResult::InvalidBryxConfiguration;
 							std::ostringstream msg;
-							msg << "Parse(): Invalid file configuration" << to_string(lexi.curr_token.type);
+							msg << "Parse(): Invalid file configuration" << to_string(lexi.curr_token->type);
 							LogError(result, msg.str(), curr_token_index);
 						}
 					}
@@ -712,7 +713,7 @@ namespace bryx
 					{
 						result = ParserResult::UnexpectedToken;
 						std::ostringstream msg;
-						msg << "CollectObject(): token " << to_string(lexi.curr_token.type);
+						msg << "CollectObject(): token " << to_string(lexi.curr_token->type);
 						LogError(result, msg.str(), curr_token_index);
 					}
 				}
@@ -731,13 +732,13 @@ namespace bryx
 
 		if (NotAtEnd())
 		{
-			auto& tkn_ref = Peek();
+			auto tkn = Peek();
 
-			if (tkn_ref.type != TokenEnum::LeftBrace)
+			if (tkn->type != TokenEnum::LeftBrace)
 			{
 				result = ParserResult::InvalidStartingToken;
 				std::ostringstream msg;
-				msg << "CollectObject(): token " << to_string(tkn_ref.type);
+				msg << "CollectObject(): token " << to_string(tkn->type);
 				LogError(result, msg.str(), curr_token_index);
 			}
 			else
@@ -766,7 +767,7 @@ namespace bryx
 				else
 				{
 					std::ostringstream msg;
-					msg << "CollectObject(): token " << to_string(tkn_ref.type);
+					msg << "CollectObject(): token " << to_string(tkn->type);
 					LogError(result, msg.str(), curr_token_index);
 				}
 			}
@@ -783,13 +784,13 @@ namespace bryx
 
 		if (NotAtEnd())
 		{
-			auto& tkn_ref = Peek();
+			auto tkn = Peek();
 
-			if (tkn_ref.type != TokenEnum::LeftSquareBracket)
+			if (tkn->type != TokenEnum::LeftSquareBracket)
 			{
 				result = ParserResult::InvalidStartingToken;
 				std::ostringstream msg;
-				msg << "CollectArray(): token " << to_string(tkn_ref.type);
+				msg << "CollectArray(): token " << to_string(tkn->type);
 				LogError(result, msg.str(), curr_token_index);
 			}
 			else
@@ -837,17 +838,17 @@ namespace bryx
 			//   false
 			//   null
 
-			auto& tkn_ref = Peek();
+			auto tkn = Peek();
 
-			if (tkn_ref.type == TokenEnum::LeftBrace)
+			if (tkn->type == TokenEnum::LeftBrace)
 			{
 				result = CollectObject(place_holder); // skips past automatically
 			}
-			else if (tkn_ref.type == TokenEnum::LeftSquareBracket)
+			else if (tkn->type == TokenEnum::LeftSquareBracket)
 			{
 				result = CollectArray(place_holder); // skips past automatically
 			}
-			else if (tkn_ref.type == TokenEnum::QuotedChars || tkn_ref.type == TokenEnum::UnquotedChars)
+			else if (tkn->type == TokenEnum::QuotedChars || tkn->type == TokenEnum::UnquotedChars)
 			{
 				// @@ BUG FIX. We might just have a quoted characters value, OR, we might be
 				// on the name token of a name-value pair. So we must test for an nv separator fby value.
@@ -859,7 +860,7 @@ namespace bryx
 				// that we might be throwing this copy away if we don't have name value pair after all.
 				// C'est la vie.
 
-				std::string saved_name = lexi.curr_token.to_string();
+				std::string saved_name = lexi.curr_token->to_string();
 
 				// Advance over the chars token. Note that it becomes "prev_token", which we may be
 				// taking advantage of shortly.
@@ -881,7 +882,7 @@ namespace bryx
 					{
 						result = ParserResult::TokenNotAllowed;
 						std::ostringstream msg;
-						msg << "CollectValue(): token " << to_string(tkn_ref.type) << '\n';
+						msg << "CollectValue(): token " << to_string(tkn->type) << '\n';
 						msg << "EG: Can't have name-value pair fby another name-value" << '\n';
 						LogError(result, msg.str(), curr_token_index);
 					}
@@ -915,31 +916,31 @@ namespace bryx
 					// Okay, back to that quoted character token. Where did it go? It got advanced over.
 					// But no worries, it has now become "prev_token", so we can find it there.
 
-					auto& tref = lexi.prev_token;
-					auto sp = std::make_unique<SimpleValue>(ValueEnum::QuotedString, tref); // @@ NEED TO GENERALIZE THIS FOR UNQOUTED POSSIBILITIES TOO
+					auto t = lexi.prev_token;
+					auto sp = std::make_unique<SimpleValue>(ValueEnum::QuotedString, t); // @@ NEED TO GENERALIZE THIS FOR UNQOUTED POSSIBILITIES TOO
 					place_holder = move(sp); // Transfer ownership to place_holder. Ain't C++ fun!
 					// NO! We've already skipped past this!    AdvanceToken(); // Skip past this simple token
 				}
 
 			}
-			else if (tkn_ref.type == TokenEnum::FloatingNumber || tkn_ref.type == TokenEnum::WholeNumber || tkn_ref.type == TokenEnum::NumberWithUnits)
+			else if (tkn->type == TokenEnum::FloatingNumber || tkn->type == TokenEnum::WholeNumber || tkn->type == TokenEnum::NumberWithUnits)
 			{
-				auto val_type = tkn_ref.type == TokenEnum::FloatingNumber ? ValueEnum::FloatingNumber : ValueEnum::WholeNumber;
-				if (tkn_ref.type == TokenEnum::NumberWithUnits) val_type = ValueEnum::NumberWithUnits;
-				auto sp = std::make_unique<SimpleValue>(val_type, tkn_ref);
+				auto val_type = tkn->type == TokenEnum::FloatingNumber ? ValueEnum::FloatingNumber : ValueEnum::WholeNumber;
+				if (tkn->type == TokenEnum::NumberWithUnits) val_type = ValueEnum::NumberWithUnits;
+				auto sp = std::make_unique<SimpleValue>(val_type, tkn);
 				place_holder = move(sp); // Transfer ownership to place_holder. Ain't C++ fun!
 				AdvanceToken(); // Skip past this simple token
 			}
-			else if (tkn_ref.type == TokenEnum::True || tkn_ref.type == TokenEnum::False)
+			else if (tkn->type == TokenEnum::True || tkn->type == TokenEnum::False)
 			{
-				auto val_type = tkn_ref.type == TokenEnum::True ? ValueEnum::True : ValueEnum::False;
-				auto sp = std::make_unique<SimpleValue>(val_type, tkn_ref);
+				auto val_type = tkn->type == TokenEnum::True ? ValueEnum::True : ValueEnum::False;
+				auto sp = std::make_unique<SimpleValue>(val_type, tkn);
 				place_holder = move(sp); // Transfer ownership to place_holder. Ain't C++ fun!
 				AdvanceToken(); // Skip past this simple token
 			}
-			else if (tkn_ref.type == TokenEnum::Null)
+			else if (tkn->type == TokenEnum::Null)
 			{
-				auto sp = std::make_unique<SimpleValue>(ValueEnum::Null, tkn_ref);
+				auto sp = std::make_unique<SimpleValue>(ValueEnum::Null, tkn);
 				place_holder = move(sp); // Transfer ownership to place_holder. Ain't C++ fun!
 				AdvanceToken(); // Skip past this simple token
 			}
@@ -1003,8 +1004,8 @@ namespace bryx
 
 			if (result == ParserResult::NoError)
 			{
-				auto& tref = Peek();
-				if (tref.type == TokenEnum::RightBrace)
+				auto t = Peek();
+				if (t->type == TokenEnum::RightBrace)
 				{
 					AdvanceToken();
 					break;
@@ -1064,9 +1065,9 @@ namespace bryx
 		{
 			// We might have an ending brace now
 
-			auto& tkn_ref = Peek();
+			auto tkn = Peek();
 
-			if (tkn_ref.type == TokenEnum::RightBrace)
+			if (tkn->type == TokenEnum::RightBrace)
 			{
 				// Got it, so we're outta here
 				AdvanceToken();
@@ -1090,7 +1091,7 @@ namespace bryx
 			{
 				// Gots us a name token, so make copy the quoted characters for posterity
 
-				std::string saved_name = lexi.curr_token.to_string();  // @@ TODO: Could use prev_token.text after AdvanceToken(); UPDATE: Didn't work.
+				std::string saved_name = lexi.curr_token->to_string();  // @@ TODO: Could use prev_token.text after AdvanceToken(); UPDATE: Didn't work.
 
 				// Advance over the name
 
@@ -1174,8 +1175,8 @@ namespace bryx
 
 			if (result == ParserResult::NoError)
 			{
-				auto& tref = Peek();
-				if (tref.type == TokenEnum::RightSquareBracket)
+				auto tkn = Peek();
+				if (tkn->type == TokenEnum::RightSquareBracket)
 				{
 					AdvanceToken();
 					break;
@@ -1232,9 +1233,9 @@ namespace bryx
 		{
 			// We might have an ending square bracket now
 
-			auto& tkn_ref = Peek();
+			auto tkn = Peek();
 
-			if (tkn_ref.type == TokenEnum::RightSquareBracket)
+			if (tkn->type == TokenEnum::RightSquareBracket)
 			{
 				// Got it, so we're outta here
 				AdvanceToken();
@@ -1266,11 +1267,11 @@ namespace bryx
 
 		if (last_parser_error.code == ParserResult::LexicalError)
 		{
-			lexi.curr_token.Print(sout); // will be an error token
+			lexi.curr_token->Print(sout); // will be an error token
 		}
 		else
 		{
-			lexi.curr_token.Print(sout);
+			lexi.curr_token->Print(sout);
 		}
 	}
 
@@ -1285,7 +1286,7 @@ namespace bryx
 			case ValueEnum::QuotedString:   // Bryx string
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn.to_string();
+				auto& txt = sv.tkn->to_string();
 
 				if (lexi.StringNeedsQuotes(txt))
 				{
@@ -1300,7 +1301,7 @@ namespace bryx
 			case ValueEnum::UnquotedString:   // Bryx string
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn.to_string();
+				auto& txt = sv.tkn->to_string();
 				if (lexi.StringNeedsQuotes(txt)) // @@ Don't techinically need this here
 				{
 					sout << '"' << txt << '"';
@@ -1314,21 +1315,21 @@ namespace bryx
 			case ValueEnum::WholeNumber:    // Bryx number with no floating point syntax
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn.to_string();
+				auto& txt = sv.tkn->to_string();
 				sout << txt;
 			}
 			break;
 			case ValueEnum::FloatingNumber: // Bryx number with floating point syntax
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn.to_string();
+				auto& txt = sv.tkn->to_string();
 				sout << txt;
 			}
 			break;
 			case ValueEnum::NumberWithUnits: // Bryx number with units too.
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn.to_string();
+				auto& txt = sv.tkn->to_string();
 
 				// depends on what mode we're in whether we need quotes or not
 
