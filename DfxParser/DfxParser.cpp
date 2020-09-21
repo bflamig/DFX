@@ -731,23 +731,25 @@ namespace bryx
 
 					if (svp->is_string())
 					{
-						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
+						//LexiNumberTraits number_traits;
+						//LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
 
-						if (rv == LexiResult::NoError)
+						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
+						// @@ warning: if there was a error, the errcnt was not incremented.
+
+						if (t)
 						{
-							//Token t(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
-							// t.number_traits = number_traits;
+							if (VerifyWavePropertyRatio(new_zzz, t))
+							{
+								// @@ TODO:
+								// Okay, the quoted string is actually a number.
+								// We really want to do some surgery to the parse
+								// tree and represent this value as a number. 
+								// Not sure how to pull that off.
 
-							auto extent = TokenExtent(0, 0, number_traits.end_locn);
-
-							// @@ Token type below is not correct all the time. But for what we're
-							// doing here, it's fine.
-
-							auto t = std::make_shared<NumberToken>(TokenEnum::Number, svp->tkn->to_string(), extent);
-							t->number_traits = number_traits;
-
-							VerifyWavePropertyRatio(new_zzz, t);
+								svp->tkn = t; // @@ Maybe this is all I need!
+								svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
+							}
 						}
 						else
 						{
@@ -817,23 +819,24 @@ namespace bryx
 
 					if (svp->is_string()) 
 					{
-						LexiNumberTraits number_traits;
-						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
+						//LexiNumberTraits number_traits;
+						//LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
 
-						if (rv == LexiResult::NoError)
+						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
+						// @@ warning: if there was a error, the errcnt was not incremented.
+						if (t)
 						{
-							//Token t(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
-							// t.number_traits = number_traits;
+							if (VerifyWavePropertyRatio(new_zzz, t))
+							{
+								// @@ TODO:
+								// Okay, the quoted string is actually a number.
+								// We really want to do some surgery to the parse
+								// tree and represent this value as a number. 
+								// Not sure how to pull that off.
 
-							auto extent = TokenExtent(0, 0, number_traits.end_locn);
-
-							// @@ Token type below is not correct all the time. But for what we're
-							// doing here, it's fine.
-
-							auto t = std::make_shared<NumberToken>(TokenEnum::Number, svp->tkn->to_string(), extent);
-							t->number_traits = number_traits;
-
-							VerifyWavePropertyRatio(new_zzz, t);
+								svp->tkn = t; // @@ Maybe this is all I need!
+								svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
+							}
 						}
 						else
 						{

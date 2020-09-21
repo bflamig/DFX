@@ -40,10 +40,14 @@
 // changing inadverdantly.
 
 #include <ostream>
-#include "BryxLexi.h"
+//#include "BryxLexi.h"
 
 namespace bryx
 {
+
+	class LexiNumberTraits; // forw decl
+	class NumberToken; // forw decl
+
 	// /////////////////////////////////////////////////////////////////////
 	// flags representing the status of the stored value
 
@@ -110,8 +114,8 @@ namespace bryx
 
 		static constexpr int ndigits_reserved = 31; // How many digits do we allow (including decimal point), but not including sign or null terminator
 
-		char mantissa[ndigits_reserved + 1]; // Does not store the leading sign. Will have |mantissa} < 1000 when normalized.
-		char text_units[32];                 // Text version of the units. Used during parsing. Included null byte.
+		char mantissa[ndigits_reserved + 1]; // Stores null but does not store the leading sign. Will have |mantissa} < 1000 when normalized.
+		char text_units[32];                 // Text version of the units. Used during parsing. Includes null byte.
 		int sign;                  // Sign bit. 1 if positive, -1 if negative
 		int engr_exp;              // We store the exponent in powers of a thousand or million (to support metric-style engineering notation)
 		const int MEXP_MULT;       // The multiplier for the engr_exp. Either 3 for "thousands" or 6 for "millions". The latter is for squared units.
@@ -131,6 +135,7 @@ namespace bryx
 		virtual void set_num(std::ostream& serr, double d);
 		virtual void set_num(std::ostream& serr, const NumberToken& tkn);
 		virtual void parse(std::ostream &serr, const char* src);
+		virtual void process_num_from_lexi(std::ostream& serr, const char* src, const LexiNumberTraits& number_traits);
 
 		virtual double RawX() const;
 
@@ -143,8 +148,6 @@ namespace bryx
 		void remove_leading_zeros();
 		void adjust_decimal_pt(std::ostream &serr);
 		void adjust_trailing_zeros();
-
-		virtual void process_num_from_lexi(std::ostream& serr, const char* src, const LexiNumberTraits& number_traits);
 
 		void LogError(std::ostream &serr, EngrNumResult result_, std::string msg_, int posn_);
 

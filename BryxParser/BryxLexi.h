@@ -50,6 +50,7 @@
 #include <sstream>
 #include <istream>
 #include <string>
+#include "EngrNum.h"
 
 namespace bryx
 {
@@ -151,6 +152,7 @@ namespace bryx
 		InvalidEscapedChar,
 		InvalidStartingToken,
 		Unsupported,
+		Unspecified,
 		UnexpectedEOF
 	};
 
@@ -353,11 +355,14 @@ namespace bryx
 
 	class NumberToken : public TokenBase {
 	protected:
+
 		std::string text; // Will get instantiated with text from the source
+
 	public:
 
 		friend class Lexi;
 
+		EngrNum engr_num;                // The source text will be analyzed and parsed into this
 		LexiNumberTraits number_traits;  // Will get filled in for possible number tokens
 
 	public:
@@ -372,6 +377,10 @@ namespace bryx
 
 		NumberToken& operator=(const NumberToken& other);
 		NumberToken& operator=(NumberToken&& other) noexcept;
+
+	public:
+
+		void ProcessNum(std::ostream& serr);
 
 	public:
 
@@ -583,7 +592,8 @@ namespace bryx
 
 	public:
 
-		static LexiResult CollectQuotedNumber(const std::string text, LexiNumberTraits &number_traits);
+		//static LexiResult CollectQuotedNumber(const std::string text, LexiNumberTraits &number_traits);
+		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, const std::string text);
 
 	};
 

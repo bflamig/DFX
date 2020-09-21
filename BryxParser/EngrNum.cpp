@@ -40,6 +40,7 @@
 #include <cctype>
 #include <memory>
 #include "EngrNum.h"
+#include "BryxLexi.h"
 
 namespace bryx
 {
@@ -833,12 +834,14 @@ namespace bryx
 	{
 		clear();
 
-		LexiNumberTraits number_traits;
-		LexiResult r = Lexi::CollectQuotedNumber(src, number_traits);
+		//LexiNumberTraits number_traits;
+		//LexiResult r = Lexi::CollectQuotedNumber(src, number_traits);
 
-		if (r == LexiResult::NoError)
+		auto tkn_ptr = Lexi::CollectQuotedNumber(serr, src);
+
+		if (tkn_ptr)
 		{
-			process_num_from_lexi(serr, src, number_traits);
+			process_num_from_lexi(serr, src, tkn_ptr->number_traits);
 		}
 		else
 		{

@@ -91,6 +91,12 @@ int explore()
 		{
 			std::cout << "Dfx FAILED schema check." << std::endl;
 		}
+
+		std::cout << std::endl << std::endl;
+
+		// Might have changed string tokens to number tokens. Let's see.
+		df->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
+
 	}
 
 	return 0;

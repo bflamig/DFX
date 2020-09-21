@@ -24,7 +24,7 @@ dfx =
 							{
 								fname = "kick_lo.wav",
 								offset = 1492,
-								peak = -40dB,
+								peak = "-40dB",
 								rms =  -54db
 							}
 						]

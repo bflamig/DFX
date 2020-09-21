@@ -37,7 +37,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include "EngrNum.h"
+#include "BryxLexi.h"
 
 using namespace bryx;
 
@@ -306,10 +306,9 @@ void testdb()
 
 	std::string test = "-30db";
 
-	LexiNumberTraits traits;
+	//LexiNumberTraits traits;
 
-	Lexi::CollectQuotedNumber(test, traits);
-
+	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
 }
 
 int main()

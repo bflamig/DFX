@@ -32,6 +32,7 @@
  *
 \******************************************************************************/
 
+#include <sstream>
 #include "BryxLexi.h"
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -425,6 +426,11 @@ namespace bryx
 		return *this;
 	}
 
+	void NumberToken::ProcessNum(std::ostream &serr)
+	{
+		engr_num.process_num_from_lexi(serr, text.c_str(), number_traits);
+	}
+
 	const std::string NumberToken::to_string() const
 	{
 		return text;
@@ -521,6 +527,7 @@ namespace bryx
 			case LexiResult::InvalidEscapedChar: s = "InvalidEscapedChar"; break;
 			case LexiResult::InvalidStartingToken: s = "InvalidStartingToken"; break;
 			case LexiResult::Unsupported: s = "Unsupported"; break;
+			case LexiResult::Unspecified: s = "Unspecified"; break;
 			case LexiResult::UnexpectedEOF: s = "UnexpectedEOF"; break;
 			default:; return "unspecified result";  break;
 		}
@@ -585,7 +592,7 @@ namespace bryx
 
 	bool Lexi::NeedsQuotes(const token_ptr &tkn) const
 	{
-		// WARNING: This function may not work properly if auto-synatx-mode 
+		// WARNING: This function may not work properly if auto-syntax-mode 
 		// is still in effect.
 
 		if (tkn->type == TokenEnum::QuotedChars || tkn->type == TokenEnum::UnquotedChars)
@@ -1201,13 +1208,6 @@ namespace bryx
 			c = NextPeek();
 			extent.Bump();
 			have_at_least_one_digit = true;
-#if 0
-			if (IsDigit(c))
-			{
-				result = LexiResult::UnexpectedChar;
-				LogError(result, "CollectNumber(): can't have a leading 0 for a multi-digit number", extent);
-			}
-#endif
 		}
 
 		// Collect rest of integer portion
@@ -1386,13 +1386,27 @@ namespace bryx
 
 			auto t = std::make_shared<NumberToken>(TokenEnum::Number, temp_buf.str(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
-			AcceptToken(t, false);  // false: don't advance buffer. We already have.
+			std::stringstream serr;
+			t->ProcessNum(serr);
+			auto str = serr.str();
+			if (str.empty())
+			{
+				AcceptToken(t, false);  // false: don't advance buffer. We already have.
+			}
+			else
+			{
+				LogError(LexiResult::Unspecified, str, extent);
+			}
 		}
 
 		return result;
 	}
 
-    LexiResult Lexi::CollectQuotedNumber(const std::string src, LexiNumberTraits& number_traits)
+	// A static member function
+
+    //LexiResult Lexi::CollectQuotedNumber(const std::string src, LexiNumberTraits& number_traits)
+
+    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, const std::string src)
 	{
 		// This is a static function.
 
@@ -1404,9 +1418,11 @@ namespace bryx
 
 		int len = src.length(); // strlen(src);
 
+		LexiNumberTraits number_traits;
+
 		number_traits.end_locn = len; // by def
 
-		int start_posn = 0;
+		const int start_posn = 0;
 
 		bool have_at_least_one_digit = false;
 
@@ -1622,13 +1638,37 @@ namespace bryx
 		if (have_at_least_one_digit)
 		{
 			number_traits.could_be_a_number = true;
+
+			number_traits.end_locn = posn - start_posn;
+
+			TokenExtent extent(0, start_posn, posn);
+
+			auto t = std::make_shared<NumberToken>(TokenEnum::Number, src, extent); // row, col, start_extent, end_extent);
+			t->number_traits = number_traits;
+			std::stringstream serr;
+			t->ProcessNum(serr);
+			auto str = serr.str();
+			if (str.empty())
+			{
+				return t;  // Got's us a real live token
+			}
+			else
+			{
+				result = LexiResult::Unspecified;
+			}
 		}
 		else
 		{
 			result = LexiResult::UnexpectedEOF; // @@ TODO put in a better code
 		}
 
+		if (result != LexiResult::NoError)
+		{
+			serr << to_string(result) << " --> " << "parsing quoted number" << '\n';
 
-		return result;
+		}
+
+		return nullptr;
 	}
+
 }
