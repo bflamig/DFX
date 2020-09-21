@@ -364,7 +364,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a whole number?
 
-				if (svp->tkn->type == TokenEnum::WholeNumber)
+				if (svp->tkn->IsWholeNumber())
 				{
 				}
 				else
@@ -666,7 +666,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a whole number?
 
-				if (svp->tkn->type == TokenEnum::WholeNumber)
+				if (svp->tkn->IsWholeNumber())
 				{
 				}
 				else
@@ -714,7 +714,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a number?
 
-				if (is_Bryx_number(svp->type))
+				if (svp->is_number())
 				{
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
@@ -729,7 +729,7 @@ namespace bryx
 					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
 					// so we're probably okay here.
 
-					if (is_Bryx_string(svp->type))
+					if (svp->is_string())
 					{
 						LexiNumberTraits number_traits;
 						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
@@ -744,7 +744,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = std::make_shared<NumberToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							auto t = std::make_shared<NumberToken>(TokenEnum::Number, svp->tkn->to_string(), extent);
 							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);
@@ -800,7 +800,7 @@ namespace bryx
 			{
 				// Okay, it's a simple value. Is it a number?
 
-				if (is_Bryx_number(svp->type))
+				if (svp->is_number())
 				{
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
@@ -815,7 +815,7 @@ namespace bryx
 					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
 					// so we're probably okay here.
 
-					if (is_Bryx_string(svp->type)) 
+					if (svp->is_string()) 
 					{
 						LexiNumberTraits number_traits;
 						LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
@@ -830,7 +830,7 @@ namespace bryx
 							// @@ Token type below is not correct all the time. But for what we're
 							// doing here, it's fine.
 
-							auto t = std::make_shared<NumberToken>(TokenEnum::NumberWithUnits, svp->tkn->to_string(), extent);
+							auto t = std::make_shared<NumberToken>(TokenEnum::Number, svp->tkn->to_string(), extent);
 							t->number_traits = number_traits;
 
 							VerifyWavePropertyRatio(new_zzz, t);

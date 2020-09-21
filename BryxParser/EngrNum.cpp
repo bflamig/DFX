@@ -75,6 +75,8 @@ namespace bryx
 		return s;
 	}
 
+#if 0
+
 	EngrNumResultPkg::EngrNumResultPkg()
 	: msg(), code(EngrNumResult::NoError), posn(0)
 	{
@@ -146,6 +148,8 @@ namespace bryx
 	{
 		sout << to_string(code) << " --> " << msg << '\n';
 	}
+
+#endif
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -252,7 +256,7 @@ namespace bryx
 	{
 		clear();
 
-		if (tkn.type == TokenEnum::FloatingNumber || tkn.type == TokenEnum::NumberWithUnits || tkn.type == TokenEnum::WholeNumber)
+		if (tkn.type == TokenEnum::Number)
 		{
 			process_num_from_lexi(serr, tkn.to_string().c_str(), tkn.number_traits);
 		}

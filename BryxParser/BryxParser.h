@@ -65,6 +65,7 @@ namespace bryx
 
 	extern std::string to_string(ParserResult result);
 
+
 	class ParserResultPkg {
 	public:
 		std::string msg;
@@ -85,9 +86,7 @@ namespace bryx
 	{
 		QuotedString,    // Bryx string
 		UnquotedString,  // Bryx unquoted string
-		WholeNumber,     // Bryx number with no floating point syntax
-		FloatingNumber,  // Bryx number with floating point syntax
-		NumberWithUnits, // Bryx number with either integer or floating point syntax with units
+		Number,          // Bryx number: whole, floating point, might have optional units
 		True,            // Bryx boolean that's true
 		False,           // Bryx boolean that's false
 		Null,            // Bryx value that's null
@@ -97,41 +96,6 @@ namespace bryx
 	};
 
 	extern std::string to_string(ValueEnum v);
-
-	inline bool is_Bryx_string(ValueEnum x)
-	{
-		return (x == ValueEnum::QuotedString) || (x == ValueEnum::UnquotedString);  // @@ TODO: Need to think about this
-	}
-
-	inline bool is_Bryx_number(ValueEnum x)
-	{
-		return (x == ValueEnum::WholeNumber) || (x == ValueEnum::FloatingNumber || (x == ValueEnum::NumberWithUnits));
-	}
-
-	inline bool is_Bryx_object(ValueEnum x)
-	{
-		return x == ValueEnum::Object;
-	}
-
-	inline bool is_Bryx_array(ValueEnum x)
-	{
-		return x == ValueEnum::Array;
-	}
-
-	inline bool is_Bryx_boolean(ValueEnum x)
-	{
-		return (x == ValueEnum::True) || (x == ValueEnum::False);
-	}
-
-	inline bool is_Bryx_null(ValueEnum x)
-	{
-		return x == ValueEnum::Null;
-	}
-
-	inline bool is_Bryx_pair(ValueEnum x)
-	{
-		return x == ValueEnum::NameValuePair;
-	}
 
 	// ///////////////////////////////////////////////////////////////
 
@@ -149,39 +113,54 @@ namespace bryx
 
 	public:
 
-		bool is_Bryx_string() const
+		bool is_string() const
 		{
-			return bryx::is_Bryx_string(type);
+			return (type == ValueEnum::QuotedString) || (type == ValueEnum::UnquotedString);  // @@ TODO: Need to think about this
 		}
 
-		bool is_Bryx_number(ValueEnum x) const
+		bool is_number() const
 		{
-			return bryx::is_Bryx_number(type);
+			return type == ValueEnum::Number;
 		}
 
-		bool is_Bryx_object(ValueEnum x) const
+		virtual bool is_whole_number() const
 		{
-			return bryx::is_Bryx_object(type);
+			return false;
 		}
 
-		bool is_Bryx_array(ValueEnum x) const
+		virtual bool is_floating_point() const
 		{
-			return bryx::is_Bryx_array(type);
+			return false;
 		}
 
-		bool is_Bryx_boolean(ValueEnum x) const
+		virtual bool is_number_with_units() const
 		{
-			return bryx::is_Bryx_boolean(type);
+			return false;
 		}
 
-		bool is_Bryx_null(ValueEnum x) const
+		bool is_object() const
 		{
-			return bryx::is_Bryx_null(type);
+			return type == ValueEnum::Object;
 		}
 
-		bool is_Bryx_pair(ValueEnum x) const
+		bool is_array() const
 		{
-			return bryx::is_Bryx_pair(type);
+			return type == ValueEnum::Array;
+		}
+
+		bool is_boolean() const
+		{
+			return (type == ValueEnum::True) || (type == ValueEnum::False);
+		}
+
+		bool is_null() const
+		{
+			return type == ValueEnum::Null;
+		}
+
+		bool is_pair() const
+		{
+			return type == ValueEnum::NameValuePair;
 		}
 	};
 
@@ -195,6 +174,21 @@ namespace bryx
 	public:
 		explicit SimpleValue(ValueEnum type_, token_ptr tkn_);
 		virtual ~SimpleValue();
+
+		virtual bool is_whole_number() const
+		{
+			return tkn->IsWholeNumber();
+		}
+
+		virtual bool is_floating_pt() const
+		{
+			return tkn->IsFloatingPoint();
+		}
+
+		virtual bool is_number_with_units() const
+		{
+			return tkn->IsNumberWithUnits();
+		}
 	};
 
 	using nv_type = std::pair<const std::string, std::shared_ptr<Value>>;

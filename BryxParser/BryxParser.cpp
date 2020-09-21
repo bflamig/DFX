@@ -61,7 +61,6 @@ namespace bryx
 		return s;
 	}
 
-
 	ParserResultPkg::ParserResultPkg()
 	: msg(), code(ParserResult::NoError), token_id(0)
 	{
@@ -102,9 +101,7 @@ namespace bryx
 		{
 			case ValueEnum::QuotedString: "QuotedString"; break;
 			case ValueEnum::UnquotedString: "UnquotedString"; break;
-			case ValueEnum::WholeNumber: "WholeNumber"; break;
-			case ValueEnum::FloatingNumber: "FloatingNumber"; break;
-			case ValueEnum::NumberWithUnits: "NumberWithUnits"; break;
+			case ValueEnum::Number: "Number"; break;
 			case ValueEnum::True: "True"; break;
 			case ValueEnum::False: "False"; break;
 			case ValueEnum::Null: "Null"; break;
@@ -121,13 +118,13 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////
 
 	Value::Value()
-		: type(ValueEnum::Null), dirty(false)
+	: type(ValueEnum::Null), dirty(false)
 	{
 		std::cout << "Value default ctor called\n";
 	}
 
 	Value::Value(ValueEnum type_)
-		: type(type_), dirty(false)
+	: type(type_), dirty(false)
 	{
 		//std::cout << "Value ctor called\n";
 	}
@@ -154,8 +151,8 @@ namespace bryx
 
 
 	NameValue::NameValue(const std::string& name_, std::shared_ptr<Value>& val_)
-		: Value(ValueEnum::NameValuePair)
-		, pair(name_, move(val_))
+	: Value(ValueEnum::NameValuePair)
+	, pair(name_, move(val_))
 	{
 		//std::cout << "NameValue default ctor called\n";
 	};
@@ -923,10 +920,11 @@ namespace bryx
 				}
 
 			}
-			else if (tkn->type == TokenEnum::FloatingNumber || tkn->type == TokenEnum::WholeNumber || tkn->type == TokenEnum::NumberWithUnits)
+			else if (tkn->type == TokenEnum::Number)
 			{
-				auto val_type = tkn->type == TokenEnum::FloatingNumber ? ValueEnum::FloatingNumber : ValueEnum::WholeNumber;
-				if (tkn->type == TokenEnum::NumberWithUnits) val_type = ValueEnum::NumberWithUnits;
+				//auto val_type = tkn->type == TokenEnum::FloatingNumber ? ValueEnum::FloatingNumber : ValueEnum::WholeNumber;
+				//if (tkn->type == TokenEnum::NumberWithUnits) val_type = ValueEnum::NumberWithUnits;
+				auto val_type = ValueEnum::Number;
 				auto sp = std::make_unique<SimpleValue>(val_type, tkn);
 				place_holder = move(sp); // Transfer ownership to place_holder. Ain't C++ fun!
 				AdvanceToken(); // Skip past this simple token
@@ -1312,36 +1310,16 @@ namespace bryx
 				}
 			}
 			break;
-			case ValueEnum::WholeNumber:    // Bryx number with no floating point syntax
+			case ValueEnum::Number:    // Bryx number
 			{
 				auto& sv = dynamic_cast<const SimpleValue&>(jv);
 				auto& txt = sv.tkn->to_string();
-				sout << txt;
-			}
-			break;
-			case ValueEnum::FloatingNumber: // Bryx number with floating point syntax
-			{
-				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn->to_string();
-				sout << txt;
-			}
-			break;
-			case ValueEnum::NumberWithUnits: // Bryx number with units too.
-			{
-				auto& sv = dynamic_cast<const SimpleValue&>(jv);
-				auto& txt = sv.tkn->to_string();
-
-				// depends on what mode we're in whether we need quotes or not
 
 				if (lexi.NeedsQuotes(sv.tkn))
 				{
 					sout << '"' << txt << '"';
 				}
-				else
-				{
-					sout << txt;
-				}
-
+				else sout << txt;
 			}
 			break;
 			case ValueEnum::True:           // Bryx boolean that's true

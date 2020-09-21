@@ -71,9 +71,7 @@ namespace bryx
 
 			case TokenEnum::QuotedChars:	 s = "QuotedChars";		break;
 			case TokenEnum::UnquotedChars:	 s = "UnquotedChars";		break;
-			case TokenEnum::WholeNumber:	 s = "WholeNumber";		break;
-			case TokenEnum::FloatingNumber:	 s = "FloatingNumber";		break;
-			case TokenEnum::NumberWithUnits: s = "NumberWithUnits";		break;
+			case TokenEnum::Number:			 s = "Number";		break;
 			case TokenEnum::True:			 s = "True";		break;
 			case TokenEnum::False:			 s = "False";		break;
 			case TokenEnum::Null:			 s = "Null";		break;
@@ -594,7 +592,7 @@ namespace bryx
 		{
 			return StringNeedsQuotes(tkn->to_string());
 		}
-		else if (tkn->type == TokenEnum::NumberWithUnits)
+		else if (tkn->IsNumberWithUnits())
 		{
 			return syntax_mode == SyntaxModeEnum::Json;
 		}
@@ -1386,10 +1384,7 @@ namespace bryx
 			number_traits.could_be_a_number = true;
 			number_traits.end_locn = extent.ecol - extent.scol; // @@ BUG FIX 09/16/2020
 
-			auto type = (number_traits.HasDecimal() || number_traits.HasExponent()) ? TokenEnum::FloatingNumber : TokenEnum::WholeNumber;
-			if (number_traits.HasUnits()) type = TokenEnum::NumberWithUnits;
-
-			auto t = std::make_shared<NumberToken>(type, temp_buf.str(), extent); // row, col, start_extent, end_extent);
+			auto t = std::make_shared<NumberToken>(TokenEnum::Number, temp_buf.str(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
 			AcceptToken(t, false);  // false: don't advance buffer. We already have.
 		}

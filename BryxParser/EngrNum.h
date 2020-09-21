@@ -75,6 +75,8 @@ namespace bryx
 		UnspecifiedError
 	};
 
+#if 0
+
 	class EngrNumResultPkg {
 	public:
 		std::string msg;
@@ -95,6 +97,7 @@ namespace bryx
 		void Print(std::ostream& sout) const;
 	};
 
+#endif
 
 	// //////////////////////////////////////////////////////////////////////////////////
 
@@ -108,7 +111,7 @@ namespace bryx
 		static constexpr int ndigits_reserved = 31; // How many digits do we allow (including decimal point), but not including sign or null terminator
 
 		char mantissa[ndigits_reserved + 1]; // Does not store the leading sign. Will have |mantissa} < 1000 when normalized.
-		char text_units[32];                 // Text version of the units. Used during parsing 
+		char text_units[32];                 // Text version of the units. Used during parsing. Included null byte.
 		int sign;                  // Sign bit. 1 if positive, -1 if negative
 		int engr_exp;              // We store the exponent in powers of a thousand or million (to support metric-style engineering notation)
 		const int MEXP_MULT;       // The multiplier for the engr_exp. Either 3 for "thousands" or 6 for "millions". The latter is for squared units.

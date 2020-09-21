@@ -53,7 +53,6 @@
 
 namespace bryx
 {
-
 	enum class TokenEnum
 	{
 		// Low level, single character tokens
@@ -83,9 +82,10 @@ namespace bryx
 
 		QuotedChars,     // sequence of characters surrounded by double quotes
 		UnquotedChars,   // sequence of characters that are either alphanumeric, or a select set of characters (esp no ws or quotes or =)
-		WholeNumber,     // sequence of characters that are digits only, with optional sign prefix
-		FloatingNumber,  // sequence of characters that has a valid floating point syntax
-		NumberWithUnits, // sequence of characters that has a valid whole number or floating point syntax, with optional alpha unit characters
+		//WholeNumber,     // sequence of characters that are digits only, with optional sign prefix
+		//FloatingNumber,  // sequence of characters that has a valid floating point syntax
+		//NumberWithUnits, // sequence of characters that has a valid whole number or floating point syntax, with optional alpha unit characters
+		Number,            // sequence of characters that comprise whole numbers, floating point numbers, all with optional metric prefix and units
 		True,            // the sequence of characters 'true', no quotes
 		False,           // the sequence of characters 'false', no quotes
 		Null,            // the sequence of characters 'null', no quotes
@@ -114,9 +114,7 @@ namespace bryx
 
 	inline bool IsNumeric(TokenEnum t)
 	{
-		return t == TokenEnum::WholeNumber ||
-			t == TokenEnum::FloatingNumber ||
-			t == TokenEnum::NumberWithUnits;
+		return t == TokenEnum::Number;
 	}
 	// ////////////////////////////////////////////////////////////////////////////////
 
@@ -223,7 +221,6 @@ namespace bryx
 		void Print(std::ostream& sout) const;
 	};
 
-
 	// ////////////////////////////////////////////////////////////////////////////////
 
 	class TokenBase {
@@ -271,6 +268,22 @@ namespace bryx
 		{
 			return bryx::IndicatesQuit(type);
 		}
+
+		virtual bool IsWholeNumber() const
+		{
+			return false;
+		}
+
+		virtual bool IsFloatingPoint() const
+		{
+			return false;
+		}
+
+		virtual bool IsNumberWithUnits() const
+		{
+			return false;
+		}
+
 
 	public:
 
@@ -361,6 +374,21 @@ namespace bryx
 		NumberToken& operator=(NumberToken&& other) noexcept;
 
 	public:
+
+		bool IsWholeNumber() const
+		{
+			return !number_traits.HasDecimal();
+		}
+
+		bool IsFloatingPoint() const
+		{
+			return number_traits.HasDecimal();
+		}
+
+		bool IsNumberWithUnits() const
+		{
+			return number_traits.HasUnits();
+		}
 
 		virtual const std::string to_string() const;
 	};
