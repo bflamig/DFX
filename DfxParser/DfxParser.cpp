@@ -731,11 +731,9 @@ namespace bryx
 
 					if (svp->is_string())
 					{
-						//LexiNumberTraits number_traits;
-						//LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
-
 						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
-						// @@ warning: if there was a error, the errcnt was not incremented.
+						// @@ warning: if there was an error, the errcnt was not incremented.
+						// but no biggie, the extra error msg below will at least inc the counter.
 
 						if (t)
 						{
@@ -819,11 +817,10 @@ namespace bryx
 
 					if (svp->is_string()) 
 					{
-						//LexiNumberTraits number_traits;
-						//LexiResult rv = Lexi::CollectQuotedNumber(svp->tkn->to_string(), number_traits);
-
 						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
-						// @@ warning: if there was a error, the errcnt was not incremented.
+						// @@ warning: if there was an error, the errcnt was not incremented.
+						// but no biggie, the extra error msg below will at least inc the counter.
+
 						if (t)
 						{
 							if (VerifyWavePropertyRatio(new_zzz, t))

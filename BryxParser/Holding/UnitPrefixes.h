@@ -198,7 +198,7 @@ namespace bryx
 		static constexpr int Mega = 6;
 		static constexpr int Giga = 9;
 		static constexpr int Tera = 12;
-		static constexpr int Petal = 15;
+		static constexpr int Peta = 15;
 
 		// ////////////////////////////////////////////////////
 

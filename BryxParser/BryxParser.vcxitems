@@ -17,17 +17,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)BryxLexi.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)BryxParser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngrNum.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)UnitChoicesBase.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)UnitPrefixes.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ValDesc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Units.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)BryxLexi.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)BryxParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)EngrNum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MapTypeEnum.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)UnitChoicesBase.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)UnitPrefixes.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ValDesc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Units.h" />
   </ItemGroup>
 </Project>
