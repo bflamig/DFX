@@ -36,6 +36,7 @@ MetricPrefixEnum MatchMetricPrefix(std::string_view sv)
 }
 
 
+#if 0
 UnitEnum MatchUnits(std::string_view sv)
 {
     // Not optimized at all
@@ -56,6 +57,106 @@ UnitEnum MatchUnits(std::string_view sv)
     return UnitEnum::None;
 
 }
+#else
+
+const std::unordered_map<std::string_view, UnitEnum> mytable = {
+    {"db", UnitEnum::DB},
+    {"dB", UnitEnum::DB},
+    {"dbm", UnitEnum::DBm},
+    {"dBm", UnitEnum::DBm},
+    {"ppm", UnitEnum::PPM},
+
+    {"%", UnitEnum::Percent},
+    {"percent", UnitEnum::Percent},
+
+    {"X", UnitEnum::Ratio},
+    {"ratio", UnitEnum::Ratio},
+
+    {"deg", UnitEnum::Degree},
+    {"degree", UnitEnum::Degree},
+    {"degrees", UnitEnum::Degree},
+
+    {"rad", UnitEnum::Radian},
+    {"radian", UnitEnum::Radian},
+    {"radians", UnitEnum::Radian},
+
+    {"R", UnitEnum::Ohm},
+    {"O", UnitEnum::Ohm},
+    {"Ohm", UnitEnum::Ohm},
+    {"Ohms", UnitEnum::Ohm},
+
+    {"F", UnitEnum::Farad},
+    {"Farad", UnitEnum::Farad},
+    {"Farads", UnitEnum::Farad},
+
+    {"H", UnitEnum::Henry},
+    {"Henry", UnitEnum::Henry},
+    {"Henries", UnitEnum::Henry},
+
+    {"V", UnitEnum::Volt},
+    {"Volt", UnitEnum::Volt},
+    {"Volts", UnitEnum::Volt},
+    {"Vpeak", UnitEnum::Vpeak},
+    {"VoltsPeak", UnitEnum::Vpeak},
+    {"Vpp", UnitEnum::Vpp},
+    {"VoltsPP", UnitEnum::Vpp},
+    {"Vrms", UnitEnum::Vrms},
+    {"VoltsRms", UnitEnum::Vrms},
+
+    {"A", UnitEnum::Amp},
+    {"Amp", UnitEnum::Amp},
+    {"Amps", UnitEnum::Amp},
+    {"Apeak", UnitEnum::Apeak},
+    {"AmpsPeak", UnitEnum::Apeak},
+    {"App", UnitEnum::App},
+    {"AmpsPP", UnitEnum::App},
+    {"Arms", UnitEnum::Arms},
+    {"AmpsRms", UnitEnum::Arms},
+
+    {"C", UnitEnum::Coulomb},
+    {"Coulomb", UnitEnum::Coulomb},
+    {"Coulombs", UnitEnum::Coulomb},
+    {"Cpeak", UnitEnum::Cpeak},
+    {"CoulombsPeak", UnitEnum::Cpeak},
+    {"Cpp", UnitEnum::Cpp},
+    {"CoulombsPP", UnitEnum::Cpp},
+    {"Crms", UnitEnum::Crms},
+    {"CoulombsRms", UnitEnum::Arms},
+
+    {"W", UnitEnum::Watt},
+    {"Watt", UnitEnum::Watt},
+    {"Watts", UnitEnum::Watt},
+
+    {"degK", UnitEnum::DegreeK},
+    {"degreesK", UnitEnum::DegreeK},
+
+    {"degC", UnitEnum::DegreeC},
+    {"degreesC", UnitEnum::DegreeC},
+
+    {"degF", UnitEnum::DegreeF},
+    {"degreesF", UnitEnum::DegreeF},
+
+    {"rps", UnitEnum::RadiansPerSec},
+    {"radians/sec", UnitEnum::RadiansPerSec},
+
+    {"Hz", UnitEnum::Hertz},
+    {"Hertz", UnitEnum::Hertz}
+};
+
+UnitEnum MatchUnits(std::string_view sv)
+{
+    try
+    {
+        auto xx = mytable.at(sv);
+        return xx;
+    }
+    catch (...)
+    {
+        return UnitEnum::None;
+    }
+}
+
+#endif
 
 
 // //////////////////////////////////

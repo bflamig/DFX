@@ -4,7 +4,9 @@
 #include <vector>
 #include <string_view>
 #include <algorithm>
+#include <unordered_map>
 #include <memory>
+#include <functional>
 
 enum class UnitEnum
 {
@@ -53,13 +55,6 @@ enum class UnitCatEnum
     Ratio, Angle, Resistance, Capacitance, Inductance, Voltage, Current, Charge, Power, Temperature, Frequency, None
 };
 
-
-//struct Baby
-//{
-//    UnitEnum type;
-//    UnitCatEnum cat;
-//};
-
 const std::vector<UnitCatEnum> UnitCats
 {
     UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio,
@@ -79,60 +74,6 @@ const std::vector<UnitCatEnum> UnitCats
 template<UnitCatEnum C> bool IsCat(UnitEnum x) { return UnitCats[int(x)] == C; }
 template<UnitCatEnum C> double Convert(double old_val, UnitEnum old_u, UnitEnum new_u);
 
-#if 0
-
-const std::vector<UnitEnum> RatioSet
-{
-    UnitEnum::DB, UnitEnum::DBm, UnitEnum::PPM, UnitEnum::Percent, UnitEnum::Ratio
-};
-
-const std::vector<UnitEnum> AngleSet
-{
-    UnitEnum::Degree, UnitEnum::Radian
-};
-
-const std::vector<UnitEnum> ResistanceSet
-{
-    UnitEnum::Ohm
-};
-
-const std::vector<UnitEnum> CapacitanceSet
-{
-    UnitEnum::Farad
-};
-
-const std::vector<UnitEnum> InductanceSet
-{
-    UnitEnum::Henry
-};
-
-const std::vector<UnitEnum> VoltageSet
-{
-    UnitEnum::Volt, UnitEnum::Vpeak, UnitEnum::Vrms, UnitEnum::Vpp
-};
-
-const std::vector<UnitEnum> CurrentSet
-{
-    UnitEnum::Amp, UnitEnum::Apeak, UnitEnum::Arms, UnitEnum::App
-};
-
-const std::vector<UnitEnum> ChargeSet
-{
-    UnitEnum::Coulomb, UnitEnum::Cpeak, UnitEnum::Crms, UnitEnum::Cpp
-};
-
-const std::vector<UnitEnum> PowerSet
-{
-    UnitEnum::Watt
-};
-
-const std::vector<UnitEnum> TemperatureSet
-{
-    UnitEnum::DegreeK, UnitEnum::DegreeC, UnitEnum::DegreeF
-};
-
-#endif
-
 
 #if 0
 
@@ -145,35 +86,7 @@ auto contains(const C& v, const T& x)
 
 #endif
 
-const std::vector<std::vector<std::string_view>> UnitNames =
-{
-    { "db", "db", "db"},
-    { "dbm", "dbm", "dbm" },
-    { "ppm", "ppm", "ppm" },
-    { "%", "percent", "percent" },
-    { "X", "ratio", "ratio" },
-    { "deg", "degree", "degrees" },
-    { "rad", "radian", "radians" },
-    { "R", "Ohm", "Ohms" },
-    { "F", "Farad", "Farads"},
-    { "H", "Henry", "Henries"},
-    { "V", "Volt", "Volts"},
-    { "Vpeak", "Volts Peak", "Volts Peak"},
-    { "Vpp", "Volts PP", "Volts PP"},
-    { "Vrms", "Volts Rms", "Volts Rms"},
-    { "A", "Amp", "Amps"},
-    { "Apeak", "Amps Peak", "Amps Peak"},
-    { "App", "Amps PP", "Amps PP"},
-    { "C", "Coulomb", "Coulombs"},
-    { "Cpeak", "Coulombs Peak", "Coulombs Peak"},
-    { "Cpp", "Coulombs PP", "Coulombs PP"},
-    { "W", "Watt", "Watts"},
-    { "degK", "degrees K", "degrees K"},
-    { "degC", "degrees C", "degrees C"},
-    { "degF", "degrees F", "degrees F"},
-    { "rps", "radians/sec", "radians/sec"},
-    { "Hz", "Hertz", "Hertz"}
-};
+extern const std::unordered_map<std::string_view, UnitEnum> mytable;
 
 extern UnitEnum MatchUnits(std::string_view sv);
 
@@ -411,3 +324,24 @@ public:
         return Convert<UnitCatEnum::Frequency>(old_val, unit, new_u);
     }
 };
+
+
+// //////////////////////////////////
+
+typedef double (*Cvf)(double old_val, UnitEnum old_u, UnitEnum new_u);
+
+std::vector<std::function<double(double, UnitEnum, UnitEnum)>> ConvertTable{
+    Convert<UnitCatEnum::Ratio>,
+    Convert<UnitCatEnum::Angle>,
+    nullptr, // R
+    nullptr, // C
+    nullptr, // I
+    Convert<UnitCatEnum::Voltage>,
+    Convert<UnitCatEnum::Current>,
+    Convert<UnitCatEnum::Charge>,
+    nullptr, // P
+    Convert<UnitCatEnum::Temperature>,
+    Convert<UnitCatEnum::Frequency>
+};
+
+
