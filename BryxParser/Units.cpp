@@ -4,6 +4,7 @@ static const double sqrt2 = std::sqrt(2);
 static const double one_over_sqrt2 = 1.0 / std::sqrt(2);
 static const double one_over_two_times_sqrt2 = 1.0 / (2.0 * std::sqrt(2));
 static constexpr double pi = 3.14159; // @@ TODO: FIX THIS
+static constexpr double two_pi = 2.0 * pi;
 
 MetricPrefixEnum MatchMetricPrefix(std::string_view sv)
 {
@@ -63,45 +64,49 @@ UnitEnum MatchUnits(std::string_view sv)
 
 std::shared_ptr<Unit> Unit::ClassFactory(UnitEnum x)
 {
-    if (Unit::IsRatio(x))
+    if (IsCat<UnitCatEnum::Ratio>(x))
     {
         return std::make_shared<RatioUnit>(x);
     }
-    else if (Unit::IsAngle(x))
+    else if (IsCat<UnitCatEnum::Angle>(x))
     {
         return std::make_shared<AngleUnit>(x);
     }
-    else if (Unit::IsResistance(x))
+    else if (IsCat<UnitCatEnum::Resistance>(x))
     {
         return std::make_shared<ResistanceUnit>(x);
     }
-    else if (Unit::IsCapacitance(x))
+    else if (IsCat<UnitCatEnum::Capacitance>(x))
     {
         return std::make_shared<CapacitanceUnit>(x);
     }
-    else if (Unit::IsInductance(x))
+    else if (IsCat<UnitCatEnum::Inductance>(x))
     {
         return std::make_shared<InductanceUnit>(x);
     }
-    else if (Unit::IsVoltage(x))
+    else if (IsCat<UnitCatEnum::Voltage>(x))
     {
         return std::make_shared<VoltageUnit>(x);
     }
-    else if (Unit::IsCurrent(x))
+    else if (IsCat<UnitCatEnum::Current>(x))
     {
         return std::make_shared<CurrentUnit>(x);
     }
-    else if (Unit::IsCharge(x))
+    else if (IsCat<UnitCatEnum::Charge>(x))
     {
         return std::make_shared<ChargeUnit>(x);
     }
-    else if (Unit::IsPower(x))
+    else if (IsCat<UnitCatEnum::Power>(x))
     {
         return std::make_shared<PowerUnit>(x);
     }
-    else if (Unit::IsCurrent(x))
+    else if (IsCat<UnitCatEnum::Temperature>(x))
     {
-        return std::make_shared<CurrentUnit>(x);
+        return std::make_shared<TemperatureUnit>(x);
+    }
+    else if (IsCat<UnitCatEnum::Frequency>(x))
+    {
+        return std::make_shared<FrequencyUnit>(x);
     }
 
     return nullptr;
@@ -125,11 +130,11 @@ RatioUnit::RatioUnit(UnitEnum unit_)
 }
 
 
-double RatioUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val;
 
-    if (!Unit::IsRatio(old_u) || !Unit::IsRatio(new_u))
+    if (!IsCat<UnitCatEnum::Ratio>(old_u) || !IsCat<UnitCatEnum::Ratio>(new_u))
     {
         throw std::exception("One of the units is not a ratio type");
     }
@@ -207,11 +212,11 @@ AngleUnit::AngleUnit(UnitEnum unit_)
     }
 }
 
-double AngleUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val;
 
-    if (!Unit::IsAngle(old_u) || !Unit::IsAngle(new_u))
+    if (!IsCat<UnitCatEnum::Angle>(old_u) || !IsCat<UnitCatEnum::Angle>(new_u))
     {
         throw std::exception("One of the units is not an angle type");
     }
@@ -293,11 +298,11 @@ VoltageUnit::VoltageUnit(UnitEnum unit_)
 
 // Support for converting between the common voltage types, (peak, peak-to-peak, rms)
 
-double VoltageUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Voltage>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val = old_val;
 
-    if (!Unit::IsVoltage(old_u) || !Unit::IsVoltage(new_u))
+    if (!IsCat<UnitCatEnum::Voltage>(old_u) || !IsCat<UnitCatEnum::Voltage>(new_u))
     {
         throw std::exception("One of the units is not a voltage type");
     }
@@ -360,11 +365,11 @@ CurrentUnit::CurrentUnit(UnitEnum unit_)
 
 // Support for converting between the common amperage types, (peak, peak-to-peak, rms)
 
-double CurrentUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Current>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val = old_val;
 
-    if (!Unit::IsCurrent(old_u) || !Unit::IsCurrent(new_u))
+    if (!IsCat<UnitCatEnum::Current>(old_u) || !IsCat<UnitCatEnum::Current>(new_u))
     {
         throw std::exception("One of the units is not a current type");
     }
@@ -428,11 +433,11 @@ ChargeUnit::ChargeUnit(UnitEnum unit_)
 
 // Support for converting between the common charge types, (peak, peak-to-peak, rms)
 
-double ChargeUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val = old_val;
 
-    if (!Unit::IsCharge(old_u) || !Unit::IsCharge(new_u))
+    if (!IsCat<UnitCatEnum::Charge>(old_u) || !IsCat<UnitCatEnum::Charge>(new_u))
     {
         throw std::exception("One of the units is not a charge type");
     }
@@ -504,11 +509,11 @@ TemperatureUnit::TemperatureUnit(UnitEnum unit_)
     }
 }
 
-double TemperatureUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u)
+template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val;
 
-    if (!Unit::IsTemperature(old_u) || !Unit::IsTemperature(new_u))
+    if (!IsCat<UnitCatEnum::Temperature>(old_u) || !IsCat<UnitCatEnum::Temperature>(new_u))
     {
         throw std::exception("One of the units is not a temperature type");
     }
@@ -545,6 +550,57 @@ double TemperatureUnit::ConvertType(double old_val, UnitEnum old_u, UnitEnum new
 
         case UnitEnum::DegreeF:
             new_val = (native * 9.0 / 5.0) + 32.0;
+        break;
+    }
+
+    return new_val;
+}
+
+
+// ///////////////////////////////////
+
+FrequencyUnit::FrequencyUnit(UnitEnum unit_)
+: Unit(unit_)
+{
+    if (!IsFrequency())
+    {
+        throw std::exception("Arg type not a frequency");
+    }
+}
+
+template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u)
+{
+    double new_val;
+
+    if (!IsCat<UnitCatEnum::Frequency>(old_u) || !IsCat<UnitCatEnum::Frequency>(new_u))
+    {
+        throw std::exception("One of the units is not a frequency type");
+    }
+
+    double native;  // native is hertz
+
+    switch (old_u)
+    {
+        case UnitEnum::RadiansPerSec:
+        native = old_val / two_pi;
+        break;
+
+        case UnitEnum::Hertz:
+        default:
+        native = old_val;
+        break;
+    }
+
+    switch (new_u)
+    {
+        case UnitEnum::RadiansPerSec:
+        new_val = two_pi * native;
+        break;
+
+        case UnitEnum::Hertz:
+        default:
+        // already in native form
+        new_val = native;
         break;
     }
 

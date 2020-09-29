@@ -42,8 +42,44 @@ enum class UnitEnum
     DegreeC,
     DegreeF,
 
+    RadiansPerSec,
+    Hertz,
+
     None
 };
+
+enum class UnitCatEnum
+{
+    Ratio, Angle, Resistance, Capacitance, Inductance, Voltage, Current, Charge, Power, Temperature, Frequency, None
+};
+
+
+//struct Baby
+//{
+//    UnitEnum type;
+//    UnitCatEnum cat;
+//};
+
+const std::vector<UnitCatEnum> UnitCats
+{
+    UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio, UnitCatEnum::Ratio,
+    UnitCatEnum::Angle, UnitCatEnum::Angle,
+    UnitCatEnum::Resistance,
+    UnitCatEnum::Capacitance,
+    UnitCatEnum::Inductance,
+    UnitCatEnum::Voltage, UnitCatEnum::Voltage, UnitCatEnum::Voltage, UnitCatEnum::Voltage,
+    UnitCatEnum::Current, UnitCatEnum::Current, UnitCatEnum::Current, UnitCatEnum::Current,
+    UnitCatEnum::Charge, UnitCatEnum::Charge, UnitCatEnum::Charge, UnitCatEnum::Charge,
+    UnitCatEnum::Power,
+    UnitCatEnum::Temperature, UnitCatEnum::Temperature, UnitCatEnum::Temperature,
+    UnitCatEnum::Frequency, UnitCatEnum::Frequency,
+    UnitCatEnum::None
+};
+
+template<UnitCatEnum C> bool IsCat(UnitEnum x) { return UnitCats[int(x)] == C; }
+template<UnitCatEnum C> double Convert(double old_val, UnitEnum old_u, UnitEnum new_u);
+
+#if 0
 
 const std::vector<UnitEnum> RatioSet
 {
@@ -95,6 +131,10 @@ const std::vector<UnitEnum> TemperatureSet
     UnitEnum::DegreeK, UnitEnum::DegreeC, UnitEnum::DegreeF
 };
 
+#endif
+
+
+#if 0
 
 template<class C, class T>
 auto contains(const C& v, const T& x)
@@ -102,6 +142,8 @@ auto contains(const C& v, const T& x)
 {
     return end(v) != std::find(begin(v), end(v), x);
 }
+
+#endif
 
 const std::vector<std::vector<std::string_view>> UnitNames =
 {
@@ -128,7 +170,9 @@ const std::vector<std::vector<std::string_view>> UnitNames =
     { "W", "Watt", "Watts"},
     { "degK", "degrees K", "degrees K"},
     { "degC", "degrees C", "degrees C"},
-    { "degF", "degrees F", "degrees F"}
+    { "degF", "degrees F", "degrees F"},
+    { "rps", "radians/sec", "radians/sec"},
+    { "Hz", "Hertz", "Hertz"}
 };
 
 extern UnitEnum MatchUnits(std::string_view sv);
@@ -244,27 +288,17 @@ public:
 
 public:
 
-    static bool IsRatio(UnitEnum x) { return contains(RatioSet, x); }
-    static bool IsAngle(UnitEnum x) { return contains(AngleSet, x); }
-    static bool IsResistance(UnitEnum x) { return contains(ResistanceSet, x); }
-    static bool IsCapacitance(UnitEnum x) { return contains(CapacitanceSet, x); }
-    static bool IsInductance(UnitEnum x) { return contains(InductanceSet, x); }
-    static bool IsVoltage(UnitEnum x) { return contains(VoltageSet, x); }
-    static bool IsCurrent(UnitEnum x) { return contains(CurrentSet, x); }
-    static bool IsCharge(UnitEnum x) { return contains(ChargeSet, x); }
-    static bool IsPower(UnitEnum x) { return contains(PowerSet, x); }
-    static bool IsTemperature(UnitEnum x) { return contains(TemperatureSet, x); }
-
-    bool IsRatio() { return IsRatio(unit); }
-    bool IsAngle() { return IsAngle(unit); }
-    bool IsResistance() { return IsResistance(unit); }
-    bool IsCapacitance() { return IsCapacitance(unit); }
-    bool IsInductance() { return IsInductance(unit); }
-    bool IsVoltage() { return IsVoltage(unit); }
-    bool IsCurrent() { return IsCurrent(unit); }
-    bool IsCharge() { return IsCharge(unit); }
-    bool IsPower() { return IsPower(unit); }
-    bool IsTemperature() { return IsTemperature(unit); }
+    bool IsRatio() { return IsCat<UnitCatEnum::Ratio>(unit); }
+    bool IsAngle() { return IsCat<UnitCatEnum::Angle>(unit); }
+    bool IsResistance() { return IsCat<UnitCatEnum::Resistance>(unit); }
+    bool IsCapacitance() { return IsCat<UnitCatEnum::Capacitance>(unit); }
+    bool IsInductance() { return IsCat<UnitCatEnum::Inductance>(unit); }
+    bool IsVoltage() { return IsCat<UnitCatEnum::Voltage>(unit); }
+    bool IsCurrent() { return IsCat<UnitCatEnum::Current>(unit); }
+    bool IsCharge() { return IsCat<UnitCatEnum::Charge>(unit); }
+    bool IsPower() { return IsCat<UnitCatEnum::Power>(unit); }
+    bool IsTemperature() { return IsCat<UnitCatEnum::Temperature>(unit); }
+    bool IsFrequency() { return IsCat<UnitCatEnum::Frequency>(unit); }
 
     double ConvFactor() const
     {
@@ -273,25 +307,27 @@ public:
 };
 
 
+template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, UnitEnum new_u);
+
 class RatioUnit : public Unit {
 public:
     RatioUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be ratio units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Ratio>(old_val, unit, new_u);
     }
 };
+
+template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
 class AngleUnit : public Unit {
 public:
     AngleUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be angle units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Angle>(old_val, unit, new_u);
     }
 };
 
@@ -311,37 +347,39 @@ public:
     InductanceUnit(UnitEnum unit_);
 };
 
+template<> double Convert<UnitCatEnum::Voltage>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
 class VoltageUnit : public Unit {
 public:
     VoltageUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be voltage units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Voltage>(old_val, unit, new_u);
     }
 };
+
+template<> double Convert<UnitCatEnum::Current>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
 class CurrentUnit : public Unit {
 public:
     CurrentUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be current units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Current>(old_val, unit, new_u);
     }
 };
+
+template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
 class ChargeUnit : public Unit {
 public:
     ChargeUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be charge units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Charge>(old_val, unit, new_u);
     }
 };
 
@@ -350,13 +388,26 @@ public:
     PowerUnit(UnitEnum unit_);
 };
 
+template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u);
+
 class TemperatureUnit : public Unit {
 public:
     TemperatureUnit(UnitEnum unit_);
-    double ConvertType(double old_val, UnitEnum old_u, UnitEnum new_u);
     double ConvertTo(double old_val, UnitEnum new_u)
     {
         // Must be temperature units
-        return ConvertType(old_val, unit, new_u);
+        return Convert<UnitCatEnum::Temperature>(old_val, unit, new_u);
+    }
+};
+
+template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u);
+
+class FrequencyUnit : public Unit {
+public:
+    FrequencyUnit(UnitEnum unit_);
+    double ConvertTo(double old_val, UnitEnum new_u)
+    {
+        // Must be frequency units
+        return Convert<UnitCatEnum::Frequency>(old_val, unit, new_u);
     }
 };
