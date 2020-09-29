@@ -217,11 +217,14 @@ public:
     {
         return ConvFactors[static_cast<int>(metric_prefix)];
     }
+
+    double ConvertTo(double old_val, UnitEnum new_u);
 };
 
 
 template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class RatioUnit : public Unit {
 public:
     RatioUnit(UnitEnum unit_);
@@ -231,9 +234,11 @@ public:
         return Convert<UnitCatEnum::Ratio>(old_val, unit, new_u);
     }
 };
+#endif
 
 template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class AngleUnit : public Unit {
 public:
     AngleUnit(UnitEnum unit_);
@@ -243,8 +248,10 @@ public:
         return Convert<UnitCatEnum::Angle>(old_val, unit, new_u);
     }
 };
+#endif
 
 
+#if 0
 class ResistanceUnit : public Unit {
 public:
     ResistanceUnit(UnitEnum unit_);
@@ -260,8 +267,11 @@ public:
     InductanceUnit(UnitEnum unit_);
 };
 
+#endif
+
 template<> double Convert<UnitCatEnum::Voltage>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class VoltageUnit : public Unit {
 public:
     VoltageUnit(UnitEnum unit_);
@@ -271,9 +281,11 @@ public:
         return Convert<UnitCatEnum::Voltage>(old_val, unit, new_u);
     }
 };
+#endif
 
 template<> double Convert<UnitCatEnum::Current>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class CurrentUnit : public Unit {
 public:
     CurrentUnit(UnitEnum unit_);
@@ -283,9 +295,11 @@ public:
         return Convert<UnitCatEnum::Current>(old_val, unit, new_u);
     }
 };
+#endif
 
 template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class ChargeUnit : public Unit {
 public:
     ChargeUnit(UnitEnum unit_);
@@ -296,13 +310,18 @@ public:
     }
 };
 
+#endif
+
+#if 0
 class PowerUnit : public Unit {
 public:
     PowerUnit(UnitEnum unit_);
 };
+#endif
 
 template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class TemperatureUnit : public Unit {
 public:
     TemperatureUnit(UnitEnum unit_);
@@ -312,9 +331,11 @@ public:
         return Convert<UnitCatEnum::Temperature>(old_val, unit, new_u);
     }
 };
+#endif
 
 template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
+#if 0
 class FrequencyUnit : public Unit {
 public:
     FrequencyUnit(UnitEnum unit_);
@@ -324,6 +345,7 @@ public:
         return Convert<UnitCatEnum::Frequency>(old_val, unit, new_u);
     }
 };
+#endif
 
 
 // //////////////////////////////////
