@@ -36,29 +36,6 @@ MetricPrefixEnum MatchMetricPrefix(std::string_view sv)
 }
 
 
-#if 0
-UnitEnum MatchUnits(std::string_view sv)
-{
-    // Not optimized at all
-
-    int n = static_cast<int>(UnitEnum::None);
-
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            if (UnitNames[i][j] == sv)
-            {
-                return static_cast<UnitEnum>(i);
-            }
-        }
-    }
-
-    return UnitEnum::None;
-
-}
-#else
-
 const std::unordered_map<std::string_view, UnitEnum> mytable = {
     {"db", UnitEnum::DB},
     {"dB", UnitEnum::DB},
@@ -156,64 +133,8 @@ UnitEnum MatchUnits(std::string_view sv)
     }
 }
 
-#endif
-
 
 // //////////////////////////////////
-
-// A static function
-
-std::shared_ptr<Unit> Unit::ClassFactory(UnitEnum x)
-{
-    if (IsCat<UnitCatEnum::Ratio>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Angle>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Resistance>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Capacitance>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Inductance>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Voltage>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Current>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Charge>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Power>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Temperature>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-    else if (IsCat<UnitCatEnum::Frequency>(x))
-    {
-        return std::make_shared<Unit>(x);
-    }
-
-    return nullptr;
-}
-
-
 
 double Unit::ConvertTo(double old_val, UnitEnum new_u)
 {
@@ -223,23 +144,6 @@ double Unit::ConvertTo(double old_val, UnitEnum new_u)
 }
 
 // ///////////////////////////////////
-
-
-
-// ///////////////////////////////////
-
-#if 0
-
-RatioUnit::RatioUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsRatio())
-    {
-        throw std::exception("Arg type not a ratio");
-    }
-}
-#endif
-
 
 template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
@@ -314,17 +218,6 @@ template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, Un
 
 // ///////////////////////////////////
 
-#if 0
-AngleUnit::AngleUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsAngle())
-    {
-        throw std::exception("Arg type not an angle");
-    }
-}
-#endif
-
 template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val;
@@ -363,60 +256,6 @@ template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, Un
 
 
 // ///////////////////////////////////
-
-#if 0
-ResistanceUnit::ResistanceUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsResistance())
-    {
-        throw std::exception("Arg type not a resistance");
-    }
-}
-
-#endif
-
-// ///////////////////////////////////
-
-#if 0
-CapacitanceUnit::CapacitanceUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsCapacitance())
-    {
-        throw std::exception("Arg type not a capacitance");
-    }
-}
-
-#endif
-
-// ///////////////////////////////////
-
-#if 0
-InductanceUnit::InductanceUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsInductance())
-    {
-        throw std::exception("Arg type not an inductance");
-    }
-}
-#endif
-
-// ///////////////////////////////////
-
-#if 0
-
-VoltageUnit::VoltageUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsVoltage())
-    {
-        throw std::exception("Arg type not a voltage");
-    }
-}
-
-#endif
 
 // Support for converting between the common voltage types, (peak, peak-to-peak, rms)
 
@@ -475,19 +314,6 @@ template<> double Convert<UnitCatEnum::Voltage>(double old_val, UnitEnum old_u, 
 
 
 // ///////////////////////////////////
-
-#if 0
-
-CurrentUnit::CurrentUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsCurrent())
-    {
-        throw std::exception("Arg type not a current");
-    }
-}
-
-#endif
 
 // Support for converting between the common amperage types, (peak, peak-to-peak, rms)
 
@@ -548,18 +374,6 @@ template<> double Convert<UnitCatEnum::Current>(double old_val, UnitEnum old_u, 
 
 // ///////////////////////////////////
 
-#if 0
-ChargeUnit::ChargeUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsCharge())
-    {
-        throw std::exception("Arg type not a charge");
-    }
-}
-
-#endif
-
 // Support for converting between the common charge types, (peak, peak-to-peak, rms)
 
 template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, UnitEnum new_u)
@@ -618,30 +432,6 @@ template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, U
 
 // ///////////////////////////////////
 
-#if 0
-PowerUnit::PowerUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsPower())
-    {
-        throw std::exception("Arg type not a power");
-    }
-}
-#endif
-
-// ///////////////////////////////////
-
-#if 0
-
-TemperatureUnit::TemperatureUnit(UnitEnum unit_)
-    : Unit(unit_)
-{
-    if (!IsTemperature())
-    {
-        throw std::exception("Arg type not a temperature");
-    }
-}
-#endif
 template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {
     double new_val;
@@ -691,20 +481,6 @@ template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old
 
 
 // ///////////////////////////////////
-
-
-#if 0
-
-FrequencyUnit::FrequencyUnit(UnitEnum unit_)
-: Unit(unit_)
-{
-    if (!IsFrequency())
-    {
-        throw std::exception("Arg type not a frequency");
-    }
-}
-
-#endif
 
 template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u)
 {

@@ -140,8 +140,6 @@ public:
 
     virtual ~Unit() { }
 
-    static std::shared_ptr<Unit> ClassFactory(UnitEnum x);
-
 public:
 
     static constexpr double peta(double v)
@@ -223,136 +221,17 @@ public:
 
 
 template<> double Convert<UnitCatEnum::Ratio>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class RatioUnit : public Unit {
-public:
-    RatioUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be ratio units
-        return Convert<UnitCatEnum::Ratio>(old_val, unit, new_u);
-    }
-};
-#endif
-
 template<> double Convert<UnitCatEnum::Angle>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class AngleUnit : public Unit {
-public:
-    AngleUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be angle units
-        return Convert<UnitCatEnum::Angle>(old_val, unit, new_u);
-    }
-};
-#endif
-
-
-#if 0
-class ResistanceUnit : public Unit {
-public:
-    ResistanceUnit(UnitEnum unit_);
-};
-
-class CapacitanceUnit : public Unit {
-public:
-    CapacitanceUnit(UnitEnum unit_);
-};
-
-class InductanceUnit : public Unit {
-public:
-    InductanceUnit(UnitEnum unit_);
-};
-
-#endif
-
 template<> double Convert<UnitCatEnum::Voltage>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class VoltageUnit : public Unit {
-public:
-    VoltageUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be voltage units
-        return Convert<UnitCatEnum::Voltage>(old_val, unit, new_u);
-    }
-};
-#endif
-
 template<> double Convert<UnitCatEnum::Current>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class CurrentUnit : public Unit {
-public:
-    CurrentUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be current units
-        return Convert<UnitCatEnum::Current>(old_val, unit, new_u);
-    }
-};
-#endif
-
 template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class ChargeUnit : public Unit {
-public:
-    ChargeUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be charge units
-        return Convert<UnitCatEnum::Charge>(old_val, unit, new_u);
-    }
-};
-
-#endif
-
-#if 0
-class PowerUnit : public Unit {
-public:
-    PowerUnit(UnitEnum unit_);
-};
-#endif
-
 template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class TemperatureUnit : public Unit {
-public:
-    TemperatureUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be temperature units
-        return Convert<UnitCatEnum::Temperature>(old_val, unit, new_u);
-    }
-};
-#endif
-
 template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u);
-
-#if 0
-class FrequencyUnit : public Unit {
-public:
-    FrequencyUnit(UnitEnum unit_);
-    double ConvertTo(double old_val, UnitEnum new_u)
-    {
-        // Must be frequency units
-        return Convert<UnitCatEnum::Frequency>(old_val, unit, new_u);
-    }
-};
-#endif
-
 
 // //////////////////////////////////
 
-typedef double (*Cvf)(double old_val, UnitEnum old_u, UnitEnum new_u);
 
-std::vector<std::function<double(double, UnitEnum, UnitEnum)>> ConvertTable{
+const std::vector<std::function<double(double, UnitEnum, UnitEnum)>> ConvertTable{
     Convert<UnitCatEnum::Ratio>,
     Convert<UnitCatEnum::Angle>,
     nullptr, // R
