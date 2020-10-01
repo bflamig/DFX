@@ -228,21 +228,5 @@ template<> double Convert<UnitCatEnum::Charge>(double old_val, UnitEnum old_u, U
 template<> double Convert<UnitCatEnum::Temperature>(double old_val, UnitEnum old_u, UnitEnum new_u);
 template<> double Convert<UnitCatEnum::Frequency>(double old_val, UnitEnum old_u, UnitEnum new_u);
 
-// //////////////////////////////////
-
-
-const std::vector<std::function<double(double, UnitEnum, UnitEnum)>> ConvertTable{
-    Convert<UnitCatEnum::Ratio>,
-    Convert<UnitCatEnum::Angle>,
-    nullptr, // R
-    nullptr, // C
-    nullptr, // I
-    Convert<UnitCatEnum::Voltage>,
-    Convert<UnitCatEnum::Current>,
-    Convert<UnitCatEnum::Charge>,
-    nullptr, // P
-    Convert<UnitCatEnum::Temperature>,
-    Convert<UnitCatEnum::Frequency>
-};
 
 

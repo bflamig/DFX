@@ -136,11 +136,27 @@ UnitEnum MatchUnits(std::string_view sv)
 
 // //////////////////////////////////
 
+
+const std::vector<std::function<double(double, UnitEnum, UnitEnum)>> ConvertTable{
+    Convert<UnitCatEnum::Ratio>,
+    Convert<UnitCatEnum::Angle>,
+    nullptr, // R
+    nullptr, // C
+    nullptr, // I
+    Convert<UnitCatEnum::Voltage>,
+    Convert<UnitCatEnum::Current>,
+    Convert<UnitCatEnum::Charge>,
+    nullptr, // P
+    Convert<UnitCatEnum::Temperature>,
+    Convert<UnitCatEnum::Frequency>
+};
+
+
 double Unit::ConvertTo(double old_val, UnitEnum new_u)
 {
 
-    auto zebra = UnitCats[int(unit)];
-    return ConvertTable[int(zebra)](old_val, unit, new_u);
+    auto kitty = UnitCats[int(unit)];
+    return ConvertTable[int(kitty)](old_val, unit, new_u);
 }
 
 // ///////////////////////////////////

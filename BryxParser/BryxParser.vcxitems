@@ -17,6 +17,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)BryxLexi.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)BryxParser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngrNum.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SymTree.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Units.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)BryxParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)EngrNum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MapTypeEnum.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SymTree.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Units.h" />
   </ItemGroup>
 </Project>

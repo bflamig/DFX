@@ -1622,7 +1622,7 @@ namespace bryx
 					}
 				}
 
-				// okay, really now onto units
+				// okay, really now onto other units
 
 				number_traits.generic_units_locn = posn - start_posn;
 
