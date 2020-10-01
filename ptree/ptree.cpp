@@ -7,30 +7,30 @@ using namespace bryx;
 
 void test1()
 {
-	auto tp = std::make_shared<SymTree>();
+	auto tp = SymTree();
 
-	tp->addstring("abc", 42);
-	tp->print(std::cout);
+	tp.addstring("abc", 42);
+	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp->addstring("abx", 17);
-	tp->print(std::cout);
+	tp.addstring("abx", 17);
+	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp->addstring("abcd", 55);
-	tp->print(std::cout);
+	tp.addstring("abcd", 55);
+	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp->addstring("a", 99);
-	tp->print(std::cout);
+	tp.addstring("a", 99);
+	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
 	int id;
 
-	id = tp->search("abx");
-	id = tp->search("a");
-	id = tp->search("abcd");
-	id = tp->search("abc");
+	id = tp.search("abx");
+	id = tp.search("a");
+	id = tp.search("abcd");
+	id = tp.search("abc");
 }
 
 #include "units.h"

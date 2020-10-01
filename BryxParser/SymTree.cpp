@@ -51,7 +51,7 @@ namespace bryx
 		{
 			// Already there, but there may not be a new tree
 			// for the next char which we ASSUME is coming.
-			// So create a new tree for it.
+			// So create that new tree
 
 			auto p = children.at(index).child;
 			if (!p)
