@@ -1406,7 +1406,7 @@ namespace bryx
 
     //LexiResult Lexi::CollectQuotedNumber(const std::string src, LexiNumberTraits& number_traits)
 
-    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, const std::string src)
+    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, const std::string_view src)
 	{
 		// This is a static function.
 
@@ -1643,7 +1643,7 @@ namespace bryx
 
 			TokenExtent extent(0, start_posn, posn);
 
-			auto t = std::make_shared<NumberToken>(TokenEnum::Number, src, extent); // row, col, start_extent, end_extent);
+			auto t = std::make_shared<NumberToken>(TokenEnum::Number, src.data(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
 			std::stringstream serr;
 			t->ProcessNum(serr);

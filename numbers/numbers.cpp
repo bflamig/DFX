@@ -318,7 +318,7 @@ int main()
 	//testd();
 	//testf();
 	//testg();
-	testh();
+	//testh();
 
-	//testdb();
+	testdb();
 }

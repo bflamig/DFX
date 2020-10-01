@@ -592,8 +592,7 @@ namespace bryx
 
 	public:
 
-		//static LexiResult CollectQuotedNumber(const std::string text, LexiNumberTraits &number_traits);
-		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, const std::string text);
+		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, const std::string_view text);
 
 	};
 
