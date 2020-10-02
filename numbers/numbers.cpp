@@ -334,9 +334,8 @@ int main()
 	//testd();
 	//testf();
 	//testg();
-	//testh();
 
 	testdb();
-
 	testpfx();
+	testh();
 }

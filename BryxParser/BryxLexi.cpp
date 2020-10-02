@@ -1432,7 +1432,7 @@ namespace bryx
 
 	// A static member function
 
-    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, const std::string_view &src)
+    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, std::string_view src)
 	{
 		// This is a static function.
 

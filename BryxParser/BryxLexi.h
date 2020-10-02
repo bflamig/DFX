@@ -592,7 +592,7 @@ namespace bryx
 
 	public:
 
-		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, const std::string_view &text);
+		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, std::string_view text);
 
 	};
 

@@ -622,12 +622,12 @@ namespace bryx
 				if (dc == 3)
 				{
 					++engr_exp;
-					char* q = p;
-					*q++ = 0; // this is the only one necessary
-					*q++ = 0; // but we'll keep things tidy
-					*q++ = 0; // ""
+char* q = p;
+*q++ = 0; // this is the only one necessary
+*q++ = 0; // but we'll keep things tidy
+*q++ = 0; // ""
 
-					dc = 0;
+dc = 0;
 				}
 				--p;
 				--n;
@@ -713,7 +713,7 @@ namespace bryx
 		return sout;
 	}
 
-	void EngrNum::process_num_from_lexi(std::ostream &serr, const std::string_view &src, const LexiNumberTraits& number_traits)
+	void EngrNum::process_num_from_lexi(std::ostream& serr, std::string_view src, const LexiNumberTraits& number_traits)
 	{
 		// Do this first, because reasons (we want x to point to right after number)
 
@@ -731,6 +731,7 @@ namespace bryx
 				units = UnitEnum::Other;
 			}
 		}
+		else x = number_traits.end_locn;
 
 		int y = number_traits.metric_pfx_locn;
 		if (y != -1)
@@ -752,24 +753,28 @@ namespace bryx
 
 		// At this point, x is offset to just after number
 
-		const char* p = src.data();
-		if (*p == '+')
+		int n = src.length();
+		x = n - x;
+
+		src.remove_suffix(x);
+
+		if (src[0] == '+')
 		{
 			sign = 1;
-			++p;
-			--x;
+			src.remove_prefix(1);
 		}
-		else if (*p == '-')
+		else if (src[0] == '-')
 		{
 			sign = -1;
-			++p;
-			--x;
+			src.remove_prefix(1);
 		}
+
+		n = static_cast<int>(src.length());
 
 		if (x < ndigits_reserved) // Does not include null
 		{
-			std::memcpy(mantissa, p, x);
-			mantissa[x] = 0;
+			std::memcpy(mantissa, src.data(), n);
+			mantissa[n] = 0;
 
 			extract_tens_exp(serr);
 			engr_exp += tens_exp / MEXP_MULT;
