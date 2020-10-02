@@ -15,7 +15,7 @@ namespace bryx
 		return static_cast<int>(children.size()) - 1;
 	}
 
-	int SymTree::find_index(char c_)
+	int SymTree::find_index(char c_) const
 	{
 		int index = -1;
 
@@ -44,7 +44,7 @@ namespace bryx
 		{
 			// Not already there
 			index = add_internal(c);
-			auto new_tree = std::make_shared<SymTree>();
+			auto new_tree = MakeNewTree();
 			children.at(index).child = new_tree;
 		}
 		else
@@ -56,7 +56,7 @@ namespace bryx
 			auto p = children.at(index).child;
 			if (!p)
 			{
-				p = std::make_shared<SymTree>();
+				p = MakeNewTree();
 				children.at(index).child = p;
 			}
 		}
@@ -75,22 +75,23 @@ namespace bryx
 		}
 		else
 		{
-			// Already there. Now, it's id might be different from the
+			// Already there. Now, its id might be different from the
 			// stored id. In particular, the stored id might be -1,
 			// which means this element wasn't the "end" of a valid
-			// string, but merely prefix. (If id == -1, then it should
-			// be the case that child is not a nullptr.) @@ ASSERT THIS?
+			// string, but merely a prefix. If id == -1, then it should
+			// be the case that child is not a nullptr. @@ ASSERT THIS?
 
 			auto& elem = children.at(index);
 
 			if (elem.id == -1)
 			{
-				// @@ ASSSRT Child not null?
+				// @@ TODO: ASSERT Child not null?
 				elem.id = id;
 			}
 			else
 			{
-				// @@ What to do? Replace the id?
+				// @@ TODO:
+				// What to do? Replace the id?
 				// For now, that's what we'll do
 
 				elem.id = id;
@@ -123,7 +124,7 @@ namespace bryx
 		}
 	}
 
-	int SymTree::search(std::string_view s)
+	int SymTree::search(std::string_view s) const
 	{
 		// Returns id if found, else -1
 
@@ -149,13 +150,13 @@ namespace bryx
 			{
 				// The character was found. Now, if it's the last character in
 				// our search string, then the corresponding element in the 
-				// tree better have a non-negative id. Such an id is our signal
-				// that we've reached a valid search end. Note that the element
-				// may have a child, which means that are valid search end is
-				// also just a prefix of another valid string. If, however,
-				// the id *is* negative, it means we're not at a valid search
-				// end, so our search string is just a prefix of another valid
-				// string.
+				// tree better have a non-negative id, which is our signal that
+				// we've reached a valid search end. Note that the element may
+				// also have a child, which means that we are at a valid search
+				// end which is also a prefix of another valid string.
+				// If, however, the id *is* negative, it means we're not at a
+				// valid search end, so our search string is for sure just a
+				// prefix of another valid string.
 				// The upshot is this: Test for a non-negative id. If we find
 				// one, our search is a success. Otherwise, not.
 				// 
@@ -178,7 +179,7 @@ namespace bryx
 		return id;
 	}
 
-	void SymTree::print(std::ostream& sout, int indent)
+	void SymTree::print(std::ostream& sout, int indent) const
 	{
 		for (auto& v : children)
 		{
@@ -189,7 +190,8 @@ namespace bryx
 			if (v.id != -1)
 			{
 				// Is a leaf
-				sout << " --> " << v.id;
+				sout << " --> ";
+				print_leaf(sout, v.id);
 			}
 
 			sout << '\n';
@@ -199,5 +201,10 @@ namespace bryx
 				v.child->print(sout, indent + 3);
 			}
 		}
+	}
+
+	void SymTree::print_leaf(std::ostream &sout, int id) const
+	{
+		sout << id;
 	}
 };
