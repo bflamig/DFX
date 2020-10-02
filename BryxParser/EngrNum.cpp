@@ -715,32 +715,40 @@ namespace bryx
 
 	void EngrNum::process_num_from_lexi(std::ostream &serr, const char* src, const LexiNumberTraits& number_traits)
 	{
-		int x = number_traits.ratio_units_locn;
-		if (x == -1)
+		// Do this first, because reasons (we want x to point to right after number)
+
+		int x = number_traits.generic_units_locn;
+		if (x != -1)
 		{
-			x = number_traits.metric_pfx_locn;
-			if (x != -1)
+			// Parse the units
+			auto s = src + x;
+			units = unit_parse_tree.find_unitname(s);
+			if (units == UnitEnum::None)
 			{
-				char pfx = src[x];
-
-				auto idx = mpfx_parse_tree.MetricPrefixIndex(pfx);
-
-				if (idx != -1)
-				{
-					engr_exp = metric_db[idx].metric_exp;
-				}
-				else engr_exp = 0;
-			}
-			else
-			{
-				x = number_traits.generic_units_locn;
-				if (x == -1) x = number_traits.end_locn;
+				// Because the units location wasn't empty,
+				// we know we have some units, we just
+				// don't know anything about them.
+				units = UnitEnum::Other;
 			}
 		}
-		else // @@ BUG FIX: Added else trap 01/06/2020
+
+		x = number_traits.metric_pfx_locn;
+		if (x != -1)
 		{
-			// Uh ... er ... maybe nothing to do (?)
+			// Parse the metric prefix
+			char pfx = src[x];
+
+			auto idx = mpfx_parse_tree.MetricPrefixIndex(pfx);
+
+			if (idx != -1)
+			{
+				engr_exp = metric_db[idx].metric_exp;
+			}
+			else engr_exp = 0;
 		}
+		else x = number_traits.end_locn;
+
+		// At this point, x is offset to just after number
 
 		const char* p = src;
 		if (*p == '+')
@@ -773,7 +781,6 @@ namespace bryx
 			value_flag = EngrNumFlags::NaN;
 		}
 	}
-
 
 	void EngrNum::parse(std::ostream &serr, const std::string_view &src)
 	{

@@ -12,7 +12,7 @@
  *
  * This exchange format has a one to one mapping to the widely used Json syntax,
  * simplified to be easier to read and write. It is easy to translate DFX files
- * into Json files that can be processed by any software supporting Json syntax.
+ * into Json files that can be parsed by any software supporting Json syntax.
  *
  ******************************************************************************
  *
@@ -315,6 +315,11 @@ void testpfx()
 {
 	std::string test = "4.5pF";
 	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
+	if (tkn_ptr)
+	{
+		std::cout << tkn_ptr->engr_num << std::endl;
+	}
+	else std::cout << "Failed to parse: " << test << std::endl;
 }
 
 int main()
@@ -324,9 +329,9 @@ int main()
 	//testd();
 	//testf();
 	//testg();
-	testh();
+	//testh();
 
 	//testdb();
 
-	//testpfx();
+	testpfx();
 }

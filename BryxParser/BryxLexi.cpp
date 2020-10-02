@@ -1580,52 +1580,40 @@ namespace bryx
 			}
 		}
 
-		// Okay, we might be at ratio units: "dB", "X", or "%"
-		// NOTE: We'll allow "db" as well, for convenience sake.
-		// Ditto for "x"
+		// Okay, check for any metric prefix. Right now, only 
+		// single letter monikers are allowed.
 
-		if (c == 'X' || c == 'x' || c == '%')
+		auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
+
+		if (idx != -1)
 		{
-			number_traits.ratio_units_locn = std::distance(sit, pit);
+			number_traits.metric_pfx_locn = std::distance(sit, pit);
 			c = bump_char(pit, eit);
+		}
+
+		// Okay, we might have units. Note that all units are alpha only,
+		// except for percentages, which can have the short hand of "%".
+		// So let's test for that first, and then test for all other units.
+
+		if (c == '%')
+		{
+			number_traits.generic_units_locn = std::distance(sit, pit);
+			c = bump_char(pit, eit);
+		}
+		else if (isalpha(c))
+		{
+			// On to all other units. We collect up all alpha characters.
+
+			number_traits.generic_units_locn = std::distance(sit, pit);
+
+			while (isalpha(c))
+			{
+				c = bump_char(pit, eit);
+			}
 		}
 		else
 		{
-#if 0
-			if (c == 'd')
-			{
-				int try_c = posn < last ? src[posn + 1] : EOS;  // @@ TODO: FIX!
-				if (try_c == 'B' || try_c == 'b')
-				{
-					number_traits.ratio_units_locn = std::distance(sit, pit); //  posn - start_posn;
-					//c = posn < last ? src[++posn] : EOS;
-					c = pit != eit ? *++pit : EOS;
-				}
-			}
-#endif
-
-			if (number_traits.ratio_units_locn == -1 && isalpha(c))
-			{
-				// Collect up other kinds of units.
-				// But first, any metric prefix. Right now, we only allow single characters. 
-
-				auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
-
-				if (idx != -1)
-				{
-					number_traits.metric_pfx_locn = std::distance(sit, pit);
-					c = bump_char(pit, eit);
-				}
-
-				// okay, really now onto other units
-
-				number_traits.generic_units_locn = std::distance(sit, pit);
-
-				while (isalpha(c))
-				{
-					c = bump_char(pit, eit);
-				}
-			}
+			// @@ TODO: ERROR? Unless space?
 		}
 
 		// Alrighty then, we've got ourselves a number, supposedly
