@@ -304,11 +304,16 @@ void testdb()
 	//auto sbuf = f.rdbuf();
 	//SetStreamBuf(fbuf);
 
-	std::string test = "-30db";
+	std::string test = "-30dB";
 
 	//LexiNumberTraits traits;
 
 	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
+	if (tkn_ptr)
+	{
+		std::cout << tkn_ptr->engr_num << std::endl;
+	}
+	else std::cout << "Failed to parse: " << test << std::endl;
 }
 
 void testpfx()
@@ -331,7 +336,7 @@ int main()
 	//testg();
 	//testh();
 
-	//testdb();
+	testdb();
 
 	testpfx();
 }

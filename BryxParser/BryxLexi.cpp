@@ -429,7 +429,7 @@ namespace bryx
 
 	void NumberToken::ProcessNum(std::ostream &serr)
 	{
-		engr_num.process_num_from_lexi(serr, text.c_str(), number_traits);
+		engr_num.process_num_from_lexi(serr, text, number_traits);
 	}
 
 	const std::string NumberToken::to_string() const

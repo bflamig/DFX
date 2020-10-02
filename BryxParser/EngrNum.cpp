@@ -713,7 +713,7 @@ namespace bryx
 		return sout;
 	}
 
-	void EngrNum::process_num_from_lexi(std::ostream &serr, const char* src, const LexiNumberTraits& number_traits)
+	void EngrNum::process_num_from_lexi(std::ostream &serr, const std::string_view &src, const LexiNumberTraits& number_traits)
 	{
 		// Do this first, because reasons (we want x to point to right after number)
 
@@ -721,8 +721,8 @@ namespace bryx
 		if (x != -1)
 		{
 			// Parse the units
-			auto s = src + x;
-			units = unit_parse_tree.find_unitname(s);
+			std::string_view unit_string = src.substr(x);
+			units = unit_parse_tree.find_unitname(unit_string);
 			if (units == UnitEnum::None)
 			{
 				// Because the units location wasn't empty,
@@ -732,11 +732,11 @@ namespace bryx
 			}
 		}
 
-		x = number_traits.metric_pfx_locn;
-		if (x != -1)
+		int y = number_traits.metric_pfx_locn;
+		if (y != -1)
 		{
 			// Parse the metric prefix
-			char pfx = src[x];
+			char pfx = src[y];
 
 			auto idx = mpfx_parse_tree.MetricPrefixIndex(pfx);
 
@@ -746,11 +746,13 @@ namespace bryx
 			}
 			else engr_exp = 0;
 		}
-		else x = number_traits.end_locn;
+		else y = number_traits.end_locn;
+
+		if (y < x) x = y;
 
 		// At this point, x is offset to just after number
 
-		const char* p = src;
+		const char* p = src.data();
 		if (*p == '+')
 		{
 			sign = 1;
