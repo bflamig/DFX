@@ -1293,80 +1293,49 @@ namespace bryx
 			}
 		}
 
-		// Okay, we might be at ratio units: "dB", "X", or "%"
-		// NOTE: We'll allow "db" as well, for convenience sake.
-		// Ditto for "x"
+		// Okay, check for any metric prefix. Right now, only 
+		// single letter monikers are allowed.
+		// NOTE: It just so happens that all units we have do *not*
+		// start with any of the characters designated for metric
+		// prefixes. We're relying on that, here, actually.
 
-		if (c == 'X' || c == 'x' || c == '%')
+		auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
+
+		if (idx != -1)
 		{
-			number_traits.ratio_units_locn = extent.ecol - extent.scol;
+			number_traits.metric_pfx_locn = extent.ecol - extent.scol;
 			AppendChar(c);
 			c = NextPeek();
 			extent.Bump();
 		}
+
+		// Okay, we might have units. Note that all units are alpha only,
+		// except for percentages, which can have the short hand of "%".
+		// So let's test for that first, and then test for all other units.
+
+		if (c == '%')
+		{
+			number_traits.units_locn = extent.ecol - extent.scol;
+			AppendChar(c);
+			c = NextPeek();
+			extent.Bump();
+		}
+		else if (isalpha(c))
+		{
+			// Collect up other kinds of units.
+
+			number_traits.units_locn = extent.ecol - extent.scol;
+
+			while (IsAlpha(c))
+			{
+				AppendChar(c);
+				c = NextPeek();
+				extent.Bump();
+			}
+		}
 		else
 		{
-#if 0
-			int trial_location = extent.ecol - extent.scol;
-
-			if (c == 'd')
-			{
-				AppendChar('d');
-				extent.Bump();
-
-				int try_c = NextPeek(); // advance, then peek
-
-				if (try_c == 'B' || try_c == 'b')
-				{
-					number_traits.ratio_units_locn = trial_location; //  extent.ecol - extent.scol;
-					AppendChar(try_c);
-					extent.Bump();
-					c = NextPeek();
-				}
-				else
-				{
-					// Some other kind of generic unit
-					number_traits.generic_units_locn = trial_location;
-
-					while (IsAlpha(try_c))
-					{
-						AppendChar(try_c);
-						extent.Bump();
-						try_c = NextPeek();
-					}
-
-					c = try_c;
-				}
-			}
-
-#endif
-
-			if (number_traits.ratio_units_locn == -1 && number_traits.generic_units_locn == -1 && isalpha(c))
-			{
-				// Collect up other kinds of units.
-				// But first, any metric prefix. Right now, we only allow single characters. 
-
-				auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
-
-				if (idx != -1)
-				{
-					number_traits.metric_pfx_locn = extent.ecol - extent.scol;
-					AppendChar(c);
-					c = NextPeek();
-					extent.Bump();
-				}
-
-				// okay, really now onto generic units
-
-				number_traits.generic_units_locn = extent.ecol - extent.scol;
-
-				while (IsAlpha(c))
-				{
-					AppendChar(c);
-					c = NextPeek();
-					extent.Bump();
-				}
-			}
+			// @@ TODO: ERROR? Unless space?
 		}
 
 		// Alrighty then, we've got ourselves a number, supposedly
@@ -1387,8 +1356,10 @@ namespace bryx
 
 			auto t = std::make_shared<NumberToken>(TokenEnum::Number, temp_buf.str(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
+
 			std::stringstream serr;
 			t->ProcessNum(serr);
+
 			auto str = serr.str();
 			if (str.empty())
 			{
@@ -1402,6 +1373,8 @@ namespace bryx
 
 		return result;
 	}
+
+	// Support when using string views later on
 
 	inline int bump_char(std::string_view::const_iterator& pit, std::string_view::const_iterator& eit)
 	{
@@ -1582,6 +1555,9 @@ namespace bryx
 
 		// Okay, check for any metric prefix. Right now, only 
 		// single letter monikers are allowed.
+		// NOTE: It just so happens that all units we have do *not*
+		// start with any of the characters designated for metric
+		// prefixes. We're relying on that, here, actually.
 
 		auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
 
@@ -1597,14 +1573,14 @@ namespace bryx
 
 		if (c == '%')
 		{
-			number_traits.generic_units_locn = std::distance(sit, pit);
+			number_traits.units_locn = std::distance(sit, pit);
 			c = bump_char(pit, eit);
 		}
 		else if (isalpha(c))
 		{
 			// On to all other units. We collect up all alpha characters.
 
-			number_traits.generic_units_locn = std::distance(sit, pit);
+			number_traits.units_locn = std::distance(sit, pit);
 
 			while (isalpha(c))
 			{

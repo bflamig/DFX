@@ -74,14 +74,13 @@ namespace bryx
 
     extern const MpfxParseTree mpfx_parse_tree;
 
-
     enum class UnitEnum
     {
         DB, 
         DBm,
         PPM,
         Percent,
-        Ratio,
+        SimpleRatio,
 
         Degree,
         Radian,

@@ -622,12 +622,12 @@ namespace bryx
 				if (dc == 3)
 				{
 					++engr_exp;
-char* q = p;
-*q++ = 0; // this is the only one necessary
-*q++ = 0; // but we'll keep things tidy
-*q++ = 0; // ""
+					char* q = p;
+					*q++ = 0; // this is the only one necessary
+					*q++ = 0; // but we'll keep things tidy
+					*q++ = 0; // ""
 
-dc = 0;
+					dc = 0;
 				}
 				--p;
 				--n;
@@ -717,7 +717,7 @@ dc = 0;
 	{
 		// Do this first, because reasons (we want x to point to right after number)
 
-		int x = number_traits.generic_units_locn;
+		int x = number_traits.units_locn;
 		if (x != -1)
 		{
 			// Parse the units

@@ -97,6 +97,14 @@ int explore()
 		// Might have changed string tokens to number tokens. Let's see.
 		df->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
 
+		std::cout << std::endl << std::endl;
+
+		// Let's see what we look like as json
+
+		std::cout << "In Json syntax" << std::endl << std::endl;
+
+		df->WriteDfx(std::cout, SyntaxModeEnum::Json);
+
 	}
 
 	return 0;

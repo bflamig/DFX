@@ -719,7 +719,7 @@ namespace bryx
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
 
-					VerifyWavePropertyRatio(new_zzz, svp->tkn);
+					VerifyWaveMagnitude(new_zzz, svp->tkn);
 				}
 				else
 				{
@@ -737,7 +737,7 @@ namespace bryx
 
 						if (t)
 						{
-							if (VerifyWavePropertyRatio(new_zzz, t))
+							if (VerifyWaveMagnitude(new_zzz, t))
 							{
 								// @@ TODO:
 								// Okay, the quoted string is actually a number.
@@ -805,7 +805,7 @@ namespace bryx
 					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
 					// If it's in db, it must be negative.
 
-					VerifyWavePropertyRatio(new_zzz, svp->tkn);
+					VerifyWaveMagnitude(new_zzz, svp->tkn);
 				}
 				else
 				{
@@ -823,7 +823,7 @@ namespace bryx
 
 						if (t)
 						{
-							if (VerifyWavePropertyRatio(new_zzz, t))
+							if (VerifyWaveMagnitude(new_zzz, t))
 							{
 								// @@ TODO:
 								// Okay, the quoted string is actually a number.
@@ -862,7 +862,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyWavePropertyRatio(const std::string zzz, const token_ptr& tkn)
+	bool DfxParser::VerifyWaveMagnitude(const std::string zzz, const token_ptr& tkn)
 	{
 		// Here, we know it's a number. But is it a properly formed number
 		// that would serve as a wave file's peak or rms value? In these
@@ -876,8 +876,8 @@ namespace bryx
 		int save_errcnt = errcnt;
 
 		auto froglegs = std::dynamic_pointer_cast<NumberToken>(tkn);
-
 		auto& traits = froglegs->number_traits;
+		auto& engr_num = froglegs->engr_num;
 
 		if (traits.HasExponent() || traits.HasMetricPrefix())
 		{
@@ -885,121 +885,67 @@ namespace bryx
 		}
 		else
 		{
-			if (traits.HasGenericUnits())
+			if (IsCat<UnitCatEnum::Ratio>(engr_num.units))
 			{
-				LogError(zzz, DfxVerifyResult::ValueHasWrongUnits);
-			}
-			else
-			{
-				// Okay, we have no exponents to deal with, but we may still have
-				// ratio units.
+				// Okay, we have ratio units. There are some constraints
+				// we put on the number, depending on what kind of
+				// ratio it is.
 
-				double num = 0.0;
-				bool past_decimal_point = false;
-				double fact = 1.0;
-
-				int col = 0;
-				int ecol = traits.ratio_units_locn > -1 ? traits.ratio_units_locn : traits.end_locn;
-
-				auto& txt = tkn->to_string();
-				auto p = txt.c_str();
-				auto q = p;
-
-				int sign = 1;
-
-				if (*p == '-')
-				{
-					sign = -1;
-					++p;
-					++col;
-				}
-				else if (*p == '+')
-				{
-					sign = 1;
-					++p;
-					++col;
-				}
-
-				while (col < ecol)
-				{
-					if (*p == '.')
-					{
-						past_decimal_point = true;
-					}
-					else
-					{
-						int n = *p - '0'; // ascii only here!
-
-						if (past_decimal_point)
-						{
-							fact *= 0.1;
-							num += fact * n;
-						}
-						else
-						{
-							num = num * 10.0 + n;
-						}
-
-					}
-
-					++col; ++p;
-				}
+				auto num = engr_num.RawX(); // First, get the value
 
 				// examine number in light of units given
 
-				if (traits.ratio_units_locn > -1)
+				if (engr_num.units == UnitEnum::SimpleRatio)
 				{
-					// We have some type of ratio units, db, dB, x, X or %
+					// Raw ratios must not be negative, and must be <= 1.0
 
-					auto first_ch = q + traits.ratio_units_locn;
-
-					if (*first_ch == 'x' || *first_ch == 'X')
-					{
-						// Ratio must no be negative, and must be <= 1.0;
-
-						if (sign == -1 || num > 1.0)
-						{
-							LogError(zzz, DfxVerifyResult::ValueNotLegal);
-						}
-					}
-					else if (*first_ch == '%')
-					{
-						// percentage must not be negative, and must be <= 100
-
-						if (sign == -1 || num > 100.0)
-						{
-							LogError(zzz, DfxVerifyResult::ValueNotLegal);
-						}
-					}
-					else if (*first_ch == 'd')
-					{
-						// In decibels. So number *must* *be* negative, or 0.
-
-						if (sign == -1)
-						{
-							// okay
-						}
-						else if (num == 0.0)
-						{
-							// okay
-						}
-						else
-						{
-							LogError(zzz, DfxVerifyResult::ValueNotLegal);
-						}
-
-					}
-				}
-				else
-				{
-					// No units given, so the number must not be negative
-					// and must be <= 1.0;
-
-					if (sign == -1 || num > 1.0)
+					if (num < 0.0 || num > 1.0)
 					{
 						LogError(zzz, DfxVerifyResult::ValueNotLegal);
 					}
 				}
+				else if (engr_num.units == UnitEnum::Percent)
+				{
+					// percentage must not be negative, and must be <= 100
+
+					if (num < 0.0 || num > 100.0)
+					{
+						LogError(zzz, DfxVerifyResult::ValueNotLegal);
+					}
+				}
+				else if (engr_num.units == UnitEnum::DB)
+				{
+					// In decibels. So number *must* *be* negative, or 0.
+
+					if (num < 0)
+					{
+						// okay
+					}
+					else if (num == 0.0)
+					{
+						// okay
+					}
+					else
+					{
+						LogError(zzz, DfxVerifyResult::ValueNotLegal);
+					}
+				}
+			}
+			else if (engr_num.units == UnitEnum::None)
+			{
+				// No units given, so the number must not be negative
+				// and must be <= 1.0;
+
+				auto num = engr_num.RawX();
+
+				if (num < 0.0 || num > 1.0)
+				{
+					LogError(zzz, DfxVerifyResult::ValueNotLegal);
+				}
+			}
+			else
+			{
+				LogError(zzz, DfxVerifyResult::ValueHasWrongUnits);
 			}
 		}
 

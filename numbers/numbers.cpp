@@ -329,6 +329,20 @@ void testpfx()
 
 int main()
 {
+#if 0
+	std::string_view sv = "abcde";
+
+	auto s = sv.begin();
+	auto e = sv.end();
+	auto p = s;
+
+	for (int i = 0; i < 10; i++)
+	{
+		++p;
+	}
+#endif
+
+
 	//test_positive();
 	//test_negative();
 	//testd();

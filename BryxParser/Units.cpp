@@ -119,8 +119,8 @@ namespace bryx
 			{"%", UnitEnum::Percent},
 			{"percent", UnitEnum::Percent},
 
-			{"X", UnitEnum::Ratio},
-			{"ratio", UnitEnum::Ratio},
+			{"X", UnitEnum::SimpleRatio},
+			{"ratio", UnitEnum::SimpleRatio},
 
 			{"deg", UnitEnum::Degree},
 			{"degree", UnitEnum::Degree},
@@ -268,7 +268,7 @@ namespace bryx
             ratio = old_val / 100.0;
             break;
 
-            case UnitEnum::Ratio:
+            case UnitEnum::SimpleRatio:
             default:
             ratio = old_val;
             break;
@@ -296,7 +296,7 @@ namespace bryx
             new_val = ratio * 100.0;
             break;
 
-            case UnitEnum::Ratio:
+            case UnitEnum::SimpleRatio:
             default:
             new_val = ratio;
             break;

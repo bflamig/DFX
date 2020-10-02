@@ -83,10 +83,7 @@ namespace bryx
 
 		QuotedChars,     // sequence of characters surrounded by double quotes
 		UnquotedChars,   // sequence of characters that are either alphanumeric, or a select set of characters (esp no ws or quotes or =)
-		//WholeNumber,     // sequence of characters that are digits only, with optional sign prefix
-		//FloatingNumber,  // sequence of characters that has a valid floating point syntax
-		//NumberWithUnits, // sequence of characters that has a valid whole number or floating point syntax, with optional alpha unit characters
-		Number,            // sequence of characters that comprise whole numbers, floating point numbers, all with optional metric prefix and units
+		Number,          // sequence of characters that comprise whole numbers, floating point numbers, all with optional metric prefix and units
 		True,            // the sequence of characters 'true', no quotes
 		False,           // the sequence of characters 'false', no quotes
 		Null,            // the sequence of characters 'null', no quotes
@@ -160,20 +157,13 @@ namespace bryx
 
 	// //////////////////////////////////////////////////////////////////////////////////
 
-	//constexpr const char* MetricPrefixes[] = { "femto", "pico", "nano", "micro", "milli", "", "kilo", "Mega", "Giga", "Tera", "Peta" };
-	//constexpr char MetricPrefixMonikerChars[]{ 'f', 'p', 'n', 'u', 'm', '\0', 'k', 'M', 'G', 'T', 'P' };
-	//constexpr int MetricExps[]{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
-
-	constexpr const char* ratioUnits[] = { "dB", "X", "%" };
-
 	class LexiNumberTraits {
 	public:
 
 		int decimal_point_locn; // -1 if no decimal point
 		int exponent_locn;      // -1 if no exponent
-		int ratio_units_locn;   // -1 if none
-		int metric_pfx_locn;    // -1 if none
-		int generic_units_locn; // -1 if no other kind of units
+		int metric_pfx_locn;    // -1 if no metric prefix
+		int units_locn;         // -1 if no unit
 		int end_locn;
 		bool could_be_a_number; // even if quoted, it could be valid number if quotes were removed
 
@@ -185,9 +175,8 @@ namespace bryx
 		{
 			decimal_point_locn = -1;
 			exponent_locn = -1;
-			ratio_units_locn = -1;
 			metric_pfx_locn = -1;
-			generic_units_locn = -1;
+			units_locn = -1;
 			could_be_a_number = false;
 		}
 
@@ -195,10 +184,8 @@ namespace bryx
 		bool HasExponent() const { return exponent_locn != -1; }
 		bool IsWholeNumber() const { return !HasDecimal() && !HasExponent(); }
 		bool IsFloatingNumber() const { return HasDecimal() || HasExponent(); }
-		bool HasUnits() const { return HasRatioUnits() || HasGenericUnits(); }
-		bool HasRatioUnits() const { return ratio_units_locn != -1; }
 		bool HasMetricPrefix() const { return metric_pfx_locn != -1; }
-		bool HasGenericUnits() const { return generic_units_locn != -1; }
+		bool HasUnits() const { return units_locn != -1; }
 	};
 
 	// //////////////////////////////////////////////////////////////////////////////////
@@ -249,11 +236,6 @@ namespace bryx
 
 		void AddResult(const LexiResultPkg& rp);
 
-		//void seek_to(std::streambuf& sb, size_t p) const
-		//{
-		//	sb.pubseekoff(p, std::ios_base::beg);
-		//}
-
 	public:
 
 		bool IsEndToken() const
@@ -286,17 +268,13 @@ namespace bryx
 			return false;
 		}
 
-
 	public:
 
 		virtual const std::string to_string() const = 0;
-
 		void Print(std::ostream& sout) const;
 	};
 
 	// Single char tokens
-
-	// Ordinary simple tokens
 
 	class CharToken : public TokenBase {
 	protected:
@@ -321,13 +299,14 @@ namespace bryx
 	public:
 
 		virtual const std::string to_string() const;
-
 	};
 
 
 	class SimpleToken : public TokenBase {
 	protected:
+
 		std::string text; // Will get instantiated with text from the source
+
 	public:
 
 		friend class Lexi;
@@ -348,7 +327,6 @@ namespace bryx
 	public:
 
 		virtual const std::string to_string() const;
-
 	};
 
 	// Number tokens
@@ -583,7 +561,6 @@ namespace bryx
 
 	protected:
 
-		LexiResult PerformSanityCheck();
 		LexiResult CollectSingleCharToken(TokenEnum type, int c);
 		LexiResult CollectQuotedChars();
 		int HandleEscapedChar(int c);
