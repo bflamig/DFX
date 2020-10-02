@@ -41,6 +41,7 @@
 #include <memory>
 #include "EngrNum.h"
 #include "BryxLexi.h"
+#include "Units.h"
 
 namespace bryx
 {
@@ -166,8 +167,26 @@ namespace bryx
 		text_units[0] = 0;
 	}
 
+	EngrNum::EngrNum(const EngrNum& s)
+	//: EngrNum()
+	{
+		operator=(s);
+	}
+
 	EngrNum::~EngrNum()
 	{
+	}
+
+	void EngrNum::operator=(const EngrNum& s)
+	{
+		memcpy_s(mantissa, ndigits_reserved + 1, s.mantissa, s.ndigits_reserved + 1);
+		memcpy_s(mantissa, 32, s.mantissa, 32);
+		sign = s.sign;
+		engr_exp = s.engr_exp;
+		MEXP_MULT = s.MEXP_MULT;
+		tens_exp = s.tens_exp;
+		error_code = s.error_code;
+		value_flag = s.value_flag;
 	}
 
 	void EngrNum::clear()
@@ -777,14 +796,14 @@ namespace bryx
 			if (x != -1)
 			{
 				char pfx = src[x];
-				for (int i = 0; i < sizeof(MetricPrefixMonikerChars); i++)
+
+				auto idx = mpfx_parse_tree.MetricPrefixIndex(pfx);
+
+				if (idx != -1)
 				{
-					if (pfx == MetricPrefixMonikerChars[i])
-					{
-						engr_exp = MetricExps[i];
-						break;
-					}
+					engr_exp = metric_db[idx].metric_exp;
 				}
+				else engr_exp = 0;
 			}
 			else
 			{
@@ -841,7 +860,8 @@ namespace bryx
 
 		if (tkn_ptr)
 		{
-			process_num_from_lexi(serr, src, tkn_ptr->number_traits);
+			//process_num_from_lexi(serr, src, tkn_ptr->number_traits);
+			*this = tkn_ptr->engr_num;
 		}
 		else
 		{

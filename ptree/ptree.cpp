@@ -49,6 +49,18 @@ void test2()
 	auto sally = unit_parse_tree.find_unitname("Cowlomb");
 }
 
+void test3()
+{
+	// Test the specialized metric prefix parse tree
+
+	mpfx_parse_tree.print(std::cout);
+
+	auto fred = mpfx_parse_tree.find_pfxname("p");
+	auto george = mpfx_parse_tree.find_pfxname("u");
+	auto harry = mpfx_parse_tree.find_pfxname("Q");
+	auto sally = mpfx_parse_tree.find_pfxname("milli");
+}
+
 int main()
 {
 	test1();
@@ -56,5 +68,10 @@ int main()
 	std::cout << std::endl << std::endl;
 
 	test2();
+
+	std::cout << std::endl << std::endl;
+
+	test3();
+
 	return 0;
 }

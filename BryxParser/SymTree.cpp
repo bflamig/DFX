@@ -2,7 +2,6 @@
 
 namespace bryx
 {
-
 	int SymTree::add_internal(char c)
 	{
 		children.push_back(SymElem(c));

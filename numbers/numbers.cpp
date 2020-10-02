@@ -311,6 +311,12 @@ void testdb()
 	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
 }
 
+void testpfx()
+{
+	std::string test = "4.5pF";
+	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
+}
+
 int main()
 {
 	//test_positive();
@@ -318,7 +324,9 @@ int main()
 	//testd();
 	//testf();
 	//testg();
-	//testh();
+	testh();
 
-	testdb();
+	//testdb();
+
+	//testpfx();
 }

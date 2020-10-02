@@ -34,6 +34,7 @@
 
 #include <sstream>
 #include "BryxLexi.h"
+#include "Units.h"
 
 // /////////////////////////////////////////////////////////////////////////////
 
@@ -1341,18 +1342,17 @@ namespace bryx
 			{
 				// Collect up other kinds of units, including perhaps a metric pfx
 
-				// but first, any metric prefix
+				// but first, any metric prefix. Right now, we only allow
+				// single characters. 
 
-				for (int i = 0; i < sizeof(MetricPrefixMonikerChars); i++)
+				auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
+
+				if (idx != -1)
 				{
-					if (c == MetricPrefixMonikerChars[i])
-					{
-						number_traits.metric_pfx_locn = extent.ecol - extent.scol;
-						AppendChar(c);
-						c = NextPeek();
-						extent.Bump();
-						break;
-					}
+					number_traits.metric_pfx_locn = extent.ecol - extent.scol;
+					AppendChar(c);
+					c = NextPeek();
+					extent.Bump();
 				}
 
 				// okay, really now onto generic units
@@ -1402,6 +1402,33 @@ namespace bryx
 		return result;
 	}
 
+	inline int bump_char(std::string_view::const_iterator& pit, std::string_view::const_iterator& eit)
+	{
+		static constexpr char EOS = 0;
+
+		if (pit != eit)
+		{
+			++pit;
+		}
+
+		if (pit == eit)
+		{
+			return EOS;
+		}
+		else return *pit;
+	}
+
+	inline int peek_char(std::string_view::const_iterator& pit, std::string_view::const_iterator& eit)
+	{
+		static constexpr char EOS = 0;
+
+		if (pit == eit)
+		{
+			return EOS;
+		}
+		else return *pit;
+	}
+
 	// A static member function
 
     //LexiResult Lexi::CollectQuotedNumber(const std::string src, LexiNumberTraits& number_traits)
@@ -1412,15 +1439,22 @@ namespace bryx
 
 		// The gist of this copied and pasted from CollectNumber on 12/12/2019. @@ BE SURE TO MAKE THIS TRACK
 
+		// WARNING: The switch to using string_view means no more null termination. So beware!
+		// So we've moved on to iterators
+
+		auto sit = src.begin();
+		auto pit = sit;
+		auto eit = src.end();
+
 		static constexpr char EOS = 0;
 
 		LexiResult result{ LexiResult::NoError };
 
-		int len = src.length(); // strlen(src);
+		int last = src.length() - 1; // base 0 last posn
 
 		LexiNumberTraits number_traits;
 
-		number_traits.end_locn = len; // by def
+		number_traits.end_locn = last + 1; // for default, one past the last character
 
 		const int start_posn = 0;
 
@@ -1430,7 +1464,8 @@ namespace bryx
 
 		auto posn = start_posn;
 
-		int c = posn < len ? src[posn] : EOS;
+		//int c = posn < last ? src[posn] : EOS;
+		int c = peek_char(pit, eit);
 
 		// Bryx.org (haha) official grammar says:
 		//
@@ -1484,32 +1519,30 @@ namespace bryx
 
 		if (c == '-')
 		{
-			c = posn < len ? src[++posn] : EOS;
+			//c = posn < last ? src[++posn] : EOS;
+			//c = pit != eit ? *++pit : EOS;
+			c = bump_char(pit, eit);
 		}
 
 		if (c == '0')
 		{
 			have_at_least_one_digit = true;
 
-			if (len == 1)
+#if 0
+			if (last == 0)
 			{
 				// We have a single digit of zero
-				c = posn < len ? src[++posn] : EOS;
+				c = posn < last ? src[++posn] : EOS;
 			}
 			else
 			{
-				c = posn < len ? src[++posn] : EOS;
-
-#if 0
-				if (isdigit(c))
-				{
-					result = LexiResult::UnexpectedChar;
-					//TokenExtent extent;
-					//extent.MakeSingleLineExtent(posn);
-					//LogError(result, "CollectNumber(): can't have a leading 0 for a multi-digit number", extent);
-				}
-#endif
+				c = posn < last ? src[++posn] : EOS;
 			}
+#else
+			//c = posn < last ? src[++posn] : EOS;
+			//c = pit != eit ? *++pit : EOS;
+			c = bump_char(pit, eit);
+#endif
 		}
 
 		// Collect rest of integer portion
@@ -1525,7 +1558,10 @@ namespace bryx
 			{
 				if (isdigit(c))
 				{
-					c = src[++posn];
+					//c = src[++posn];
+					//c = posn < last ? src[++posn] : EOS;
+					//c = pit != eit ? *++pit : EOS;
+					c = bump_char(pit, eit);
 				}
 				else break;
 			}
@@ -1535,8 +1571,10 @@ namespace bryx
 
 		if (c == '.')
 		{
-			number_traits.decimal_point_locn = posn - start_posn;
-			c = posn < len ? src[++posn] : EOS;
+			number_traits.decimal_point_locn = std::distance(sit, pit); //  posn - start_posn;
+			//c = posn < last ? src[++posn] : EOS;
+			//c = pit != eit ? *++pit : EOS;
+			c = bump_char(pit, eit);
 
 			// Collect up digits
 
@@ -1544,7 +1582,10 @@ namespace bryx
 			{
 				if (isdigit(c))
 				{
-					c = src[++posn];
+					//c = src[++posn];
+					//c = posn < last ? src[++posn] : EOS;
+					//c = pit != eit ? *++pit : EOS;
+					c = bump_char(pit, eit);
 				}
 				else break;
 			}
@@ -1554,14 +1595,19 @@ namespace bryx
 
 		if (c == 'e' || c == 'E')
 		{
-			number_traits.exponent_locn = posn - start_posn;
-			c = posn < len ? src[++posn] : EOS;
+			number_traits.exponent_locn = std::distance(sit, pit); //  posn - start_posn;
+			//c = posn < last ? src[++posn] : EOS;
+			//c = pit != eit ? *++pit : EOS;
+			c = bump_char(pit, eit);
 
 			// Collect possible sign, either plus or minus
 
 			if (c == '+' || c == '-')
 			{
-				c = src[++posn];
+				//c = src[++posn];
+				//c = posn < last ? src[++posn] : EOS;
+				//c = pit != eit ? *++pit : EOS;
+				c = bump_char(pit, eit);
 			}
 
 			// Now collect up digits of the exponent, no white space!
@@ -1578,7 +1624,10 @@ namespace bryx
 				{
 					if (isdigit(c))
 					{
-						c = src[++posn];
+						// c = src[++posn];
+						//c = posn < last ? src[++posn] : EOS;
+						//c = pit != eit ? *++pit : EOS;
+						c = bump_char(pit, eit);
 					}
 					else break;
 				}
@@ -1591,44 +1640,52 @@ namespace bryx
 
 		if (c == 'X' || c == 'x' || c == '%')
 		{
-			number_traits.ratio_units_locn = posn - start_posn;
-			c = posn < len ? src[++posn] : EOS;
+			number_traits.ratio_units_locn = std::distance(sit, pit); //  posn - start_posn;
+			//c = posn < last ? src[++posn] : EOS;
+			//c = pit != eit ? *++pit : EOS;
+			c = bump_char(pit, eit);
 		}
 		else
 		{
+#if 0
 			if (c == 'd')
 			{
-				int try_c = posn < len ? src[posn + 1] : EOS;
+				int try_c = posn < last ? src[posn + 1] : EOS;  // @@ TODO: FIX!
 				if (try_c == 'B' || try_c == 'b')
 				{
-					number_traits.ratio_units_locn = posn - start_posn;
-					c = posn < len ? src[++posn] : EOS;
+					number_traits.ratio_units_locn = std::distance(sit, pit); //  posn - start_posn;
+					//c = posn < last ? src[++posn] : EOS;
+					c = pit != eit ? *++pit : EOS;
 				}
 			}
+#endif
 
 			if (number_traits.ratio_units_locn == -1 && isalpha(c))
 			{
 				// Collect up other kinds of units, including perhaps a metric pfx
 
-				// but first, any metric prefix
+				// but first, any metric prefix. Right now, we only allow
+				// single characters. 
 
-				for (int i = 0; i < sizeof(MetricPrefixMonikerChars); i++)
+				auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
+
+				if (idx != -1)
 				{
-					if (c == MetricPrefixMonikerChars[i])
-					{
-						number_traits.metric_pfx_locn = posn - start_posn;
-						c = posn < len ? src[++posn] : EOS;
-						break;
-					}
+					number_traits.metric_pfx_locn = std::distance(sit, pit); //  posn - start_posn;
+					//c = posn < last ? src[++posn] : EOS;
+					//c = pit != eit ? *++pit : EOS;
+					c = bump_char(pit, eit);
 				}
 
 				// okay, really now onto other units
 
-				number_traits.generic_units_locn = posn - start_posn;
+				number_traits.generic_units_locn = std::distance(sit, pit); //  posn - start_posn;
 
 				while (isalpha(c))
 				{
-					c = posn < len ? src[++posn] : EOS;
+					//c = posn < last ? src[++posn] : EOS;
+					//c = pit != eit ? *++pit : EOS;
+					c = bump_char(pit, eit);
 				}
 			}
 		}
@@ -1639,9 +1696,10 @@ namespace bryx
 		{
 			number_traits.could_be_a_number = true;
 
-			number_traits.end_locn = posn - start_posn;
+			number_traits.end_locn = std::distance(sit, pit); //  posn - start_posn;
 
-			TokenExtent extent(0, start_posn, posn);
+			//TokenExtent extent(0, start_posn, posn); // @@ TODO: FIX!
+			TokenExtent extent(0, 0, number_traits.end_locn);
 
 			auto t = std::make_shared<NumberToken>(TokenEnum::Number, src.data(), extent); // row, col, start_extent, end_extent);
 			t->number_traits = number_traits;
@@ -1670,5 +1728,4 @@ namespace bryx
 
 		return nullptr;
 	}
-
 }

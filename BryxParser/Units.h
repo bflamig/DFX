@@ -12,6 +12,69 @@
 
 namespace bryx
 {
+    enum class MetricPrefixEnum
+    {
+        Femto,
+        Pico,
+        Nano,
+        Micro,
+        Milli,
+        None,
+        Kilo,
+        Mega,
+        Giga,
+        Tera,
+        Peta,
+        Count
+    };
+
+    struct metric_db_elem
+    {
+        MetricPrefixEnum prefix;
+        std::string moniker;
+        std::string full;
+        int metric_exp;
+        int tens_exp;
+        double conversion_factor;
+    };
+
+    extern const std::vector<metric_db_elem> metric_db;
+
+    // /////////////////////////////////////////////
+    // A search tree useful when metric prefixes
+
+    class MpfxParseTree : public SymTree {
+    public:
+
+        MpfxParseTree() { }
+
+        MpfxParseTree(std::vector<metric_db_elem> pfx_list);
+
+        virtual ~MpfxParseTree() = default;
+
+        virtual std::shared_ptr<SymTree> MakeNewTree()
+        {
+            return std::make_shared<MpfxParseTree>();
+        }
+
+        void add_pfxname(std::string_view s, MetricPrefixEnum pfx)
+        {
+            SymTree::addstring(s, static_cast<int>(pfx));
+        }
+
+        MetricPrefixEnum find_pfxname(std::string_view s) const;
+
+        int MetricPrefixIndex(char c) const;
+
+        virtual void print_leaf(std::ostream& sout, int id) const
+        {
+            sout << metric_db[id].moniker;
+        }
+    };
+
+    extern const MpfxParseTree mpfx_parse_tree;
+
+
     enum class UnitEnum
     {
         DB, 
@@ -122,37 +185,6 @@ namespace bryx
 
     extern const UnitParseTree unit_parse_tree;
 
-    // ////////////////////////////////////////////////
-
-    enum class MetricPrefixEnum
-    {
-        Femto,
-        Pico,
-        Nano,
-        Micro,
-        Milli,
-        None,
-        Kilo,
-        Mega,
-        Giga,
-        Tera,
-        Peta,
-        Count
-    };
-
-    static constexpr std::string_view MetricPrefixes[] = { "femto", "pico", "nano", "micro", "milli", "", "kilo", "Mega", "Giga", "Tera", "Peta" };
-
-    static constexpr std::string_view MetricPrefixMonikers[]{ "f", "p", "n", "u", "m", "", "k", "M", "G", "T", "P" };
-
-    static constexpr char MetricPrefixMonikerChars[]{ 'f', 'p', 'n', 'u', 'm', '\0', 'k', 'M', 'G', 'T', 'P' };
-
-    static constexpr int MetricExps[]{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
-
-    static constexpr int Exps[] = { -15, -12, -9, -6, -3, 0, 3, 6, 9, 12, 15 };
-
-    static constexpr double ConvFactors[] = { 1.0e-15, 1.0e-12, 1.0e-9, 1.0e-6, 1.0e-3, 1.0, 1.0e+3, 1.0e+6, 1.0e+9, 1.0e+12, 1.0e+15 };
-
-    extern MetricPrefixEnum MatchMetricPrefix(std::string_view sv);
 
     // //////////////////////////////////////////////////////////
     // Unit class: Support for different categories of units
@@ -247,7 +279,7 @@ namespace bryx
 
         double ConvFactor() const
         {
-            return ConvFactors[static_cast<int>(metric_prefix)];
+            return metric_db[static_cast<int>(metric_prefix)].conversion_factor;
         }
 
         double ConvertTo(double old_val, UnitEnum new_u);

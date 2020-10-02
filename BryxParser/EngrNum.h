@@ -79,32 +79,7 @@ namespace bryx
 		UnspecifiedError
 	};
 
-#if 0
-
-	class EngrNumResultPkg {
-	public:
-		std::string msg;
-		EngrNumResult code;
-		int posn;
-	public:
-
-		EngrNumResultPkg();
-		EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn);
-		EngrNumResultPkg(const EngrNumResultPkg& other);
-		EngrNumResultPkg(EngrNumResultPkg&& other) noexcept;
-
-		EngrNumResultPkg& operator=(const EngrNumResultPkg& other);
-		EngrNumResultPkg& operator=(EngrNumResultPkg&& other) noexcept;
-
-		void Clear();
-		void ResetMsg();
-		void Print(std::ostream& sout) const;
-	};
-
-#endif
-
 	// //////////////////////////////////////////////////////////////////////////////////
-
 
 	class EngrNum {
 	public:
@@ -118,7 +93,7 @@ namespace bryx
 		char text_units[32];                 // Text version of the units. Used during parsing. Includes null byte.
 		int sign;                  // Sign bit. 1 if positive, -1 if negative
 		int engr_exp;              // We store the exponent in powers of a thousand or million (to support metric-style engineering notation)
-		const int MEXP_MULT;       // The multiplier for the engr_exp. Either 3 for "thousands" or 6 for "millions". The latter is for squared units.
+		int MEXP_MULT;             // The multiplier for the engr_exp. Either 3 for "thousands" or 6 for "millions". The latter is for squared units.
 		int tens_exp;              // Additional tens exponent that is sometimes tacked on to mantissa (think prefix tracking)
 		EngrNumResult error_code;  // If non-zero, then the number is invalid for reasons indicated in the code.
 		EngrNumFlags value_flag;   // Always check this first before using the number. We indicate infinity and NaN here.
@@ -126,7 +101,10 @@ namespace bryx
 	public:
 
 		explicit EngrNum(int MEXP_MULT_ = 3);
+		EngrNum(const EngrNum& s);
 		virtual ~EngrNum();
+
+		void operator=(const EngrNum& s);
 
 	public:
 

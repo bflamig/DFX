@@ -8,34 +8,61 @@ namespace bryx
     static constexpr double pi = 3.14159; // @@ TODO: FIX THIS
     static constexpr double two_pi = 2.0 * pi;
 
-    MetricPrefixEnum MatchMetricPrefix(std::string_view sv)
+
+    // ///////////////////////////////////////////////////////////
+        
+    const std::vector<metric_db_elem> metric_db =
     {
-        // Not optimized at all
+        {MetricPrefixEnum::Femto, "f", "femto", -5, -15, 1.0e-15},
+        {MetricPrefixEnum::Pico,  "p", "pico",  -4, -12, 1.0e-12},
+        {MetricPrefixEnum::Nano,  "n", "nano",  -3, -9,  1.0e-9},
+        {MetricPrefixEnum::Micro, "u", "micro", -2, -6,  1.0e-6},
+        {MetricPrefixEnum::Milli, "m", "milli", -1, -3,  1.0e-3},
+        {MetricPrefixEnum::None,  "",   "",      0,  0,  1.0},
+        {MetricPrefixEnum::Kilo,  "k", "kilo",   1,  3,  1.0e3},
+        {MetricPrefixEnum::Mega,  "M", "Mega",   2,  6,  1.0e6},
+        {MetricPrefixEnum::Giga,  "G", "Giga",   3,  9,  1.0e9},
+        {MetricPrefixEnum::Tera,  "T", "Tera",   4,  12, 1.0e12},
+        {MetricPrefixEnum::Peta,  "P", "Peta",   5,  15, 1.0e15}
+    };
 
-        int n = static_cast<int>(MetricPrefixEnum::Count);
 
-        // Check the one letter monikers
-
-        for (int i = 0; i < n; i++)
+    MpfxParseTree::MpfxParseTree(std::vector<metric_db_elem> pfx_list)
+    {
+        for (auto& e : pfx_list)
         {
-            if (MetricPrefixMonikers[i] == sv)
-            {
-                return static_cast<MetricPrefixEnum>(i);
-            }
+            add_pfxname(e.moniker, e.prefix);
+            add_pfxname(e.full, e.prefix);
         }
-
-        // Check the full prefix names
-
-        for (int i = 0; i < n; i++)
-        {
-            if (MetricPrefixes[i] == sv)
-            {
-                return static_cast<MetricPrefixEnum>(i);
-            }
-        }
-
-        return MetricPrefixEnum::None;
     }
+
+    MetricPrefixEnum MpfxParseTree::find_pfxname(std::string_view s) const
+    {
+        auto index = SymTree::search(s);
+
+        if (index == -1)
+        {
+            return MetricPrefixEnum::None;
+        }
+        else return static_cast<MetricPrefixEnum>(index);
+    }
+
+    int MpfxParseTree::MetricPrefixIndex(char c) const
+    {
+        auto index = SymTree::find_index(c);
+
+        if (index != -1)
+        {
+            return children.at(index).id; // The enumerated pfx in integer form
+        }
+        else return -1;
+    }
+
+    const MpfxParseTree mpfx_parse_tree(metric_db);
+
+
+    // /////////////////////////////////////////////////
+
 
     const std::vector<std::string> ShortUnitNames
     {
@@ -584,5 +611,6 @@ namespace bryx
 
         return new_val;
     }
+
 
 } // end of namespace bryx
