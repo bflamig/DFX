@@ -112,7 +112,7 @@ namespace bryx
 
 		virtual void set_num(std::ostream& serr, double d);
 		virtual void set_num(std::ostream& serr, const NumberToken& tkn);
-		virtual void parse(std::ostream &serr, const char* src);
+		virtual void parse(std::ostream &serr, const std::string_view &src);
 		virtual void process_num_from_lexi(std::ostream& serr, const char* src, const LexiNumberTraits& number_traits);
 
 		virtual double RawX() const;

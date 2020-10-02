@@ -849,18 +849,14 @@ namespace bryx
 	}
 
 
-	void EngrNum::parse(std::ostream &serr, const char* src)
+	void EngrNum::parse(std::ostream &serr, const std::string_view &src)
 	{
 		clear();
-
-		//LexiNumberTraits number_traits;
-		//LexiResult r = Lexi::CollectQuotedNumber(src, number_traits);
 
 		auto tkn_ptr = Lexi::CollectQuotedNumber(serr, src);
 
 		if (tkn_ptr)
 		{
-			//process_num_from_lexi(serr, src, tkn_ptr->number_traits);
 			*this = tkn_ptr->engr_num;
 		}
 		else
@@ -877,7 +873,5 @@ namespace bryx
 		serr << msg_ << std::endl;
 		if (posn_ != 0) serr << "at posn: " << posn_ << std::endl;
 	}
-
-
 
 }; // end of namespace
