@@ -117,7 +117,8 @@ namespace bryx
 		virtual void parse(std::ostream &serr, const std::string_view &src);
 		virtual void process_num_from_lexi(std::ostream& serr, std::string_view src, const LexiNumberTraits& number_traits);
 
-		virtual double RawX() const;
+		virtual double RawX() const; // Metric prefixes applied, but no scaled units like dB and %
+		virtual double X() const;    // Scaled units like dB and % applied.
 
 	protected:
 

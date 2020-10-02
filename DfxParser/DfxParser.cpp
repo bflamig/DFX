@@ -888,10 +888,16 @@ namespace bryx
 			if (IsCat<UnitCatEnum::Ratio>(engr_num.units))
 			{
 				// Okay, we have ratio units. There are some constraints
-				// we put on the number, depending on what kind of
-				// ratio it is.
+				// we put on the number, specifically, it must not be 
+				// negative or greater than 1.0
 
-				auto num = engr_num.RawX(); // First, get the value
+				auto num = engr_num.X(); // First, get the value, apply any scale too
+
+				if (num < 0.0 || num > 1.0)
+				{
+					LogError(zzz, DfxVerifyResult::ValueNotLegal);
+				}
+#if 0
 
 				// examine number in light of units given
 
@@ -930,6 +936,7 @@ namespace bryx
 						LogError(zzz, DfxVerifyResult::ValueNotLegal);
 					}
 				}
+#endif
 			}
 			else if (engr_num.units == UnitEnum::None)
 			{

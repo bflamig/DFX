@@ -128,6 +128,8 @@ namespace bryx
 
 	double EngrNum::RawX() const
 	{
+		// No scaled units like dB applied
+
 		switch (value_flag)
 		{
 			case EngrNumFlags::Ordinary:
@@ -157,6 +159,20 @@ namespace bryx
 			}
 			break;
 		}
+	}
+
+	double EngrNum::X() const
+	{
+		// Applies scaled units like dB
+
+		auto x = RawX();
+
+		if (IsCat<UnitCatEnum::Ratio>(units))
+		{
+			x = Convert<UnitCatEnum::Ratio>(x, units, UnitEnum::SimpleRatio);
+		}
+		
+		return x;
 	}
 
 	void EngrNum::set_num(std::ostream &serr, double d)
