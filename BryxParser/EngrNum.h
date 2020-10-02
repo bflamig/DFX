@@ -41,6 +41,7 @@
 
 #include <ostream>
 //#include "BryxLexi.h"
+#include "Units.h"
 
 namespace bryx
 {
@@ -97,6 +98,7 @@ namespace bryx
 		int tens_exp;              // Additional tens exponent that is sometimes tacked on to mantissa (think prefix tracking)
 		EngrNumResult error_code;  // If non-zero, then the number is invalid for reasons indicated in the code.
 		EngrNumFlags value_flag;   // Always check this first before using the number. We indicate infinity and NaN here.
+		UnitEnum units; 
 
 	public:
 

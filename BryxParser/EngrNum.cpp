@@ -77,82 +77,6 @@ namespace bryx
 		return s;
 	}
 
-#if 0
-
-	EngrNumResultPkg::EngrNumResultPkg()
-	: msg(), code(EngrNumResult::NoError), posn(0)
-	{
-	}
-
-	EngrNumResultPkg::EngrNumResultPkg(std::string msg_, EngrNumResult code_, int posn_)
-	: EngrNumResultPkg()
-	{
-		msg = msg_;
-		code = code_;
-		posn = posn_;
-	}
-
-	EngrNumResultPkg::EngrNumResultPkg(const EngrNumResultPkg& other)
-	: EngrNumResultPkg(other.msg, other.code, other.posn)
-	{
-		// Copy constructor
-	}
-
-	EngrNumResultPkg::EngrNumResultPkg(EngrNumResultPkg&& other) noexcept
-	: EngrNumResultPkg(move(other.msg), other.code, other.posn)
-	{
-		// Move constructor
-		other.code = EngrNumResult::NoError;
-		other.posn = 0; //  extent.clear();
-	}
-
-	EngrNumResultPkg& EngrNumResultPkg::operator=(const EngrNumResultPkg& other)
-	{
-		// Copy assignment
-
-		if (this != &other)
-		{
-			msg = other.msg;
-			code = other.code;
-			posn = other.posn;
-		}
-
-		return *this;
-	}
-
-	EngrNumResultPkg& EngrNumResultPkg::operator=(EngrNumResultPkg&& other) noexcept
-	{
-		// Move assignment
-
-		if (this != &other)
-		{
-			msg = move(other.msg);
-			code = other.code;
-			posn = other.posn;
-		}
-
-		return *this;
-	}
-
-
-	void EngrNumResultPkg::Clear()
-	{
-		code = EngrNumResult::NoError;
-		ResetMsg();
-	}
-
-	void EngrNumResultPkg::ResetMsg()
-	{
-		msg.clear();
-	}
-
-	void EngrNumResultPkg::Print(std::ostream& sout) const
-	{
-		sout << to_string(code) << " --> " << msg << '\n';
-	}
-
-#endif
-
 	// ///////////////////////////////////////////////////////////////////////////////////////////
 
 	EngrNum::EngrNum(int MEXP_MULT_)
@@ -162,13 +86,13 @@ namespace bryx
 	, tens_exp(0)
 	, error_code(EngrNumResult::NoError)
 	, value_flag(EngrNumFlags::Ordinary)
+	, units(UnitEnum::None)
 	{
 		mantissa[0] = 0;
 		text_units[0] = 0;
 	}
 
 	EngrNum::EngrNum(const EngrNum& s)
-	//: EngrNum()
 	{
 		operator=(s);
 	}
@@ -187,6 +111,7 @@ namespace bryx
 		tens_exp = s.tens_exp;
 		error_code = s.error_code;
 		value_flag = s.value_flag;
+		units = s.units;
 	}
 
 	void EngrNum::clear()
@@ -198,6 +123,7 @@ namespace bryx
 		tens_exp = 0;
 		error_code = EngrNumResult::NoError;
 		value_flag = EngrNumFlags::Ordinary;
+		// units = UnitEnum::None; @@ TODO: SHOULD WE? UPDATE: NO!
 	}
 
 	double EngrNum::RawX() const

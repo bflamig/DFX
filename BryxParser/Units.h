@@ -114,6 +114,7 @@ namespace bryx
         RadiansPerSec,
         Hertz,
 
+        Other,
         None
     };
 
