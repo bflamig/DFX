@@ -205,6 +205,7 @@ namespace bryx
 
 		void StartLog(std::ostream& slog);
 		DfxVerifyResult LogError(const std::string prop, DfxVerifyResult err);
+		DfxVerifyResult LogError(const std::string prop, DfxVerifyResult err, LexiResultPkg& err_pkg);
 		void EndLog();
 
 		void WriteDfx(std::ostream& sout);

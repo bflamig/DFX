@@ -750,10 +750,10 @@ namespace bryx
 						}
 						else
 						{
-							// @@ TODO: t contains an error token that we can use here for some purpose
-							//auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
-							//auto& err_pkg = err_t->result_pkg;
-							LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
+							// t contains an error token with further info
+							auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+							auto& err_pkg = err_t->result_pkg;
+							LogError(zzz, DfxVerifyResult::PeakMustBeNumber, err_pkg);
 						}
 					}
 					else
@@ -838,10 +838,10 @@ namespace bryx
 						}
 						else
 						{
-							// @@ TODO: t contains an error token that we can use here for some purpose
-							//auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
-							//auto& err_pkg = err_t->result_pkg;
-							LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+							// t contains an error token with further info
+							auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+							auto& err_pkg = err_t->result_pkg;
+							LogError(zzz, DfxVerifyResult::RmsMustBeNumber, err_pkg);
 						}
 					}
 					else
@@ -968,6 +968,17 @@ namespace bryx
 		++errcnt;
 		return err;
 	}
+
+	DfxVerifyResult DfxParser::LogError(const std::string prop, DfxVerifyResult err, LexiResultPkg &err_pkg)
+	{
+		std::ostream& sl = *slog;
+		sl << "Property " << prop << ": ";
+		sl << to_string(err) << std::endl;
+		sl << "Lexical err --> " << err_pkg.msg << " at (" << err_pkg.extent.ecol << ")" << std::endl;
+		++errcnt;
+		return err;
+	}
+
 
 	void DfxParser::EndLog()
 	{
