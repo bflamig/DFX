@@ -12,7 +12,7 @@
  *
  * This exchange format has a one to one mapping to the widely used Json syntax,
  * simplified to be easier to read and write. It is easy to translate DFX files
- * into Json files that can be processed by any software supporting Json syntax.
+ * into Json files that can be parsed by any software supporting Json syntax.
  *
  ******************************************************************************
  *
@@ -137,7 +137,7 @@ namespace bryx
 				char* pEnd;
 				double d = std::strtod(mantissa, &pEnd);
 				if (sign == -1) d = -d;
-				int overall_exp = engr_exp * 3 + tens_exp;
+				int overall_exp = engr_exp * MEXP_MULT + tens_exp;
 				d *= pow(10.0, overall_exp);
 				return d;
 			}
@@ -357,7 +357,7 @@ namespace bryx
 			}
 			else
 			{
-				tens_exp = 2;
+				tens_exp = 2; // @@ TODO: MEXP_MULT - 1 ?
 				--engr_exp;
 			}
 
@@ -469,8 +469,9 @@ namespace bryx
 			}
 
 			// Put in null bytes. Remember that ndigits_reserved does not include
-			// room for null byte, but there is room for it. So in the code below,
-			// we use <= instead of < so that that last byte gets nulled for sure.
+			// room for null byte, but there is room for it in the buffer. So in
+			// the code below, we use <= instead of < so that that last byte gets
+			// nulled for sure.
 
 			while (cnt <= ndigits_reserved)
 			{
@@ -842,7 +843,7 @@ namespace bryx
 	{
 		error_code = result_;
 		serr << msg_ << std::endl;
-		if (posn_ != 0) serr << "at posn: " << posn_ << std::endl;
+		if (posn_ != 0) serr << "near posn: " << posn_ << std::endl;
 	}
 
 }; // end of namespace

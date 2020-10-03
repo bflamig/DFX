@@ -297,6 +297,27 @@ void testh()
 	//testengr("123456789k");
 }
 
+void testbiggie()
+{
+	std::string test = "1234.567e34";
+
+	auto tp = Lexi::ParseBryxNumber(test);
+
+	auto np = std::dynamic_pointer_cast<NumberToken>(tp);
+
+	if (np)
+	{
+		std::cout << np->engr_num << std::endl;
+	}
+	else
+	{
+		auto ep = std::dynamic_pointer_cast<SimpleToken>(tp);
+		auto& err_pkg = ep->result_pkg;
+		std::cout << "Failed to parse: (" << test << ") -- " << err_pkg.msg;
+		std::cout << " near pos(" << err_pkg.extent.ecol << ")" << std::endl;
+	}
+}
+
 
 void testdb()
 {
@@ -306,65 +327,52 @@ void testdb()
 
 	std::string test = "-30dB";
 
-	auto tkn_ptr = Lexi::ParseBryxNumber(test);
+	auto tp = Lexi::ParseBryxNumber(test);
 
-	auto number_tkn_ptr = std::dynamic_pointer_cast<NumberToken>(tkn_ptr);
+	auto np = std::dynamic_pointer_cast<NumberToken>(tp);
 
-	if (number_tkn_ptr)
+	if (np)
 	{
-		std::cout << number_tkn_ptr->engr_num << std::endl;
+		std::cout << np->engr_num << std::endl;
 	}
 	else
 	{
-		auto err_tkn_ptr = std::dynamic_pointer_cast<SimpleToken>(tkn_ptr);
-		auto& err_pkg = err_tkn_ptr->result_pkg;
+		auto ep = std::dynamic_pointer_cast<SimpleToken>(tp);
+		auto& err_pkg = ep->result_pkg;
 		std::cout << "Failed to parse: (" << test << ") -- " << err_pkg.msg;
-		std::cout << " at pos(" << err_pkg.extent.ecol << ")" << std::endl;
+		std::cout << " near pos(" << err_pkg.extent.ecol << ")" << std::endl;
 	}
 }
 
 void testpfx()
 {
-	std::string test = "4.5%pF";
-	auto tkn_ptr = Lexi::ParseBryxNumber(test);
+	std::string test = "4.5%}pF";
+	auto tp = Lexi::ParseBryxNumber(test);
 
-	auto number_tkn_ptr = std::dynamic_pointer_cast<NumberToken>(tkn_ptr);
+	auto np = std::dynamic_pointer_cast<NumberToken>(tp);
 
-	if (number_tkn_ptr)
+	if (np)
 	{
-		std::cout << number_tkn_ptr->engr_num << std::endl;
+		std::cout << np->engr_num << std::endl;
 	}
 	else
 	{
-		auto err_tkn_ptr = std::dynamic_pointer_cast<SimpleToken>(tkn_ptr);
-		auto& err_pkg = err_tkn_ptr->result_pkg;
+		auto ep = std::dynamic_pointer_cast<SimpleToken>(tp);
+		auto& err_pkg = ep->result_pkg;
 		std::cout << "Failed to parse: (" << test << ") -- " << err_pkg.msg;
-		std::cout << " at pos(" << err_pkg.extent.ecol << ")" << std::endl;
+		std::cout << " near pos(" << err_pkg.extent.ecol << ")" << std::endl;
 	}
 }
 
 int main()
 {
-#if 0
-	std::string_view sv = "abcde";
-
-	auto s = sv.begin();
-	auto e = sv.end();
-	auto p = s;
-
-	for (int i = 0; i < 10; i++)
-	{
-		++p;
-	}
-#endif
-
-
 	//test_positive();
 	//test_negative();
 	//testd();
 	//testf();
 	//testg();
 
+	testbiggie();
 	testdb();
 	testpfx();
 	testh();

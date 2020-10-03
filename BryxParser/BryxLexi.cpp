@@ -12,7 +12,7 @@
  *
  * This exchange format has a one to one mapping to the widely used Json syntax,
  * simplified to be easier to read and write. It is easy to translate DFX files
- * into Json files that can be processed by any software supporting Json syntax.
+ * into Json files that can be parsed by any software supporting Json syntax.
  *
  ******************************************************************************
  *
@@ -1696,7 +1696,7 @@ namespace bryx
 			// considered a mistake.
 			result = LexiResult::UnexpectedChar;
 			TokenExtent extent(0, 0, std::distance(s, p));
-			result_token = MakeErrorToken(result, "CollectBryxNumber(): unexpected characters near the end", extent);
+			result_token = MakeErrorToken(result, "CollectBryxNumber(): unexpected characters", extent);
 		}
 		else
 		{
