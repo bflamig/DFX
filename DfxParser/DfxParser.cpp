@@ -731,15 +731,14 @@ namespace bryx
 
 					if (svp->is_string())
 					{
-						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
+						auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
 						// @@ warning: if there was an error, the errcnt was not incremented.
 						// but no biggie, the extra error msg below will at least inc the counter.
 
-						if (t)
+						if (std::dynamic_pointer_cast<NumberToken>(t))
 						{
 							if (VerifyWaveMagnitude(new_zzz, t))
 							{
-								// @@ TODO:
 								// Okay, the quoted string is actually a number.
 								// We really want to do some surgery to the parse
 								// tree and represent this value as a number. 
@@ -751,6 +750,9 @@ namespace bryx
 						}
 						else
 						{
+							// @@ TODO: t contains an error token that we can use here for some purpose
+							//auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+							//auto& err_pkg = err_t->result_pkg;
 							LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
 						}
 					}
@@ -817,15 +819,14 @@ namespace bryx
 
 					if (svp->is_string()) 
 					{
-						auto t = Lexi::CollectQuotedNumber(*slog, svp->tkn->to_string());
+						auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
 						// @@ warning: if there was an error, the errcnt was not incremented.
 						// but no biggie, the extra error msg below will at least inc the counter.
 
-						if (t)
+						if (std::dynamic_pointer_cast<NumberToken>(t))
 						{
 							if (VerifyWaveMagnitude(new_zzz, t))
 							{
-								// @@ TODO:
 								// Okay, the quoted string is actually a number.
 								// We really want to do some surgery to the parse
 								// tree and represent this value as a number. 
@@ -837,6 +838,9 @@ namespace bryx
 						}
 						else
 						{
+							// @@ TODO: t contains an error token that we can use here for some purpose
+							//auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+							//auto& err_pkg = err_t->result_pkg;
 							LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
 						}
 					}
@@ -897,46 +901,6 @@ namespace bryx
 				{
 					LogError(zzz, DfxVerifyResult::ValueNotLegal);
 				}
-#if 0
-
-				// examine number in light of units given
-
-				if (engr_num.units == UnitEnum::SimpleRatio)
-				{
-					// Raw ratios must not be negative, and must be <= 1.0
-
-					if (num < 0.0 || num > 1.0)
-					{
-						LogError(zzz, DfxVerifyResult::ValueNotLegal);
-					}
-				}
-				else if (engr_num.units == UnitEnum::Percent)
-				{
-					// percentage must not be negative, and must be <= 100
-
-					if (num < 0.0 || num > 100.0)
-					{
-						LogError(zzz, DfxVerifyResult::ValueNotLegal);
-					}
-				}
-				else if (engr_num.units == UnitEnum::DB)
-				{
-					// In decibels. So number *must* *be* negative, or 0.
-
-					if (num < 0)
-					{
-						// okay
-					}
-					else if (num == 0.0)
-					{
-						// okay
-					}
-					else
-					{
-						LogError(zzz, DfxVerifyResult::ValueNotLegal);
-					}
-				}
-#endif
 			}
 			else if (engr_num.units == UnitEnum::None)
 			{

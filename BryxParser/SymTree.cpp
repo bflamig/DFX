@@ -172,6 +172,16 @@ namespace bryx
 				// rest of the characters in the string
 
 				tp = elem.child.get();
+
+				if (!tp)
+				{
+					// Well, according to the tree, there are no more characters
+					// in the stored key, yet clearly we have more characters
+					// in our candidate key, so this means there is no match.
+					// We've only got a partial match, which is an error for now.
+					id = -1; 
+					break;
+				}
 			}
 		}
 

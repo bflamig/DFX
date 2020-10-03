@@ -514,6 +514,9 @@ namespace bryx
 
 		void LogError(LexiResult result_, std::string msg_, const TokenExtent &eztent_);
 
+		// A static function for those cases where we need to be independent from a lexi object
+		static std::shared_ptr<SimpleToken> MakeErrorToken(LexiResult result_, std::string msg_, const TokenExtent& extent_);
+
 		inline void ClearTempBuff()
 		{
 			std::ostringstream().swap(temp_buf); // swap with a default constructed stringstream
@@ -569,7 +572,7 @@ namespace bryx
 
 	public:
 
-		static std::shared_ptr<NumberToken> CollectQuotedNumber(std::ostream &serr, std::string_view text);
+		static std::shared_ptr<TokenBase> ParseBryxNumber(std::string_view text);
 
 	};
 

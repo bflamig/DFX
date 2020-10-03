@@ -306,25 +306,41 @@ void testdb()
 
 	std::string test = "-30dB";
 
-	//LexiNumberTraits traits;
+	auto tkn_ptr = Lexi::ParseBryxNumber(test);
 
-	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
-	if (tkn_ptr)
+	auto number_tkn_ptr = std::dynamic_pointer_cast<NumberToken>(tkn_ptr);
+
+	if (number_tkn_ptr)
 	{
-		std::cout << tkn_ptr->engr_num << std::endl;
+		std::cout << number_tkn_ptr->engr_num << std::endl;
 	}
-	else std::cout << "Failed to parse: " << test << std::endl;
+	else
+	{
+		auto err_tkn_ptr = std::dynamic_pointer_cast<SimpleToken>(tkn_ptr);
+		auto& err_pkg = err_tkn_ptr->result_pkg;
+		std::cout << "Failed to parse: (" << test << ") -- " << err_pkg.msg;
+		std::cout << " at pos(" << err_pkg.extent.ecol << ")" << std::endl;
+	}
 }
 
 void testpfx()
 {
-	std::string test = "4.5pF";
-	auto tkn_ptr = Lexi::CollectQuotedNumber(std::cout, test);
-	if (tkn_ptr)
+	std::string test = "4.5%pF";
+	auto tkn_ptr = Lexi::ParseBryxNumber(test);
+
+	auto number_tkn_ptr = std::dynamic_pointer_cast<NumberToken>(tkn_ptr);
+
+	if (number_tkn_ptr)
 	{
-		std::cout << tkn_ptr->engr_num << std::endl;
+		std::cout << number_tkn_ptr->engr_num << std::endl;
 	}
-	else std::cout << "Failed to parse: " << test << std::endl;
+	else
+	{
+		auto err_tkn_ptr = std::dynamic_pointer_cast<SimpleToken>(tkn_ptr);
+		auto& err_pkg = err_tkn_ptr->result_pkg;
+		std::cout << "Failed to parse: (" << test << ") -- " << err_pkg.msg;
+		std::cout << " at pos(" << err_pkg.extent.ecol << ")" << std::endl;
+	}
 }
 
 int main()

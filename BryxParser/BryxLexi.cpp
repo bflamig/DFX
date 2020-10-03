@@ -356,7 +356,7 @@ namespace bryx
 
 
 	NumberToken::NumberToken(const NumberToken& other)
-		: TokenBase(other) // (other.type, other.text, other.extent)
+	: TokenBase(other) // (other.type, other.text, other.extent)
 	{
 		// Copy constructor
 		number_traits = other.number_traits;
@@ -364,7 +364,7 @@ namespace bryx
 	}
 
 	NumberToken::NumberToken(NumberToken&& other) noexcept
-		: TokenBase(other)
+	: TokenBase(other)
 		//: NumberToken(other.type, move(other.text), other.extent)
 		, text(move(other.text))
 	{
@@ -626,6 +626,26 @@ namespace bryx
 		AcceptToken(et, false); // false: don't absorb character to preserve stream position for debugging purposes
 	}
 
+	// A static function for those cases where we need to be independent from a lexi object
+
+	std::shared_ptr<SimpleToken> Lexi::MakeErrorToken(LexiResult result_, std::string msg_, const TokenExtent& extent_)
+	{
+		LexiResultPkg errpkg;
+		errpkg.ResetMsg();
+		errpkg.msg = msg_;
+		errpkg.code = result_;
+		errpkg.extent = extent_;
+
+		// @@ Experimental. @@ TODO: WHAT IS THIS? WHY?
+
+		TokenExtent extent(extent_);
+		extent.ecol = extent.scol + 1;
+
+		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
+		et->AddResult(errpkg);
+
+		return et;
+	}
 
 	int Lexi::GetFilteredChar()
 	{
@@ -1120,6 +1140,71 @@ namespace bryx
 		return result;
 	}
 
+#if 1
+
+	LexiResult Lexi::CollectNumber()
+	{
+		// I'm changing this routine in support of unit suffixes (possibly
+		// having metric prefixes.) To parse the latter, we really need a
+		// lookahead buffer. What better lookahead buffer than to simply 
+		// collect up all characters of the number until the first non
+		// number (or unit) character is reached. Then, we'll pass the 
+		// collected characters into a string-based parser function.
+
+		// For this to work, we have to ASSUME that if the first character
+		// we see passes the test as the start of a number, then the
+		// following characters *must* pass the number test, otherwise,
+		// our parsing fails for this token, period. Ie., there will be
+		// no backtracking outside the number parsing.
+
+		// FURTHER NOTE: We ASSUME THe number stays on one line. A pretty
+		// good assumption :)
+
+		LexiResult result{ LexiResult::NoError };
+		last_lexical_error.Clear();
+
+		auto start_extent = WhereAreWe();
+		auto extent = start_extent;
+
+		TokenExtent bad_extent(-1, -1);
+
+		int c = src.peek();
+
+		// NOTE: The following test has probably already been done, but
+		// in case this function is called in isolation:
+
+		if (IsDigit(c) || c == '-')
+		{
+			// The temp buff is where we collect up the non-whitespace
+			// characters of the possible token. How convenient for us.
+
+			ClearTempBuff();
+
+			while (c != EOF)
+			{
+				if (IsDigit(c) || IsAlpha(c) || c == '-' || c == '+' || c == '.' || c == '%')
+				{
+					AppendChar(c);
+					c = NextPeek();
+					extent.Bump();
+				}
+				else break;
+			}
+
+			// Return might be a number token or error token
+			auto tknptr = ParseBryxNumber(temp_buf.str());
+			AcceptToken(tknptr, false);
+		}
+		else
+		{
+			result = LexiResult::UnexpectedChar;
+			LogError(result, "Invalid start character for a number", start_extent);
+		}
+
+		return result;
+	}
+
+#else
 
 	LexiResult Lexi::CollectNumber()
 	{
@@ -1374,6 +1459,8 @@ namespace bryx
 		return result;
 	}
 
+#endif
+
 	// Support when using string views later on
 
 	inline int bump_char(std::string_view::const_iterator& pit, std::string_view::const_iterator& eit)
@@ -1405,31 +1492,32 @@ namespace bryx
 
 	// A static member function
 
-    std::shared_ptr<NumberToken> Lexi::CollectQuotedNumber(std::ostream& serr, std::string_view src)
+    std::shared_ptr<TokenBase> Lexi::ParseBryxNumber(std::string_view src)
 	{
 		// This is a static function.
-
 		// The gist of this copied and pasted from CollectNumber on 12/12/2019. @@ BE SURE TO MAKE THIS TRACK
 
 		// WARNING: The switch to using string_view means no more null termination. So beware!
 		// So we've moved on to iterators
 
-		auto sit = src.begin();
-		auto pit = sit;
-		auto eit = src.end();
+		auto s = src.begin();
+		auto p = s;
+		auto e = src.end();
 
 		static constexpr char EOS = 0;
 
 		LexiResult result{ LexiResult::NoError };
 
+		std::shared_ptr<TokenBase> result_token;
+
 		LexiNumberTraits number_traits;
-		number_traits.end_locn = std::distance(sit, eit); // for default, one past the last character
+		number_traits.end_locn = std::distance(s, e); // for default, one past the last character
 
 		bool have_at_least_one_digit = false;
 
 		number_traits.could_be_a_number = false;
 
-		int c = peek_char(pit, eit);
+		char c = peek_char(p, e);
 
 		// Bryx.org (haha) official grammar says:
 		//
@@ -1483,13 +1571,13 @@ namespace bryx
 
 		if (c == '-')
 		{
-			c = bump_char(pit, eit);
+			c = bump_char(p, e);
 		}
 
 		if (c == '0')
 		{
 			have_at_least_one_digit = true;
-			c = bump_char(pit, eit);
+			c = bump_char(p, e);
 		}
 
 		// Collect rest of integer portion
@@ -1503,7 +1591,7 @@ namespace bryx
 		{
 			while (isdigit(c))
 			{
-				c = bump_char(pit, eit);
+				c = bump_char(p, e);
 			}
 		}
 
@@ -1511,14 +1599,14 @@ namespace bryx
 
 		if (c == '.')
 		{
-			number_traits.decimal_point_locn = std::distance(sit, pit);
-			c = bump_char(pit, eit);
+			number_traits.decimal_point_locn = std::distance(s, p);
+			c = bump_char(p, e);
 
 			// Collect up digits
 
 			while (isdigit(c))
 			{
-				c = bump_char(pit, eit);
+				c = bump_char(p, e);
 			}
 		}
 
@@ -1526,14 +1614,14 @@ namespace bryx
 
 		if (c == 'e' || c == 'E')
 		{
-			number_traits.exponent_locn = std::distance(sit, pit);
-			c = bump_char(pit, eit);
+			number_traits.exponent_locn = std::distance(s, p);
+			c = bump_char(p, e);
 
 			// Collect possible sign, either plus or minus
 
 			if (c == '+' || c == '-')
 			{
-				c = bump_char(pit, eit);
+				c = bump_char(p, e);
 			}
 
 			// Now collect up digits of the exponent, no white space!
@@ -1542,29 +1630,39 @@ namespace bryx
 			{
 				// Ummm,
 				result = LexiResult::UnexpectedChar;
-				//LogError(result, "CollectNumber(): expecting first exponent digit of a number", extent);
+				TokenExtent extent(0, 0, std::distance(s, p));
+				result_token = MakeErrorToken(result, "CollectBryxNumber(): expecting first exponent digit of a number", extent);
 			}
 			else
 			{
 				while (isdigit(c))
 				{
-					c = bump_char(pit, eit);
+					c = bump_char(p, e);
 				}
 			}
 		}
+
+		// Metric prefixes and/or units are up next.
+		// Right now, we have a restricted amount of parsing here.
+		// Only single character metrix prefixes for example.
+		// Because of this, we can't support meter untis yet, 
+		// because m (milli) metric prefix has the same starting
+		// character as meter. So down the road we need a more 
+		// sophisticated back-tracking parser.
 
 		// Okay, check for any metric prefix. Right now, only 
 		// single letter monikers are allowed.
 		// NOTE: It just so happens that all units we have do *not*
 		// start with any of the characters designated for metric
 		// prefixes. We're relying on that, here, actually.
+		// @@ Except as noted above, "meter" is a problem.
 
 		auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
 
 		if (idx != -1)
 		{
-			number_traits.metric_pfx_locn = std::distance(sit, pit);
-			c = bump_char(pit, eit);
+			number_traits.metric_pfx_locn = std::distance(s, p);
+			c = bump_char(p, e);
 		}
 
 		// Okay, we might have units. Note that all units are alpha only,
@@ -1573,18 +1671,18 @@ namespace bryx
 
 		if (c == '%')
 		{
-			number_traits.units_locn = std::distance(sit, pit);
-			c = bump_char(pit, eit);
+			number_traits.units_locn = std::distance(s, p);
+			c = bump_char(p, e);
 		}
 		else if (isalpha(c))
 		{
 			// On to all other units. We collect up all alpha characters.
 
-			number_traits.units_locn = std::distance(sit, pit);
+			number_traits.units_locn = std::distance(s, p);
 
 			while (isalpha(c))
 			{
-				c = bump_char(pit, eit);
+				c = bump_char(p, e);
 			}
 		}
 		else
@@ -1592,41 +1690,55 @@ namespace bryx
 			// @@ TODO: ERROR? Unless space?
 		}
 
-		// Alrighty then, we've got ourselves a number, supposedly
-
-		if (have_at_least_one_digit)
+		if (p != e)
 		{
-			number_traits.could_be_a_number = true;
-
-			number_traits.end_locn = std::distance(sit, pit);
-
-			TokenExtent extent(0, 0, number_traits.end_locn);
-
-			auto t = std::make_shared<NumberToken>(TokenEnum::Number, src.data(), extent);
-			t->number_traits = number_traits;
-			std::stringstream serr;
-			t->ProcessNum(serr);
-			auto str = serr.str();
-			if (str.empty())
-			{
-				return t;  // Got's us a real live token
-			}
-			else
-			{
-				result = LexiResult::Unspecified;
-			}
+			// We have left over garbage characters. This is now
+			// considered a mistake.
+			result = LexiResult::UnexpectedChar;
+			TokenExtent extent(0, 0, std::distance(s, p));
+			result_token = MakeErrorToken(result, "CollectBryxNumber(): unexpected characters near the end", extent);
 		}
 		else
 		{
-			result = LexiResult::UnexpectedEOF; // @@ TODO put in a better code
+
+			// Alrighty then, we've got ourselves a number, supposedly
+
+			if (have_at_least_one_digit)
+			{
+				number_traits.could_be_a_number = true;
+
+				number_traits.end_locn = std::distance(s, p);
+
+				TokenExtent extent(0, 0, number_traits.end_locn);
+
+				auto t = std::make_shared<NumberToken>(TokenEnum::Number, src.data(), extent);
+
+				t->number_traits = number_traits;
+				std::stringstream serr;
+
+				t->ProcessNum(serr);
+
+				auto str = serr.str();
+
+				if (str.empty())
+				{
+					return t;  // Got's us a real live token!
+				}
+				else
+				{
+					result = LexiResult::Unspecified;
+					TokenExtent extent(0, 0, std::distance(s, p));
+					result_token = MakeErrorToken(result, "CollectBryxNumber(): processing number and/or units", extent);
+				}
+			}
+			else
+			{
+				result = LexiResult::UnexpectedChar; // @@ TODO put in a better code
+				TokenExtent extent(0, 0, std::distance(s, p));
+				result_token = MakeErrorToken(result, "CollectBryxNumber(): don't have at least one digit", extent);
+			}
 		}
 
-		if (result != LexiResult::NoError)
-		{
-			serr << to_string(result) << " --> " << "parsing quoted number" << '\n';
-
-		}
-
-		return nullptr;
+		return result_token;
 	}
 }

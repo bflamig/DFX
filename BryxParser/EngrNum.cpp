@@ -79,10 +79,10 @@ namespace bryx
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////
 
-	EngrNum::EngrNum(int MEXP_MULT_)
+	EngrNum::EngrNum()
 	: sign(1)
 	, engr_exp(0)
-	, MEXP_MULT(MEXP_MULT_)
+	, MEXP_MULT(3)
 	, tens_exp(0)
 	, error_code(EngrNumResult::NoError)
 	, value_flag(EngrNumFlags::Ordinary)
@@ -212,6 +212,12 @@ namespace bryx
 			LogError(serr, EngrNumResult::ErrorBuildingMantissa, "in set_num()", 0);
 			value_flag = EngrNumFlags::NaN;
 		}
+	}
+
+	void EngrNum::set_num(std::ostream& serr, double d, UnitEnum units_)
+	{
+		units = units_;
+		set_num(serr, d);
 	}
 
 	void EngrNum::set_num(std::ostream& serr, const NumberToken& tkn)
@@ -744,6 +750,9 @@ namespace bryx
 				// Because the units location wasn't empty,
 				// we know we have some units, we just
 				// don't know anything about them.
+				// UPDATE: Or we could have garbage characters
+				// at the end of the string that maybe we should
+				// have errored on?
 				units = UnitEnum::Other;
 			}
 		}
@@ -809,15 +818,21 @@ namespace bryx
 	{
 		clear();
 
-		auto tkn_ptr = Lexi::CollectQuotedNumber(serr, src);
+		auto tkn_ptr = Lexi::ParseBryxNumber(src);
 
-		if (tkn_ptr)
+		auto number_tkn_ptr = std::dynamic_pointer_cast<NumberToken>(tkn_ptr);
+
+		if (number_tkn_ptr)
 		{
-			*this = tkn_ptr->engr_num;
+			*this = number_tkn_ptr->engr_num;
 		}
 		else
 		{
-			LogError(serr, EngrNumResult::LexicalError, "parse(): lexical error parsing supposed number.", 0); 
+			auto err_tkn_ptr = std::dynamic_pointer_cast<SimpleToken>(tkn_ptr);
+			auto& errpkg = err_tkn_ptr->result_pkg;
+			// errpkg.code @@ TODO: Where to store this?
+
+			LogError(serr, EngrNumResult::LexicalError, errpkg.msg, errpkg.extent.scol); 
 			value_flag = EngrNumFlags::NaN;
 		}
 	}

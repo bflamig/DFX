@@ -117,7 +117,6 @@ std::vector<TestDataType> test_data
 	{16, R"("dfx" = { mydrumKit = { path = "", stuff = {} }})"},
 	{17, R"("dfx" = { mydrumKit = { path = "fred/abc", stuff = {} }})"},
 	{18, R"("dfx" = { mydrumKit = { path = fred/abc, stuff = {} }})"}
-
 };
 
 void LexiTest(SyntaxModeEnum syntax_mode = SyntaxModeEnum::AutoDetect)
@@ -157,5 +156,10 @@ int main()
 
 	//ParserTest(12, dfx_mode, SyntaxModeEnum::Bryx);
 
-}
+	std::cout << "additional test:" << std::endl;
+	//auto fred = R"("dfx" : { "mydrumKit" : { "gain" : "-40dB", stuff : 42 }})";
+	auto fred = R"("dfx" : { "mydrumKit" : { "gain" : "-40dB"}})";
 
+	lexi_test(fred);
+	parser_test(fred, false);
+}

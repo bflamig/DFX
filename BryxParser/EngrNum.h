@@ -102,7 +102,7 @@ namespace bryx
 
 	public:
 
-		explicit EngrNum(int MEXP_MULT_ = 3);
+		explicit EngrNum();
 		EngrNum(const EngrNum& s);
 		virtual ~EngrNum();
 
@@ -112,7 +112,15 @@ namespace bryx
 
 		void clear();
 
+		void SetMexpMult(int MEXP_MULT_)
+		{
+			// Multiplier for engr_exp. Either 3 (thousands, normal),
+			// or 6 (millions, for squared units). 
+			MEXP_MULT = MEXP_MULT_;
+		}
+
 		virtual void set_num(std::ostream& serr, double d);
+		virtual void set_num(std::ostream& serr, double d, UnitEnum units_);
 		virtual void set_num(std::ostream& serr, const NumberToken& tkn);
 		virtual void parse(std::ostream &serr, const std::string_view &src);
 		virtual void process_num_from_lexi(std::ostream& serr, std::string_view src, const LexiNumberTraits& number_traits);
