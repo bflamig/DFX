@@ -706,65 +706,18 @@ namespace bryx
 		if (vp)
 		{
 			// We found the property. Is it the right type?
-			// Is it a number?
+			// Is it a number? With the right range?
 
-			auto svp = ToSimpleValue(vp);
+			auto num_tkn_ptr = ProcessAsNumber(new_zzz, vp);
 
-			if (svp)
+			if (num_tkn_ptr)
 			{
-				// Okay, it's a simple value. Is it a number?
-
-				if (svp->is_number())
-				{
-					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
-					// If it's in db, it must be negative.
-
-					VerifyWaveMagnitude(new_zzz, svp->tkn);
-				}
-				else
-				{
-					// @@ TODO: It might be a number in a quoted string. (This would happen
-					// in json syntax, for sure, but also allowed in bryx syntax).
-
-					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
-					// so we're probably okay here.
-
-					if (svp->is_string())
-					{
-						auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
-						// @@ warning: if there was an error, the errcnt was not incremented.
-						// but no biggie, the extra error msg below will at least inc the counter.
-
-						if (std::dynamic_pointer_cast<NumberToken>(t))
-						{
-							if (VerifyWaveMagnitude(new_zzz, t))
-							{
-								// Okay, the quoted string is actually a number.
-								// We really want to do some surgery to the parse
-								// tree and represent this value as a number. 
-								// Not sure how to pull that off.
-
-								svp->tkn = t; // @@ Maybe this is all I need!
-								svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
-							}
-						}
-						else
-						{
-							// t contains an error token with further info
-							auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
-							auto& err_pkg = err_t->result_pkg;
-							LogError(zzz, DfxVerifyResult::PeakMustBeNumber, err_pkg);
-						}
-					}
-					else
-					{
-						LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
-					}
-				}
+				// We've got a number. Is it in the right range?
+				VerifyWaveMagnitude(new_zzz, num_tkn_ptr);
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::PeakMustBeNumber);
+				LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
 			}
 		}
 		else
@@ -794,61 +747,14 @@ namespace bryx
 		if (vp)
 		{
 			// We found the property. Is it the right type?
-			// Is it a number?
+			// Is it a number? With the right range?
 
-			auto svp = ToSimpleValue(vp);
+			auto num_tkn_ptr = ProcessAsNumber(new_zzz, vp);
 
-			if (svp)
+			if (num_tkn_ptr)
 			{
-				// Okay, it's a simple value. Is it a number?
-
-				if (svp->is_number())
-				{
-					// Okay, it's a number. If it's a ratio or a simple floating point number, then it must be 0 < rat <= 1.0.
-					// If it's in db, it must be negative.
-
-					VerifyWaveMagnitude(new_zzz, svp->tkn);
-				}
-				else
-				{
-					// @@ TODO: It might be a number in a quoted string. (This would happen
-					// in json syntax, for sure, but also allowed in bryx syntax).
-
-					// allows unqouted string too. Is this a problem? Lexi would kick out things like -30 db. (spaces)
-					// so we're probably okay here.
-
-					if (svp->is_string()) 
-					{
-						auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
-						// @@ warning: if there was an error, the errcnt was not incremented.
-						// but no biggie, the extra error msg below will at least inc the counter.
-
-						if (std::dynamic_pointer_cast<NumberToken>(t))
-						{
-							if (VerifyWaveMagnitude(new_zzz, t))
-							{
-								// Okay, the quoted string is actually a number.
-								// We really want to do some surgery to the parse
-								// tree and represent this value as a number. 
-								// Not sure how to pull that off.
-
-								svp->tkn = t; // @@ Maybe this is all I need!
-								svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
-							}
-						}
-						else
-						{
-							// t contains an error token with further info
-							auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
-							auto& err_pkg = err_t->result_pkg;
-							LogError(zzz, DfxVerifyResult::RmsMustBeNumber, err_pkg);
-						}
-					}
-					else
-					{
-						LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
-					}
-				}
+				// We've got a number. Is it in the right range?
+				VerifyWaveMagnitude(new_zzz, num_tkn_ptr);
 			}
 			else
 			{
@@ -864,6 +770,70 @@ namespace bryx
 		}
 
 		return errcnt == save_errcnt;
+	}
+
+	token_ptr DfxParser::ProcessAsNumber(const std::string zzz, std::shared_ptr<Value> &vp)
+	{
+		auto svp = ToSimpleValue(vp);
+
+		if (svp)
+		{
+			if (svp->is_number())
+			{
+				// Okay, it's a number. Verify that it is of the right type, and has the right
+			}
+			else
+			{
+				// It might be a number in a quoted string. (This would happen in
+				// Json sytnax, for sure, but also allowed in bryx syntax.)
+
+				// NOTE: Allows unquoted number with units here too. Is this a problem?
+				// Lexi would kick out things like -30 db (with space in between) so 
+				// we're mostly okay here.
+
+				if (svp->is_string())
+				{
+					auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
+					// @@ warning: if there was an error, the errcnt was not incremented.
+					// but no biggie, the extra error msg below will at least inc the counter.
+
+					if (std::dynamic_pointer_cast<NumberToken>(t))
+					{
+						// Okay, the quoted string is actually a number.
+						// We really want to do some surgery to the parse
+						// tree and represent this value as a number. 
+						// Not sure how to pull that off.
+
+						svp->tkn = t; // @@ Maybe this is all I need!
+						svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
+					}
+					else
+					{
+						// t contains an error token with further info
+						auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+						auto& err_pkg = err_t->result_pkg;
+						LogError(zzz, DfxVerifyResult::RmsMustBeNumber, err_pkg);
+						return nullptr;
+					}
+				}
+				else
+				{
+					// @@ TODO Need to fix this. Need to return an error token (?)
+					//svp->tkn = err_t;
+					//svp->type = ValueEnum::
+					LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+					return nullptr;
+				}
+			}
+		}
+		else
+		{
+			LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+			return nullptr;
+		}
+
+		// Guess we have a token pointer that represents a number token
+		return svp->tkn; 
 	}
 
 	bool DfxParser::VerifyWaveMagnitude(const std::string zzz, const token_ptr& tkn)
@@ -922,9 +892,6 @@ namespace bryx
 
 		return save_errcnt == errcnt;
 	}
-
-	// //////////////////////////////////////////////////////////////////
-
 
 	/////////////////////////////////////////////////////////////////////
 

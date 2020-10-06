@@ -12,19 +12,19 @@ void test1()
 
 	auto tp = SymTree();
 
-	tp.addstring("abc", 42);
+	tp.addkey("abc", 42);
 	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp.addstring("abx", 17);
+	tp.addkey("abx", 17);
 	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp.addstring("abcd", 55);
+	tp.addkey("abcd", 55);
 	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 
-	tp.addstring("a", 99);
+	tp.addkey("a", 99);
 	tp.print(std::cout);
 	std::cout << std::endl << std::endl;
 

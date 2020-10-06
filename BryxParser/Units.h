@@ -94,7 +94,7 @@ namespace bryx
 
         void add_pfxname(std::string_view s, MetricPrefixEnum pfx)
         {
-            SymTree::addstring(s, static_cast<int>(pfx));
+            SymTree::addkey(s, static_cast<int>(pfx));
         }
 
         MetricPrefixEnum find_pfxname(std::string_view s) const;
@@ -198,7 +198,7 @@ namespace bryx
 
         void add_unitname(std::string_view s, UnitEnum unit)
         {
-            SymTree::addstring(s, static_cast<int>(unit));
+            SymTree::addkey(s, static_cast<int>(unit));
         }
 
         UnitEnum find_unitname(std::string_view s) const

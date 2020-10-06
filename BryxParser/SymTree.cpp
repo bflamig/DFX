@@ -111,7 +111,7 @@ namespace bryx
 			// Already there. Now, its id might be different from the
 			// stored id. In particular, the stored id might be -1,
 			// which means this element wasn't the "end" of a valid
-			// string, but merely a prefix. If id == -1, then it should
+			// key, but merely a prefix. If id == -1, then it should
 			// be the case that child is not a nullptr. @@ ASSERT THIS?
 
 			auto& elem = children.at(index);
@@ -134,15 +134,15 @@ namespace bryx
 		return index;
 	}
 
-	void SymTree::addstring(std::string_view s, int id)
+	void SymTree::addkey(std::string_view key, int id)
 	{
-		auto n = s.length();
+		auto n = key.length();
 
 		auto tp = this;
 
 		for (size_t i = 0; i < n; i++)
 		{
-			auto c = s[i];
+			auto c = key[i];
 
 			if (i < n - 1)
 			{
@@ -157,11 +157,12 @@ namespace bryx
 		}
 	}
 
-	int SymTree::search(std::string_view s) const
+	int SymTree::search(std::string_view candy_key) const
 	{
+		// candy_key means "candidate key" haha.
 		// Returns id if found, else -1
 
-		auto n = s.length();
+		auto n = candy_key.length();
 
 		auto tp = this;
 
@@ -169,7 +170,7 @@ namespace bryx
 
 		for (size_t i = 0; i < n; i++)
 		{
-			auto c = s[i];
+			auto c = candy_key[i];
 
 			int index = tp->find_index(c);
 
@@ -182,14 +183,14 @@ namespace bryx
 			else
 			{
 				// The character was found. Now, if it's the last character in
-				// our search string, then the corresponding element in the 
+				// our key, then the corresponding element in the 
 				// tree better have a non-negative id, which is our signal that
-				// we've reached a valid search end. Note that the element may
-				// also have a child, which means that we are at a valid search
-				// end which is also a prefix of another valid string.
+				// we've reached a valid end of a key. Note that the element may
+				// also have a child, which means that we are at a valid key
+				// end which is also a prefix of another valid key.
 				// If, however, the id *is* negative, it means we're not at a
-				// valid search end, so our search string is for sure just a
-				// prefix of another valid string.
+				// valid key end, so our key is for sure just a
+				// prefix of another valid key.
 				// The upshot is this: Test for a non-negative id. If we find
 				// one, our search is a success. Otherwise, not.
 				// 

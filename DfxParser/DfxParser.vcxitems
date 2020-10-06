@@ -15,8 +15,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)DfxParser.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DrumFont.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DrumKit.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)RobinMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VelocityLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)DfxParser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DrumFont.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DrumKit.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)RobinMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VelocityLayer.h" />
   </ItemGroup>
 </Project>

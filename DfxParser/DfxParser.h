@@ -161,10 +161,14 @@ namespace bryx
 			return p;
 		}
 
+#endif
+
 		const object_map_type* GetInstruments(const object_map_type* kit) const
 		{
 			return GetObjectProperty(kit, "instruments"); 
 		}
+
+#if 0
 
 		const object_map_type* GetInstrument(const object_map_type* instruments, std::string name) const
 		{
@@ -200,6 +204,7 @@ namespace bryx
 		bool VerifyPeak(const std::string zzz, const object_map_type* parent_map, bool peak_must_be_specified);
 		bool VerifyRMS(const std::string zzz, const object_map_type* parent_map, bool rms_must_be_specified);
 		bool VerifyWaveMagnitude(const std::string zzz, const token_ptr& tkn);
+		token_ptr ProcessAsNumber(const std::string zzz, std::shared_ptr<Value>& svp);
 
 	public:
 

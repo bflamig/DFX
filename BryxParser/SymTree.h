@@ -42,7 +42,7 @@
 // /////////////////////////////////////////////////////
 // Symbol tree support:
 // Supports mapping from a string key to an int.
-// This is for unique strings only. We have Low
+// This is for unique keys only. We have Low
 // overhead, multi-way trees. Probably faster than
 // the usual map algs for the purposes I need them,
 // (mapping unit names into unit codes.) In such a 
@@ -58,7 +58,7 @@ namespace bryx
 	struct SymElem
 	{
 		std::shared_ptr<SymTree> child;
-		int id; // It's important that an id = -1 means "not at the end of a valid search string"
+		int id; // It's important that an id == -1 means "not at the end of a valid key"
 		char c;
 
 		SymElem() : child(nullptr), id(-1), c(0) { }
@@ -92,11 +92,9 @@ namespace bryx
 
 	public:
 
-		void addstring(std::string_view s, int id);
+		void addkey(std::string_view s, int id);
 
 	public:
-
-
 
 		int search(std::string_view s) const;
 		virtual void print(std::ostream& sout, int indent = 0) const;
