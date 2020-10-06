@@ -41,7 +41,7 @@ namespace bryx
 
 		ResultPkg() : msg(), code(T::NoError), extent() { }
 
-		ResultPkg(std::string msg_, T code_, const Extent& extent_)
+		ResultPkg(std::string_view msg_, T code_, const Extent& extent_)
 		{
 			msg = msg_;
 			code = code_;
