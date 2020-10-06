@@ -196,7 +196,7 @@ namespace bryx
 
 	public:
 
-		void AddResult(const LexiResultPkg& rp);
+		void SetResult(const LexiResultPkg& rp);
 
 	public:
 

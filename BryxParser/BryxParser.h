@@ -207,7 +207,7 @@ namespace bryx
 	// NOTE: Even though unordered_map below is typed to store "strings" for values, what are really
 	// stored are const strings, or at least that's what you get back.
 
-	using object_map_type = std::unordered_map<std::string, std::shared_ptr<Value>>;
+	using object_map_type = std::map<std::string, std::shared_ptr<Value>>;
 
 	// WARNING! Have to make this struct or msvc compiler complains when using polymorphic make_unique() construction
 

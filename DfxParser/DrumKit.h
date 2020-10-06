@@ -1,11 +1,12 @@
 #pragma once
+#include <filesystem>
 #include "MultiLayeredDrum.h"
 
 class DrumKit {
 public:
-	std::string cumulativePath; // For ease of recursing down
-	std::string basePath;       // Usually the path of the sound font file
-	std::string kitPath;        // Relative to sound font location
+	std::filesystem::path cumulativePath; // For ease of recursing down
+	std::filesystem::path basePath;       // Usually the path of the sound font file
+	std::filesystem::path kitPath;        // Relative to sound font location
 	std::string name;
 
 	std::vector<MultiLayeredDrum> drums;
@@ -20,7 +21,7 @@ public:
 
 public:
 
-	void FinishUp(std::string& basePath_);
+	void FinishUp(std::filesystem::path& soundFontPath_);
 
 };
 

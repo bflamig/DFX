@@ -70,6 +70,7 @@ namespace bryx
 			case DfxVerifyResult::RmsMissing: s = "rms must be specified"; break;
 			case DfxVerifyResult::ValueHasWrongUnits: s = "value can only have ratio units"; break;
 			case DfxVerifyResult::ValueNotLegal: s = "value when converted to unitless number must be in range 0 < val <= 1.0"; break;
+			case DfxVerifyResult::VerifyFailed: s = "Verify failed"; break;
 			case DfxVerifyResult::UnspecifiedError: s = "Unspecified error"; break;
 			default: break;
 		}
@@ -91,6 +92,7 @@ namespace bryx
 		else
 		{
 			sound_font_path = fname;
+			sound_font_path = sound_font_path.generic_string();
 
 			auto fbuf = f.rdbuf();
 			SetStreamBuf(fbuf);
@@ -117,7 +119,7 @@ namespace bryx
 	{
 		errcnt = 0; // @@ TODO: Do this here, or in StartLog()? 
 
-		const auto kits_map_ptr = GetKits();
+		const auto kits_map_ptr = GetKitsMapPtr();
 
 		if (kits_map_ptr)
 		{
@@ -916,7 +918,6 @@ namespace bryx
 		++errcnt;
 		return err;
 	}
-
 
 	void DfxParser::EndLog()
 	{

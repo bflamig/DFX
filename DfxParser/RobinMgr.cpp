@@ -62,6 +62,15 @@ Robin& Robin::operator=(Robin&& other) noexcept
 	return *this;
 }
 
+void Robin::FinishUp(std::filesystem::path& cumulativePath_)
+{
+	fullPath = cumulativePath_;
+	fullPath /= fileName;
+	fullPath = fullPath.generic_string();
+}
+
+
+
 // ////////////////////////////////////////////////////
 
 
@@ -110,6 +119,16 @@ RobinMgr& RobinMgr::operator=(RobinMgr&& other) noexcept
 
 	return *this;
 }
+
+void RobinMgr::FinishUp(std::filesystem::path& cumulativePath_)
+{
+	for (auto& robin : robins)
+	{
+		robin.FinishUp(cumulativePath_);
+	}
+}
+
+
 
 
 #if 0

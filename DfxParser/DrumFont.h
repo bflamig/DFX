@@ -7,16 +7,16 @@ namespace bryx
 	class DrumFont : public DfxParser {
 	public:
 
-		DfxVerifyResult LoadFile(std::string fname)
-		{
-			auto rv = DfxParser::LoadFile(fname);
+		std::vector<std::shared_ptr<DrumKit>> drumKits;
 
-			if (rv == ParserResult::NoError)
-			{
+		DrumFont();
+		virtual ~DrumFont() { }
 
-			}
-			else return DfxVerifyResult::UnspecifiedError; // @@ TODO: Last error?
-		}
+	public:
+
+		DfxVerifyResult LoadFile(std::ostream& slog, std::string fname);
+		void DumpPaths(std::ostream& sout); // For testing purposes
+
 
 	public:
 
@@ -25,6 +25,8 @@ namespace bryx
 		// IMPORTANT: These ASSUME the parse tree has been verified! If
 		// you don't call verified or ignore verification errors, it's 
 		// likely exceptions will be thrown.
+
+		void BuildFont();
 
 		std::shared_ptr<DrumKit> BuildKit(const nv_type& kit);
 		void BuildInstruments(std::shared_ptr<DrumKit>& kit, const object_map_type* instrument_map_ptr);

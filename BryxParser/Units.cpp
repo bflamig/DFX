@@ -244,6 +244,7 @@ namespace bryx
         UnitCatEnum::Power,
         UnitCatEnum::Temperature, UnitCatEnum::Temperature, UnitCatEnum::Temperature,
         UnitCatEnum::Frequency, UnitCatEnum::Frequency,
+        UnitCatEnum::None,
         UnitCatEnum::None
     };
 

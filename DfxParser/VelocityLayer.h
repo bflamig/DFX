@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include "RobinMgr.h"
 
 struct VelocityRange
@@ -27,8 +28,8 @@ struct VelocityRange
 class VelocityLayer {
 public:
 
-	std::string cumulativePath;
-	std::string localPath;
+	std::filesystem::path cumulativePath;
+	std::filesystem::path localPath;
 
 	VelocityRange vrange;
 
@@ -41,6 +42,8 @@ public:
 	VelocityLayer(const VelocityLayer &other);
 	VelocityLayer(VelocityLayer&& other) noexcept;
 	virtual ~VelocityLayer() { }
+
+	void FinishUp(std::filesystem::path& cumulativePath_);
 
 };
 

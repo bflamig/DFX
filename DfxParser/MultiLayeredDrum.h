@@ -1,12 +1,13 @@
 #pragma once
 #include <memory>
+#include <filesystem>
 #include "VelocityLayer.h"
 
 class MultiLayeredDrum {
 public:
 
-	std::string cumulativePath;  // For ease of recursing down
-	std::string drumPath;        // Relative to kit location
+	std::filesystem::path cumulativePath;  // For ease of recursing down
+	std::filesystem::path drumPath;        // Relative to kit location
 	std::string name;
 
 	std::vector<std::shared_ptr<VelocityLayer>> velocityLayers;

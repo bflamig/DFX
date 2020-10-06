@@ -34,8 +34,8 @@
  *
 \******************************************************************************/
 
-
 #include <fstream>
+#include <filesystem>
 #include "BryxParser.h"
 
 namespace bryx
@@ -70,6 +70,7 @@ namespace bryx
 		RmsMissing, // We put this here in case we decide it's not optional
 		ValueHasWrongUnits,
 		ValueNotLegal,
+		VerifyFailed,
 		UnspecifiedError
 	};
 
@@ -87,7 +88,7 @@ namespace bryx
 	public:
 
 		std::ostream* slog;
-		std::string sound_font_path; // Filled in at load time.
+		std::filesystem::path sound_font_path; // Filled in at load time.
 
 		int errcnt; // Num errors during verify
 
@@ -115,7 +116,7 @@ namespace bryx
 
 	public:
 
-		const object_map_type* GetKits() const
+		const object_map_type* GetKitsMapPtr() const
 		{
 			return root_map;
 		}

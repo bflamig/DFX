@@ -2,9 +2,9 @@ dfx =
 {
 	mydrumkit =
 	{
-		path = "rogers",
-
 		stuff = [{}, {}],
+		
+		path = "Rogers",
 	
 		instruments = 
 		{

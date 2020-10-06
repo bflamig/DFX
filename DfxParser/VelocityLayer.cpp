@@ -37,6 +37,7 @@ VelocityLayer::VelocityLayer(std::string &localPath_, int vel_code_)
 : VelocityLayer{}
 {
 	localPath = localPath_;
+	localPath = localPath.generic_string();
 	vrange.velCode = vel_code_;
 	vrange.iMinVel = vel_code_;
 }
@@ -60,3 +61,13 @@ VelocityLayer::VelocityLayer(VelocityLayer&& other) noexcept
 	other.localPath.clear();
 	other.vrange.clear();
 }
+
+
+void VelocityLayer::FinishUp(std::filesystem::path& cumulativePath_)
+{
+	cumulativePath = cumulativePath_;
+	cumulativePath /= localPath;
+	cumulativePath = cumulativePath.generic_string();
+	robinMgr.FinishUp(cumulativePath);
+}
+

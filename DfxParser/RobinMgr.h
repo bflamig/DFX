@@ -1,11 +1,12 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <filesystem>
 
 class Robin {
 public:
-	std::string fullPath;
-	std::string fileName;
+	std::filesystem::path fullPath;
+	std::filesystem::path fileName;
 	double peak; // In db, as given in the drum font
 	double rms;  // In db, as given in the drum font
 	size_t offset; // in frames, as given in the drum font
@@ -16,6 +17,8 @@ public:
 
 	Robin& operator=(const Robin& other);
 	Robin& operator=(Robin&& other) noexcept;
+
+	void FinishUp(std::filesystem::path& cumulativePath_);
 };
 
 
@@ -35,6 +38,8 @@ public:
 
 	RobinMgr& operator=(const RobinMgr& other);
 	RobinMgr& operator=(RobinMgr&& other) noexcept;
+
+	void FinishUp(std::filesystem::path& cumulativePath_);
 
 	//void LoadWaves(std::string pathToWaves, bool is_directory, FileEncoding encoding);
 

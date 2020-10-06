@@ -2,6 +2,70 @@
 
 namespace bryx
 {
+
+	DrumFont::DrumFont()
+	: drumKits{}
+	{
+
+	}
+
+	DfxVerifyResult DrumFont::LoadFile(std::ostream& slog, std::string fname)
+	{
+		auto rv = DfxVerifyResult::NoError;
+
+		auto rvp = DfxParser::LoadFile(fname);
+
+		if (rvp == ParserResult::NoError)
+		{
+			StartLog(slog);
+			auto zebra = Verify();
+			if (!zebra)
+			{
+				rv = DfxVerifyResult::VerifyFailed;
+			}
+			else
+			{
+				BuildFont();
+			}
+			EndLog();
+		}
+		else rv = DfxVerifyResult::UnspecifiedError; // @@ TODO: Last error?
+
+		return rv;
+	}
+
+	void DrumFont::BuildFont()
+	{
+		using kits_map = bryx::object_map_type;
+
+		const kits_map* kits = GetKitsMapPtr();
+
+		for (auto nvkit : *kits)
+		{
+			auto kit_ptr = BuildKit(nvkit);
+			kit_ptr->FinishUp(sound_font_path);
+			drumKits.push_back(kit_ptr);
+			int i = 42;
+		}
+	}
+
+	void DrumFont::DumpPaths(std::ostream& sout)
+	{
+		for (auto kit : drumKits)
+		{
+			for (auto& drum : kit->drums)
+			{
+				for (auto& layer : drum.velocityLayers)
+				{
+					for (auto& robin : layer->robinMgr.robins)
+					{
+						sout << robin.fullPath << '\n';
+					}
+				}
+			}
+		}
+	}
+
 	std::shared_ptr<DrumKit> DrumFont::BuildKit(const nv_type& kit)
 	{
 		auto& kit_name = kit.first;

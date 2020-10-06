@@ -203,12 +203,12 @@ namespace bryx
 
 	const object_map_type* Parser::ToObjectMap(const std::shared_ptr<Value>& valPtr)
 	{
-		auto fred = std::dynamic_pointer_cast<Object>(valPtr);
+		auto objptr = std::dynamic_pointer_cast<Object>(valPtr);
 			
-		if (fred)
+		if (objptr)
 		{
-			auto& george = fred->dict;
-			return &george;
+			auto& obj_map_ptr = objptr->dict;
+			return &obj_map_ptr;
 		}
 		else return nullptr;
 	}

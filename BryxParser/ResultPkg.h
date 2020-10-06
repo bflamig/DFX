@@ -29,7 +29,7 @@ namespace bryx
 
 
 	// T must be an enumerated type with a NoError member
-	// Must have a companion to_string() function
+	// It must have a companion to_string() function
 
 	template<typename T>
 	class ResultPkg {

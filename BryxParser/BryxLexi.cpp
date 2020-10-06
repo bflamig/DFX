@@ -149,7 +149,7 @@ namespace bryx
 		return *this;
 	}
 
-	void TokenBase::AddResult(const LexiResultPkg& rp)
+	void TokenBase::SetResult(const LexiResultPkg& rp)
 	{
 		result_pkg = rp;
 	}
@@ -547,7 +547,7 @@ namespace bryx
 		extent.ecol = extent.scol + 1;
 
 		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
-		et->AddResult(last_lexical_error);
+		et->SetResult(last_lexical_error);
 
 		AcceptToken(et, false); // false: don't absorb character to preserve stream position for debugging purposes
 	}
@@ -568,7 +568,7 @@ namespace bryx
 		extent.ecol = extent.scol + 1;
 
 		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
-		et->AddResult(errpkg);
+		et->SetResult(errpkg);
 
 		return et;
 	}

@@ -35,17 +35,26 @@ DrumKit::~DrumKit()
 	std::cout << "DrumKit dtor called" << std::endl;
 }
 
-void DrumKit::FinishUp(std::string& basePath_)
+void DrumKit::FinishUp(std::filesystem::path& soundFontPath_)
 {
-	basePath = basePath_;
+	basePath = soundFontPath_;
+	basePath.remove_filename();
+
+	cumulativePath = basePath;
+	cumulativePath /= kitPath;
+	cumulativePath = cumulativePath.generic_string(); // Sigh! THey just had to do it wrong!
 
 	for (auto &d : drums)
 	{
+		d.cumulativePath = cumulativePath;
+		d.cumulativePath /= d.drumPath;
+		d.cumulativePath = d.cumulativePath.generic_string();
+
 		d.SortLayers();
 
 		for (auto layer : d.velocityLayers)
 		{
-
+			layer->FinishUp(d.cumulativePath);
 		}
 	}
 }
