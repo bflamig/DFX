@@ -25,6 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)BryxParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)EngrNum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MapTypeEnum.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ResultPkg.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SymTree.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Units.h" />
   </ItemGroup>

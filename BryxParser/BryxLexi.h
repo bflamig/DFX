@@ -50,6 +50,7 @@
 #include <sstream>
 #include <istream>
 #include <string>
+#include "ResultPkg.h"
 #include "EngrNum.h"
 
 namespace bryx
@@ -114,30 +115,8 @@ namespace bryx
 	{
 		return t == TokenEnum::Number;
 	}
-	// ////////////////////////////////////////////////////////////////////////////////
-
-	struct TokenExtent
-	{
-		int srow; // starting row of token
-		int erow; // ending row of token
-		int scol; // starting col of token
-		int ecol; // one past ending col of token
-
-		// In the below, we default to a one row extent, but a zero sized column extent
-
-		TokenExtent() : srow(1), erow(2), scol(1), ecol(1) { }
-		TokenExtent(int srow_, int scol_) : srow(srow_), erow(srow_+1), scol(scol_), ecol(scol_) { }
-		TokenExtent(int srow_, int scol_, int ecol_) : srow(srow_), erow(srow_ + 1), scol(scol_), ecol(ecol_) { }
-		TokenExtent(const TokenExtent& other) : srow(other.srow), erow(other.erow), scol(other.scol), ecol(other.ecol) { }
-		TokenExtent& operator=(const TokenExtent& other) { srow = other.srow; erow = other.erow, scol = other.scol; ecol = other.ecol; return *this; }
-		void Clear() { srow = 1; erow = 2, scol = 1; ecol = 1; }
-		void Bump(int n = 1) { ecol += n; }
-		void CopyStart(const TokenExtent & other) { srow = other.srow; erow = other.erow; }
-		void MakeSingleLineExtent(int posn) { srow = 1; erow = 1; scol = 1; ecol = posn + 1; }
-	};
 
 	// ////////////////////////////////////////////////////////////////////////////////
-
 
 	enum class LexiResult
 	{
@@ -154,6 +133,8 @@ namespace bryx
 	};
 
 	extern std::string to_string(LexiResult r);
+
+	using LexiResultPkg = ResultPkg<LexiResult>;
 
 	// //////////////////////////////////////////////////////////////////////////////////
 
@@ -190,39 +171,20 @@ namespace bryx
 
 	// //////////////////////////////////////////////////////////////////////////////////
 
-	class LexiResultPkg {
-	public:
-		std::string msg;
-		LexiResult code;
-		TokenExtent extent;
-	public:
-
-		LexiResultPkg();
-		LexiResultPkg(std::string msg_, LexiResult code_, const TokenExtent &extent_);
-		LexiResultPkg(const LexiResultPkg& other);
-		LexiResultPkg(LexiResultPkg&& other) noexcept;
-
-		LexiResultPkg& operator=(const LexiResultPkg& other);
-		LexiResultPkg& operator=(LexiResultPkg&& other) noexcept;
-
-		void Clear();
-		void ResetMsg();
-		void Print(std::ostream& sout) const;
-	};
 
 	// ////////////////////////////////////////////////////////////////////////////////
 
 	class TokenBase {
 	public:
 		TokenEnum type;
-		TokenExtent extent;
+		Extent extent;
 		LexiResultPkg result_pkg;        // Will get filled in for error tokens
 
-		static const TokenExtent def_extent;
+		static const Extent def_extent;
 
 	public:
 
-		TokenBase(TokenEnum type_, const TokenExtent& extent_);
+		TokenBase(TokenEnum type_, const Extent& extent_);
 		explicit TokenBase(TokenEnum type_);
 		TokenBase(const TokenBase& other);
 		TokenBase(TokenBase&& other) noexcept;
@@ -285,7 +247,7 @@ namespace bryx
 
 	public:
 
-		CharToken(TokenEnum type_, char text_, const TokenExtent& extent_);
+		CharToken(TokenEnum type_, char text_, const Extent& extent_);
 		CharToken(TokenEnum type_, char text_);
 		explicit CharToken(TokenEnum type_);
 		CharToken(const CharToken& other);
@@ -313,7 +275,7 @@ namespace bryx
 
 	public:
 
-		SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_);
+		SimpleToken(TokenEnum type_, std::string text_, const Extent &extent_);
 		SimpleToken(TokenEnum type_, std::string text_);
 		explicit SimpleToken(TokenEnum type_);
 		SimpleToken(const SimpleToken& other);
@@ -345,7 +307,7 @@ namespace bryx
 
 	public:
 
-		NumberToken(TokenEnum type_, std::string text_, const TokenExtent& extent_);
+		NumberToken(TokenEnum type_, std::string text_, const Extent& extent_);
 		NumberToken(TokenEnum type_, std::string text_);
 		explicit NumberToken(TokenEnum type_);
 		NumberToken(const NumberToken& other);
@@ -406,7 +368,7 @@ namespace bryx
 		token_ptr prev_token;
 		token_ptr curr_token;
 
-		TokenExtent lexi_posn;  // NOTE: We are just using scol and srow of this for positioning info
+		Extent lexi_posn;  // NOTE: We are just using scol and srow of this for positioning info
 
 		int token_cnt;
 
@@ -512,10 +474,10 @@ namespace bryx
 
 	protected:
 
-		void LogError(LexiResult result_, std::string msg_, const TokenExtent &eztent_);
+		void LogError(LexiResult result_, std::string msg_, const Extent &eztent_);
 
 		// A static function for those cases where we need to be independent from a lexi object
-		static std::shared_ptr<SimpleToken> MakeErrorToken(LexiResult result_, std::string msg_, const TokenExtent& extent_);
+		static std::shared_ptr<SimpleToken> MakeErrorToken(LexiResult result_, std::string msg_, const Extent& extent_);
 
 		inline void ClearTempBuff()
 		{
@@ -545,7 +507,7 @@ namespace bryx
 			return NextPeek();
 		}
 
-		TokenExtent WhereAreWe();
+		Extent WhereAreWe();
 
 		int SkipWhiteSpace();
 

@@ -89,7 +89,7 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////////
 	// TokenBase
 
-	TokenBase::TokenBase(TokenEnum type_, const TokenExtent& extent_)
+	TokenBase::TokenBase(TokenEnum type_, const Extent& extent_)
 	: type(type_), extent(extent_), result_pkg()
 	{
 	}
@@ -171,7 +171,7 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////////
 	// Char simple tokens
 
-	CharToken::CharToken(TokenEnum type_, char text_, const TokenExtent& extent_)
+	CharToken::CharToken(TokenEnum type_, char text_, const Extent& extent_)
 	: TokenBase(type_, extent_)
 	{
 		text[0] = text_;
@@ -245,7 +245,7 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////////
 	// Ordinary simple tokens
 
-	SimpleToken::SimpleToken(TokenEnum type_, std::string text_, const TokenExtent &extent_)
+	SimpleToken::SimpleToken(TokenEnum type_, std::string text_, const Extent &extent_)
 	: TokenBase(type_, extent_)
 	, text(text_)
 	{
@@ -336,7 +336,7 @@ namespace bryx
 	// /////////////////////////////////////////////////////////////////////////////
 	// Number tokens
 
-	NumberToken::NumberToken(TokenEnum type_, std::string text_, const TokenExtent& extent_)
+	NumberToken::NumberToken(TokenEnum type_, std::string text_, const Extent& extent_)
 	: TokenBase(type_, extent_)
 	, text(text_), number_traits()
 	{
@@ -440,80 +440,6 @@ namespace bryx
 
 	// /////////////////////////////////////////////////////////////////////////////
 
-	LexiResultPkg::LexiResultPkg()
-	: msg(), code(LexiResult::NoError), extent()
-	{
-	}
-
-	LexiResultPkg::LexiResultPkg(std::string msg_, LexiResult code_, const TokenExtent &extent_)
-	: LexiResultPkg()
-	{
-		msg = msg_;
-		code = code_;
-		extent = extent_;
-	}
-
-	LexiResultPkg::LexiResultPkg(const LexiResultPkg& other)
-	: LexiResultPkg(other.msg, other.code, other.extent)
-	{
-		// Copy constructor
-	}
-
-	LexiResultPkg::LexiResultPkg(LexiResultPkg&& other) noexcept
-	: LexiResultPkg(move(other.msg), other.code, other.extent)
-	{
-		// Move constructor
-		other.code = LexiResult::NoError;
-		other.extent.Clear();
-	}
-
-	LexiResultPkg& LexiResultPkg::operator=(const LexiResultPkg& other)
-	{
-		// Copy assignment
-
-		if (this != &other)
-		{
-			msg = other.msg;
-			code = other.code;
-			extent = other.extent;
-		}
-
-		return *this;
-	}
-
-	LexiResultPkg& LexiResultPkg::operator=(LexiResultPkg&& other) noexcept
-	{
-		// Move assignment
-
-		if (this != &other)
-		{
-			msg = move(other.msg);
-			code = other.code;
-			extent = other.extent;
-		}
-
-		return *this;
-	}
-
-
-	void LexiResultPkg::Clear()
-	{
-		code = LexiResult::NoError;
-		ResetMsg();
-	}
-
-	void LexiResultPkg::ResetMsg()
-	{
-		//std::ostringstream().swap(msg); // swap with a default constructed stringstream
-		msg.clear();
-	}
-
-	void LexiResultPkg::Print(std::ostream& sout) const
-	{
-		sout << to_string(code) << " --> " << msg << '\n';
-	}
-
-
 	std::string to_string(LexiResult r)
 	{
 		std::string s;
@@ -608,7 +534,7 @@ namespace bryx
 		return false;
 	}
 
-	void Lexi::LogError(LexiResult result_, std::string msg_, const TokenExtent &extent_)
+	void Lexi::LogError(LexiResult result_, std::string msg_, const Extent &extent_)
 	{
 		last_lexical_error.ResetMsg();
 		last_lexical_error.msg = msg_;
@@ -617,7 +543,7 @@ namespace bryx
 
 		// @@ Experimental. @@ TODO: WHAT IS THIS? WHY?
 
-		TokenExtent extent(extent_);
+		Extent extent(extent_);
 		extent.ecol = extent.scol + 1;
 
 		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
@@ -628,7 +554,7 @@ namespace bryx
 
 	// A static function for those cases where we need to be independent from a lexi object
 
-	std::shared_ptr<SimpleToken> Lexi::MakeErrorToken(LexiResult result_, std::string msg_, const TokenExtent& extent_)
+	std::shared_ptr<SimpleToken> Lexi::MakeErrorToken(LexiResult result_, std::string msg_, const Extent& extent_)
 	{
 		LexiResultPkg errpkg;
 		errpkg.ResetMsg();
@@ -638,7 +564,7 @@ namespace bryx
 
 		// @@ Experimental. @@ TODO: WHAT IS THIS? WHY?
 
-		TokenExtent extent(extent_);
+		Extent extent(extent_);
 		extent.ecol = extent.scol + 1;
 
 		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
@@ -664,7 +590,7 @@ namespace bryx
 		return c;
 	}
 
-	TokenExtent Lexi::WhereAreWe()
+	Extent Lexi::WhereAreWe()
 	{
 		// We convert to a zero-sized character extent
 		auto posn = lexi_posn;
@@ -867,7 +793,7 @@ namespace bryx
 
 		auto start_extent = WhereAreWe();
 
-		TokenExtent bad_extent(-1, -1);
+		Extent bad_extent(-1, -1);
 
 		char expected_char = 0;
 
@@ -956,7 +882,7 @@ namespace bryx
 
 		auto start_extent = WhereAreWe();
 
-		TokenExtent bad_extent(-1, -1);
+		Extent bad_extent(-1, -1);
 
 		auto extent = start_extent;
 
@@ -1068,7 +994,7 @@ namespace bryx
 
 		auto start_extent = WhereAreWe();
 
-		TokenExtent bad_extent(-1, -1);
+		Extent bad_extent(-1, -1);
 		char expected_char = 0;
 
 		auto extent = start_extent;
@@ -1140,8 +1066,6 @@ namespace bryx
 		return result;
 	}
 
-#if 1
-
 	LexiResult Lexi::CollectNumber()
 	{
 		// I'm changing this routine in support of unit suffixes (possibly
@@ -1166,7 +1090,7 @@ namespace bryx
 		auto start_extent = WhereAreWe();
 		auto extent = start_extent;
 
-		TokenExtent bad_extent(-1, -1);
+		Extent bad_extent(-1, -1);
 
 		int c = src.peek();
 
@@ -1203,263 +1127,6 @@ namespace bryx
 
 		return result;
 	}
-
-#else
-
-	LexiResult Lexi::CollectNumber()
-	{
-		LexiNumberTraits number_traits;
-
-		LexiResult result{ LexiResult::NoError };
-		last_lexical_error.Clear();
-
-		bool have_at_least_one_digit = false;
-
-		number_traits.could_be_a_number = false;
-
-		ClearTempBuff(); // Geeesh! Clear this thing!
-
-		// NOTE: In the below, we ASSUME we stay on one line
-
-		auto start_extent = WhereAreWe();
-
-		TokenExtent bad_extent(-1, -1);
-
-		char expected_char = 0;
-
-		auto extent = start_extent;
-
-		int c = src.peek();
-
-		// Bryx.org (haha) official grammar says:
-		//
-		// number
-		//    integer fraction exponent units
-		// integer
-		//    digit
-		//    onenine digits
-		//    '-' digit
-		//    '-' digits
-		//    '-' onenine digits
-		// fraction
-		//     ""
-		//     '.' digits
-		// exponent
-		//	   ""
-		//     'E' digits
-		//     'E' sign digits
-		//     'e' digits
-		//     'e' sign digits
-		// sign
-		//     '+'
-		//     '-'
-		// digit
-		//   '0'
-		//   onenine
-		// onenine
-		//   '1', '2', '3', '4', '5', '6', '7', '8', '9'
-		// units
-		//   ""
-		//   ratio_units
-		//   metric_pfx alphas
-		//   alphas
-		// ratio_units
-		//   "dB"
-		//   "X"
-		//   "%"
-		// metric_pfx
-		//   'f', 'p', 'n', 'u', 'm', '', 'k', 'M', 'G', 'T', 'P'
-
-		// So, we cannot start with a '+' sign, that's for sure, and no a decimal point.
-		// In fact, we must start with either a minus sign, or a number, and multi-digit
-		// numbers can't begin with 0. A leading zero can only be used for ... well, a
-		// single digit of 0.
-		// @@ BUG? 07/20/2020: But what about "0.1234". Isn't that legal json? It would be
-		// crazy if it were not. @@ TODO: Need to check that.
-		// UPDATE: multi digit numbers can start with 0. Don't know why I didn't think that.
-		// However, the grammar as given on card is ambiguous.
-		// https://github.com/nst/JSONTestSuite/tree/master/test_parsing
-
-
-		if (c == '-')
-		{
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-		}
-
-		if (c == '0')
-		{
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-			have_at_least_one_digit = true;
-		}
-
-		// Collect rest of integer portion
-
-		if (result == LexiResult::NoError)
-		{
-			while (c != EOF)
-			{
-				if (IsDigit(c))
-				{
-					AppendChar(c);
-					c = NextPeek();
-					extent.Bump();
-				}
-				else break;
-			}
-		}
-
-		// Collect possible fraction
-
-		if (c == '.')
-		{
-			//encountered_decimal_point = true;
-			number_traits.decimal_point_locn = extent.ecol - extent.scol;
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-
-			// Collect up digits
-
-			while (c != EOF)
-			{
-				if (IsDigit(c))
-				{
-					AppendChar(c);
-					c = NextPeek();
-					extent.Bump();
-				}
-				else break;
-			}
-		}
-
-		// Collect up possible signed exponent
-
-		if (IsExponentMarker(c))
-		{
-			//encountered_exponent = true;
-			number_traits.exponent_locn = extent.ecol - extent.scol;
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-
-			// Collect possible sign, either plus or minus
-
-			if (IsSign(c))
-			{
-				AppendChar(c);
-				c = NextPeek();
-				extent.Bump();
-			}
-
-			// Now collect up digits of the exponent, no white space!
-
-			if (!IsDigit(c))
-			{
-				// Ummm,
-				result = LexiResult::UnexpectedChar;
-				LogError(result, "CollectNumber(): expecting first exponent digit of a number", extent);
-			}
-			else
-			{
-				while (c != EOF)
-				{
-					if (IsDigit(c))
-					{
-						AppendChar(c);
-						c = NextPeek();
-						extent.Bump();
-					}
-					else break;
-				}
-			}
-		}
-
-		// Okay, check for any metric prefix. Right now, only 
-		// single letter monikers are allowed.
-		// NOTE: It just so happens that all units we have do *not*
-		// start with any of the characters designated for metric
-		// prefixes. We're relying on that, here, actually.
-
-		auto idx = mpfx_parse_tree.MetricPrefixIndex(c);
-
-		if (idx != -1)
-		{
-			number_traits.metric_pfx_locn = extent.ecol - extent.scol;
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-		}
-
-		// Okay, we might have units. Note that all units are alpha only,
-		// except for percentages, which can have the short hand of "%".
-		// So let's test for that first, and then test for all other units.
-
-		if (c == '%')
-		{
-			number_traits.units_locn = extent.ecol - extent.scol;
-			AppendChar(c);
-			c = NextPeek();
-			extent.Bump();
-		}
-		else if (isalpha(c))
-		{
-			// Collect up other kinds of units.
-
-			number_traits.units_locn = extent.ecol - extent.scol;
-
-			while (IsAlpha(c))
-			{
-				AppendChar(c);
-				c = NextPeek();
-				extent.Bump();
-			}
-		}
-		else
-		{
-			// @@ TODO: ERROR? Unless space?
-		}
-
-		// Alrighty then, we've got ourselves a number, supposedly
-
-		if (temp_buf.str().length() == 0)
-		{
-			// @@ UPDATE: I don't think we should ever get here (?)
-			// I think we are at EOF if nothing was put in (?)
-			// Lots of implicit assumptions that this was called because first
-			// character seen looked like a possible number.
-			result = LexiResult::UnexpectedEOF;
-			LogError(result, "CollectNumber(): expected a number", extent);
-		}
-		else
-		{
-			number_traits.could_be_a_number = true;
-			number_traits.end_locn = extent.ecol - extent.scol; // @@ BUG FIX 09/16/2020
-
-			auto t = std::make_shared<NumberToken>(TokenEnum::Number, temp_buf.str(), extent); // row, col, start_extent, end_extent);
-			t->number_traits = number_traits;
-
-			std::stringstream serr;
-			t->ProcessNum(serr);
-
-			auto str = serr.str();
-			if (str.empty())
-			{
-				AcceptToken(t, false);  // false: don't advance buffer. We already have.
-			}
-			else
-			{
-				LogError(LexiResult::Unspecified, str, extent);
-			}
-		}
-
-		return result;
-	}
-
-#endif
 
 	// Support when using string views later on
 
@@ -1630,7 +1297,7 @@ namespace bryx
 			{
 				// Ummm,
 				result = LexiResult::UnexpectedChar;
-				TokenExtent extent(0, 0, std::distance(s, p));
+				Extent extent(0, 0, std::distance(s, p));
 				result_token = MakeErrorToken(result, "CollectBryxNumber(): expecting first exponent digit of a number", extent);
 			}
 			else
@@ -1695,7 +1362,7 @@ namespace bryx
 			// We have left over garbage characters. This is now
 			// considered a mistake.
 			result = LexiResult::UnexpectedChar;
-			TokenExtent extent(0, 0, std::distance(s, p));
+			Extent extent(0, 0, std::distance(s, p));
 			result_token = MakeErrorToken(result, "CollectBryxNumber(): unexpected characters", extent);
 		}
 		else
@@ -1709,7 +1376,7 @@ namespace bryx
 
 				number_traits.end_locn = std::distance(s, p);
 
-				TokenExtent extent(0, 0, number_traits.end_locn);
+				Extent extent(0, 0, number_traits.end_locn);
 
 				auto t = std::make_shared<NumberToken>(TokenEnum::Number, src.data(), extent);
 
@@ -1727,14 +1394,14 @@ namespace bryx
 				else
 				{
 					result = LexiResult::Unspecified;
-					TokenExtent extent(0, 0, std::distance(s, p));
+					Extent extent(0, 0, std::distance(s, p));
 					result_token = MakeErrorToken(result, "CollectBryxNumber(): processing number and/or units", extent);
 				}
 			}
 			else
 			{
 				result = LexiResult::UnexpectedChar; // @@ TODO put in a better code
-				TokenExtent extent(0, 0, std::distance(s, p));
+				Extent extent(0, 0, std::distance(s, p));
 				result_token = MakeErrorToken(result, "CollectBryxNumber(): don't have at least one digit", extent);
 			}
 		}
