@@ -61,36 +61,6 @@ namespace bryx
 		return s;
 	}
 
-	ParserResultPkg::ParserResultPkg()
-	: msg(), code(ParserResult::NoError), token_id(0)
-	{
-	}
-
-	ParserResultPkg::ParserResultPkg(std::string msg_, ParserResult code_, int token_id_) 
-	: ParserResultPkg()
-	{
-		msg = msg_;
-		code = code_;
-		token_id_ = token_id_;
-	}
-
-	void ParserResultPkg::Clear()
-	{
-		code = ParserResult::NoError;
-		ResetMsg();
-	}
-
-	void ParserResultPkg::ResetMsg()
-	{
-		msg.clear();
-	}
-
-	void ParserResultPkg::Print(std::ostream& sout) const
-	{
-		sout << to_string(code) << ": " << msg << std::endl;
-		//sout << "at token: " << token_id << std::endl;
-	}
-
 	// ///////////////////////////////////////////////////
 
 	std::string to_string(ValueEnum v)
@@ -353,7 +323,7 @@ namespace bryx
 		last_parser_error.ResetMsg();
 		last_parser_error.msg = msg_;
 		last_parser_error.code = result_;
-		last_parser_error.token_id = token_id_;
+		last_parser_error.extent = token_id_;
 	}
 
 

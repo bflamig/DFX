@@ -19,7 +19,8 @@ namespace bryx
 		Extent(int srow_, int scol_) : srow(srow_), erow(srow_ + 1), scol(scol_), ecol(scol_) { }
 		Extent(int srow_, int scol_, int ecol_) : srow(srow_), erow(srow_ + 1), scol(scol_), ecol(ecol_) { }
 		Extent(const Extent& other) : srow(other.srow), erow(other.erow), scol(other.scol), ecol(other.ecol) { }
-		Extent& operator=(const Extent& other) { srow = other.srow; erow = other.erow, scol = other.scol; ecol = other.ecol; return *this; }
+		void operator=(const Extent& other) { srow = other.srow; erow = other.erow, scol = other.scol; ecol = other.ecol; }
+		void operator=(int x) { srow = 1; erow = 2; scol = x; ecol = x; }
 		void Clear() { srow = 1; erow = 2, scol = 1; ecol = 1; }
 		void Bump(int n = 1) { ecol += n; }
 		void CopyStart(const Extent& other) { srow = other.srow; erow = other.erow; }

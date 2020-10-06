@@ -75,25 +75,13 @@ namespace bryx
 
 	extern std::string to_string(DfxVerifyResult result);
 
-	class DfxVerifyResultPkg {
-	public:
-		std::string msg;
-		DfxVerifyResult code;
-	public:
-		DfxVerifyResultPkg();
-		DfxVerifyResultPkg(std::string msg_, DfxVerifyResult code_);
-	public:
-		void Clear();
-		void ResetMsg();
-		void Print(std::ostream& sout) const;
-	};
+	using DfxVerifyResultPkg = ResultPkg<DfxVerifyResult>;
 
 	// ////////////////////////////////////////////////////////////////////
 	// 
 	//
 	//
 	// ////////////////////////////////////////////////////////////////////
-
 
 	class DfxParser : public Parser {
 	public:

@@ -77,35 +77,6 @@ namespace bryx
 		return s;
 	}
 
-	DfxVerifyResultPkg::DfxVerifyResultPkg()
-	: msg()
-	, code(DfxVerifyResult::NoError)
-	{
-	}
-
-	DfxVerifyResultPkg::DfxVerifyResultPkg(std::string msg_, DfxVerifyResult code_)
-	: DfxVerifyResultPkg()
-	{
-		msg = msg_;
-		code = code_;
-	}
-
-	void DfxVerifyResultPkg::Clear()
-	{
-		code = DfxVerifyResult::NoError;
-		ResetMsg();
-	}
-
-	void DfxVerifyResultPkg::ResetMsg()
-	{
-		msg.clear();
-	}
-
-	void DfxVerifyResultPkg::Print(std::ostream& sout) const
-	{
-		sout << to_string(code) << ": " << msg << std::endl;
-	}
-
 	// ///////////////////////////////////////////////////////////////
 	ParserResult DfxParser::LoadFile(std::string fname)
 	{

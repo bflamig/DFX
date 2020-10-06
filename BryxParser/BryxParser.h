@@ -65,20 +65,7 @@ namespace bryx
 
 	extern std::string to_string(ParserResult result);
 
-
-	class ParserResultPkg {
-	public:
-		std::string msg;
-		ParserResult code;
-		int token_id;
-	public:
-		ParserResultPkg();
-		ParserResultPkg(std::string msg_, ParserResult code_, int token_id_);
-	public:
-		void Clear();
-		void ResetMsg();
-		void Print(std::ostream& sout) const;
-	};
+	using ParserResultPkg = ResultPkg<ParserResult>;
 
 	// ///////////////////////////////////////////////////////
 
