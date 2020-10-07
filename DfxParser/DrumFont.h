@@ -15,7 +15,7 @@ namespace bryx
 	public:
 
 		DfxVerifyResult LoadFile(std::ostream& slog, std::string fname);
-		void DumpPaths(std::ostream& sout); // For testing purposes
+		void DumpRobins(std::ostream& sout); // For testing purposes
 
 
 	public:

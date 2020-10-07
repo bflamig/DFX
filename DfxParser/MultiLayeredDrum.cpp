@@ -11,6 +11,27 @@ MultiLayeredDrum::MultiLayeredDrum(const std::string& name_, const std::string& 
 
 }
 
+MultiLayeredDrum::MultiLayeredDrum(const MultiLayeredDrum& other)
+: cumulativePath(other.cumulativePath)
+, drumPath(other.drumPath)
+, name(other.name)
+, velocityLayers(other.velocityLayers)
+, midiNote(other.midiNote)
+{
+	// Copy constructor
+}
+
+
+MultiLayeredDrum::MultiLayeredDrum(MultiLayeredDrum&& other) noexcept
+: cumulativePath(std::move(other.cumulativePath))
+, drumPath(std::move(other.drumPath))
+, name(std::move(other.name))
+, velocityLayers(std::move(other.velocityLayers))
+, midiNote(other.midiNote)
+{
+	// Move constructor
+}
+
 void MultiLayeredDrum::SortLayers()
 {
 	// First, take all the velocity codes (aka min velocity values) from
@@ -51,8 +72,6 @@ void MultiLayeredDrum::SortLayers()
 	}
 
 	// onward
-
-	// const auto n = velocityRanges.size();
 
 	for (size_t i = 0; i < nlayers - 1; i++)
 	{

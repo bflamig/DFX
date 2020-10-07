@@ -13,13 +13,11 @@ struct VelocityRange
 
 	// Scaled 0 - 1.0 versions of the above
 
-	//stk::StkFloat fMinVel;
-	//stk::StkFloat fMaxVel;
-
 	double fMinVel;
 	double fMaxVel;
 
-	// VelocityRange();
+	VelocityRange();
+	explicit VelocityRange(int velCode_);
 
 	void clear();
 };

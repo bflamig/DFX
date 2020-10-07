@@ -11,7 +11,7 @@ void test()
 	auto result = df->LoadFile(std::cout, filename);
 
 	std::cout << std::endl << "List of robin paths" << std::endl;
-	df->DumpPaths(std::cout);
+	df->DumpRobins(std::cout);
 }
 
 int main()

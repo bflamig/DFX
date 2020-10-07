@@ -49,7 +49,7 @@ namespace bryx
 		}
 	}
 
-	void DrumFont::DumpPaths(std::ostream& sout)
+	void DrumFont::DumpRobins(std::ostream& sout)
 	{
 		for (auto kit : drumKits)
 		{
@@ -59,6 +59,7 @@ namespace bryx
 				{
 					for (auto& robin : layer->robinMgr.robins)
 					{
+						sout << "[" << layer->vrange.iMinVel << " - " << layer->vrange.iMaxVel << "]  ";
 						sout << robin.fullPath << '\n';
 					}
 				}
@@ -133,7 +134,7 @@ namespace bryx
 			BuildVelocityLayer(drum.velocityLayers, vlayer_sh_ptr);
 		}
 
-		drums.push_back(drum);
+		drums.emplace_back(std::move(drum));
 	}
 
 
@@ -172,7 +173,7 @@ namespace bryx
 			BuildRobin(vlayer->robinMgr.robins, robin_nv_ptr);
 		}
 
-		vlayers.push_back(vlayer);
+		vlayers.emplace_back(std::move(vlayer));
 	}
 
 	void DrumFont::BuildRobin(std::vector<Robin>& robins, NameValue* robin_nv_ptr)

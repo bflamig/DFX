@@ -1,16 +1,19 @@
 #include "VelocityLayer.h"
 
-#if 0
 VelocityRange::VelocityRange()
-: velCode(0)
-, iMinVel(0)
-, iMaxVel(0)
-, fMinVel(0)
-, fMaxVel(0)
 {
-
+	clear();
 }
-#endif
+
+VelocityRange::VelocityRange(int velCode_)
+: VelocityRange()
+{
+	velCode = velCode_;
+	iMinVel = velCode;
+	iMaxVel = velCode;
+	fMinVel = velCode / 127.0;
+	fMaxVel = velCode / 127.0;
+}
 
 void VelocityRange::clear()
 {
@@ -43,22 +46,19 @@ VelocityLayer::VelocityLayer(std::string &localPath_, int vel_code_)
 }
 
 VelocityLayer::VelocityLayer(const VelocityLayer& other)
+: cumulativePath(other.cumulativePath)
+, localPath(other.localPath)
+, vrange(other.vrange)
+, robinMgr(other.robinMgr)
 {
-	cumulativePath = other.cumulativePath;
-	localPath = other.localPath;
-	vrange = other.vrange;
-	robinMgr = other.robinMgr;
 }
 
 VelocityLayer::VelocityLayer(VelocityLayer&& other) noexcept
+: cumulativePath(std::move(other.cumulativePath))
+, localPath(std::move(other.localPath))
+, vrange(other.vrange)
+, robinMgr(std::move(other.robinMgr))
 {
-	cumulativePath = other.cumulativePath;
-	localPath = other.localPath;
-	vrange = other.vrange;
-	robinMgr = std::move(other.robinMgr);
-
-	other.cumulativePath.clear();
-	other.localPath.clear();
 	other.vrange.clear();
 }
 
