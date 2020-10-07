@@ -472,12 +472,14 @@ namespace bryx
 
 		bool NeedsQuotes(const token_ptr& tkn) const;
 
-	protected:
-
-		void LogError(LexiResult result_, std::string msg_, const Extent &eztent_);
+	public:
 
 		// A static function for those cases where we need to be independent from a lexi object
 		static std::shared_ptr<SimpleToken> MakeErrorToken(LexiResult result_, std::string msg_, const Extent& extent_);
+
+	protected:
+
+		void LogError(LexiResult result_, std::string msg_, const Extent &eztent_);
 
 		inline void ClearTempBuff()
 		{
@@ -535,7 +537,6 @@ namespace bryx
 	public:
 
 		static std::shared_ptr<TokenBase> ParseBryxNumber(std::string_view text);
-
 	};
 
 }; // end of namespace

@@ -179,21 +179,21 @@ namespace bryx
 	public:
 
 		bool Verify();
-		bool VerifyKit(const std::string zzz, const nv_type& kit);
-		bool VerifyPath(const std::string zzz, const object_map_type* parent_map, bool path_must_be_specified = false);
-		bool VerifyInstruments(const std::string zzz, const object_map_type* instrument_map_ptr);
-		bool VerifyInstrument(const std::string zzz, const nv_type& drum_nv);
-		bool VerifyNote(const std::string zzz, const object_map_type* parent_map, bool note_must_be_specified);
-		bool VerifyVelocityLayers(const std::string zzz, const object_map_type* parent_map);
-		bool VerifyVelocityLayer(const std::string zzz, std::shared_ptr<Value>& vlayer_sh_ptr);
-		bool VerifyRobins(const std::string zzz, const object_map_type* parent_map_ptr);
-		bool VerifyRobin(const std::string zzz, std::shared_ptr<NameValue>& robin_nv_ptr);
-		bool VerifyFname(const std::string zzz, const object_map_type* parent_map, bool must_be_specified);
-		bool VerifyOffset(const std::string zzz, const object_map_type* parent_map, bool offset_must_be_specified);
-		bool VerifyPeak(const std::string zzz, const object_map_type* parent_map, bool peak_must_be_specified);
-		bool VerifyRMS(const std::string zzz, const object_map_type* parent_map, bool rms_must_be_specified);
-		bool VerifyWaveMagnitude(const std::string zzz, const token_ptr& tkn);
-		token_ptr ProcessAsNumber(const std::string zzz, std::shared_ptr<Value>& svp);
+		bool VerifyKit(const std::string ctx, const nv_type& kit);
+		bool VerifyPath(const std::string ctx, const object_map_type* parent_map, bool path_must_be_specified = false);
+		bool VerifyInstruments(const std::string ctx, const object_map_type* instrument_map_ptr);
+		bool VerifyInstrument(const std::string ctx, const nv_type& drum_nv);
+		bool VerifyNote(const std::string ctx, const object_map_type* parent_map, bool note_must_be_specified);
+		bool VerifyVelocityLayers(const std::string ctx, const object_map_type* parent_map);
+		bool VerifyVelocityLayer(const std::string ctx, std::shared_ptr<Value>& vlayer_sh_ptr);
+		bool VerifyRobins(const std::string ctx, const object_map_type* parent_map_ptr);
+		bool VerifyRobin(const std::string ctx, std::shared_ptr<NameValue>& robin_nv_ptr);
+		bool VerifyFname(const std::string ctx, const object_map_type* parent_map, bool must_be_specified);
+		bool VerifyOffset(const std::string ctx, const object_map_type* parent_map, bool offset_must_be_specified);
+		bool VerifyPeak(const std::string ctx, const object_map_type* parent_map, bool peak_must_be_specified);
+		bool VerifyRMS(const std::string ctx, const object_map_type* parent_map, bool rms_must_be_specified);
+		bool VerifyWaveMagnitude(const std::string ctx, const token_ptr& tkn);
+		token_ptr ProcessAsNumber(const std::string ctx, std::shared_ptr<Value>& svp);
 
 	public:
 

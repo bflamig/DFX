@@ -117,6 +117,29 @@ namespace bryx
 		//std::cout << "SimpleValue dtor called\n";
 	}
 
+	token_ptr SimpleValue::CompatibleWithNumber()
+	{
+		// See if this value is a number or could be one.
+		// Returns number token or an error token. The
+		// token returned could be the original one if
+		// already a number.
+
+		token_ptr t;
+
+		if (is_number())
+		{
+			t = tkn;
+		}
+		else if (is_string())
+		{
+			// Returns an error token if not a number
+			t = Lexi::ParseBryxNumber(tkn->to_string());
+		}
+		else t = Lexi::MakeErrorToken(LexiResult::Unspecified, "Not number like", 0);
+
+		return t;
+	}
+
 	// /////////////////////////////////////////////////////////////////////////
 
 

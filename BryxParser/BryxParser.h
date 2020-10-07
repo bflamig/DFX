@@ -176,6 +176,8 @@ namespace bryx
 		{
 			return tkn->IsNumberWithUnits();
 		}
+
+		token_ptr CompatibleWithNumber();
 	};
 
 	using nv_type = std::pair<const std::string, std::shared_ptr<Value>>;

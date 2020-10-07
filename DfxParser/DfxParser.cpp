@@ -147,7 +147,7 @@ namespace bryx
 		return errcnt == 0;
 	}
 
-	bool DfxParser::VerifyKit(const std::string zzz, const nv_type& kit)
+	bool DfxParser::VerifyKit(const std::string ctx, const nv_type& kit)
 	{
 		auto& kit_name = kit.first;
 		auto& kit_val = kit.second;
@@ -208,7 +208,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyPath(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyPath(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -216,7 +216,7 @@ namespace bryx
 		// If we find such a path property, we make sure the value of that 
 		// path is a valid path string.
 
-		auto new_zzz = zzz + '/' + "path";
+		auto new_ctx = ctx + '/' + "path";
 
 		auto vp = PropertyExists(parent_map, "path");
 
@@ -238,26 +238,26 @@ namespace bryx
 				}
 				else
 				{
-					LogError(new_zzz, DfxVerifyResult::MustBeString);
+					LogError(new_ctx, DfxVerifyResult::MustBeString);
 				}
 			}
 			else
 			{
-				LogError(new_zzz, DfxVerifyResult::MustBeString);
+				LogError(new_ctx, DfxVerifyResult::MustBeString);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(new_zzz, DfxVerifyResult::MustBeSpecified);
+				LogError(new_ctx, DfxVerifyResult::MustBeSpecified);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyInstruments(const std::string zzz, const object_map_type* instrument_map_ptr)
+	bool DfxParser::VerifyInstruments(const std::string ctx, const object_map_type* instrument_map_ptr)
 	{
 		int save_errcnt = errcnt;
 
@@ -267,18 +267,18 @@ namespace bryx
 
 		for (auto& drum_nv : *instrument_map_ptr)
 		{
-			VerifyInstrument(zzz, drum_nv);
+			VerifyInstrument(ctx, drum_nv);
 		}
 
 		return save_errcnt == errcnt;
 	}
 
-	bool DfxParser::VerifyInstrument(const std::string zzz, const nv_type& drum_nv)
+	bool DfxParser::VerifyInstrument(const std::string ctx, const nv_type& drum_nv)
 	{
 		auto& drum_name = drum_nv.first;
 		auto& drum_val = drum_nv.second;
 
-		auto new_zzz = zzz + '/' + drum_name;
+		auto new_ctx = ctx + '/' + drum_name;
 
 		int save_errcnt = errcnt;
 
@@ -297,26 +297,26 @@ namespace bryx
 			// It must have at least one velocity layer.
 
 			bool path_must_be_specified = false;
-			VerifyPath(new_zzz, drum_map_ptr, path_must_be_specified);
+			VerifyPath(new_ctx, drum_map_ptr, path_must_be_specified);
 
 			// Look for note
 
 			bool note_must_be_specified = true;
-			VerifyNote(new_zzz, drum_map_ptr, note_must_be_specified);
+			VerifyNote(new_ctx, drum_map_ptr, note_must_be_specified);
 
 			// Look for at least one velocity layer
 
-			VerifyVelocityLayers(new_zzz, drum_map_ptr);
+			VerifyVelocityLayers(new_ctx, drum_map_ptr);
 		}
 		else
 		{
-			LogError(new_zzz, DfxVerifyResult::DrumValMustBeList);
+			LogError(new_ctx, DfxVerifyResult::DrumValMustBeList);
 		}
 
 		return save_errcnt == errcnt;
 	}
 
-	bool DfxParser::VerifyNote(const std::string zzz, const object_map_type* parent_map, bool note_must_be_specified)
+	bool DfxParser::VerifyNote(const std::string ctx, const object_map_type* parent_map, bool note_must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -342,26 +342,26 @@ namespace bryx
 				}
 				else
 				{
-					LogError(zzz, DfxVerifyResult::NoteMustBeWholeNumber);
+					LogError(ctx, DfxVerifyResult::NoteMustBeWholeNumber);
 				}
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::NoteMustBeWholeNumber);
+				LogError(ctx, DfxVerifyResult::NoteMustBeWholeNumber);
 			}
 		}
 		else
 		{
 			if (note_must_be_specified)
 			{
-				LogError(zzz, DfxVerifyResult::NoteMissing);
+				LogError(ctx, DfxVerifyResult::NoteMissing);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyVelocityLayers(const std::string zzz, const object_map_type* parent_map)
+	bool DfxParser::VerifyVelocityLayers(const std::string ctx, const object_map_type* parent_map)
 	{
 		int save_errcnt = errcnt;
 
@@ -384,29 +384,29 @@ namespace bryx
 					// Walk through the array (vector)
 					for (auto vlayer_sh_ptr : *velocities_ptr)
 					{
-						VerifyVelocityLayer(zzz, vlayer_sh_ptr);
+						VerifyVelocityLayer(ctx, vlayer_sh_ptr);
 					}
 				}
 				else
 				{
-					LogError(zzz, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
+					LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
 				}
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
+				LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
 			}
 
 		}
 		else
 		{
-			LogError(zzz, DfxVerifyResult::VelocitiesMissing);
+			LogError(ctx, DfxVerifyResult::VelocitiesMissing);
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyVelocityLayer(const std::string zzz, std::shared_ptr<Value>& vlayer_sh_ptr)
+	bool DfxParser::VerifyVelocityLayer(const std::string ctx, std::shared_ptr<Value>& vlayer_sh_ptr)
 	{
 		int save_errcnt = errcnt;
 
@@ -430,7 +430,7 @@ namespace bryx
 				{
 					if (!Lexi::IsDigit(*p))
 					{
-						LogError(zzz, DfxVerifyResult::InvalidVelocityCode);
+						LogError(ctx, DfxVerifyResult::InvalidVelocityCode);
 						break;
 					}
 					++p;
@@ -438,7 +438,7 @@ namespace bryx
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::InvalidVelocityCode);
+				LogError(ctx, DfxVerifyResult::InvalidVelocityCode);
 			}
 
 			// Okay, regardless of whether we have a valid velocity code,
@@ -452,34 +452,34 @@ namespace bryx
 
 			if (vlayer_body_map_ptr)
 			{
-				auto new_zzz = zzz + '/' + vel_code_str;
+				auto new_ctx = ctx + '/' + vel_code_str;
 
 				// Might have an optional path
 
 				bool path_must_be_specified = false;
-				VerifyPath(new_zzz, vlayer_body_map_ptr, path_must_be_specified);
+				VerifyPath(new_ctx, vlayer_body_map_ptr, path_must_be_specified);
 
 				// MUST have a non-empty robins array
 
-				VerifyRobins(new_zzz, vlayer_body_map_ptr);
+				VerifyRobins(new_ctx, vlayer_body_map_ptr);
 			}
 			else
 			{
 				// We shouldn't get here, seein's how we already checked for
 				// name value earlier, so vlayer_body *will* be value
-				LogError(zzz, DfxVerifyResult::VelocityMustBeNameValue);
+				LogError(ctx, DfxVerifyResult::VelocityMustBeNameValue);
 			}
 		}
 		else
 		{
-			LogError(zzz, DfxVerifyResult::VelocityMustBeNameValue);
+			LogError(ctx, DfxVerifyResult::VelocityMustBeNameValue);
 		}
 
 		return errcnt == save_errcnt;
 	}
 
 
-	bool DfxParser::VerifyRobins(const std::string zzz, const object_map_type* parent_map_ptr)
+	bool DfxParser::VerifyRobins(const std::string ctx, const object_map_type* parent_map_ptr)
 	{
 		int save_errcnt = errcnt;
 
@@ -499,29 +499,29 @@ namespace bryx
 
 					if (robin_nv_ptr)
 					{
-						VerifyRobin(zzz, robin_nv_ptr);
+						VerifyRobin(ctx, robin_nv_ptr);
 					}
 					else
 					{
-						LogError(zzz, DfxVerifyResult::RobinMustBeNameValue);
+						LogError(ctx, DfxVerifyResult::RobinMustBeNameValue);
 					}
 				}
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::RobinsMustBeNonEmptyArray);
+				LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptyArray);
 			}
 		}
 		else
 		{
-			LogError(zzz, DfxVerifyResult::RobinsMustBeNonEmptyArray);
+			LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptyArray);
 		}
 
 		return errcnt == save_errcnt;
 
 	}
 
-	bool DfxParser::VerifyRobin(const std::string zzz, std::shared_ptr<NameValue> &robin_nv_ptr)
+	bool DfxParser::VerifyRobin(const std::string ctx, std::shared_ptr<NameValue> &robin_nv_ptr)
 	{
 		int save_errcnt = errcnt;
 
@@ -533,7 +533,7 @@ namespace bryx
 
 		// Then:
 
-		auto new_zzz = zzz + '/' + robin_name;
+		auto new_ctx = ctx + '/' + robin_name;
 
 		// The body of a robin must be a {}-list having the file name to
 		// the robin, plus three optional items: offset, peak, and rms.
@@ -545,7 +545,7 @@ namespace bryx
 		if (robin_body_map_ptr)
 		{
 			bool must_be_specified = true;
-			VerifyFname(zzz, robin_body_map_ptr, must_be_specified);
+			VerifyFname(ctx, robin_body_map_ptr, must_be_specified);
 
 			// The name of a robin should be a valid file name (no paths please)
 			//auto& fname = robin_nv_ptr->pair.first;
@@ -553,9 +553,9 @@ namespace bryx
 
 
 			must_be_specified = false;
-			VerifyOffset(new_zzz, robin_body_map_ptr, must_be_specified);
-			VerifyPeak(new_zzz, robin_body_map_ptr, must_be_specified);
-			VerifyRMS(new_zzz, robin_body_map_ptr, must_be_specified);
+			VerifyOffset(new_ctx, robin_body_map_ptr, must_be_specified);
+			VerifyPeak(new_ctx, robin_body_map_ptr, must_be_specified);
+			VerifyRMS(new_ctx, robin_body_map_ptr, must_be_specified);
 
 			auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
 			auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
@@ -564,13 +564,13 @@ namespace bryx
 		{
 			// Should never reach here, cause we alerady verified earlier
 			// it's a name value
-			LogError(zzz, DfxVerifyResult::RobinMustBeNameValue);
+			LogError(ctx, DfxVerifyResult::RobinMustBeNameValue);
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyFname(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyFname(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -578,7 +578,7 @@ namespace bryx
 		// If we find such a property, we make sure the value 
 		// is a valid fname.
 
-		auto new_zzz = zzz + '/' + "fname";
+		auto new_ctx = ctx + '/' + "fname";
 
 		auto vp = PropertyExists(parent_map, "fname");
 
@@ -600,26 +600,26 @@ namespace bryx
 				}
 				else
 				{
-					LogError(new_zzz, DfxVerifyResult::MustBeString);
+					LogError(new_ctx, DfxVerifyResult::MustBeString);
 				}
 			}
 			else
 			{
-				LogError(new_zzz, DfxVerifyResult::MustBeString);
+				LogError(new_ctx, DfxVerifyResult::MustBeString);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(new_zzz, DfxVerifyResult::MustBeSpecified);
+				LogError(new_ctx, DfxVerifyResult::MustBeSpecified);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyOffset(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyOffset(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -644,30 +644,30 @@ namespace bryx
 				}
 				else
 				{
-					LogError(zzz, DfxVerifyResult::OffsetMustBeWholeNumber);
+					LogError(ctx, DfxVerifyResult::OffsetMustBeWholeNumber);
 				}
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::OffsetMustBeWholeNumber);
+				LogError(ctx, DfxVerifyResult::OffsetMustBeWholeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(zzz, DfxVerifyResult::OffsetMissing);
+				LogError(ctx, DfxVerifyResult::OffsetMissing);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyPeak(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyPeak(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
-		auto new_zzz = zzz + '/' + "peak";
+		auto new_ctx = ctx + '/' + "peak";
 
 		// Check for a possibly optional peak specification.
 		// If we find such a property, we make sure the value it's a number, 
@@ -681,30 +681,30 @@ namespace bryx
 			// We found the property. Is it the right type?
 			// Is it a number? With the right range?
 
-			auto num_tkn_ptr = ProcessAsNumber(new_zzz, vp);
+			auto num_tkn_ptr = ProcessAsNumber(new_ctx, vp);
 
 			if (num_tkn_ptr)
 			{
 				// We've got a number. Is it in the right range?
-				VerifyWaveMagnitude(new_zzz, num_tkn_ptr);
+				VerifyWaveMagnitude(new_ctx, num_tkn_ptr);
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+				LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(zzz, DfxVerifyResult::PeakMissing);
+				LogError(ctx, DfxVerifyResult::PeakMissing);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyRMS(const std::string zzz, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyRMS(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -713,7 +713,7 @@ namespace bryx
 		// whole or floating point doesn't matter. It may have an optional 
 		// db unit on it.
 
-		auto new_zzz = zzz + '/' + "rms";
+		auto new_ctx = ctx + '/' + "rms";
 
 		auto vp = PropertyExists(parent_map, "rms");
 
@@ -722,30 +722,30 @@ namespace bryx
 			// We found the property. Is it the right type?
 			// Is it a number? With the right range?
 
-			auto num_tkn_ptr = ProcessAsNumber(new_zzz, vp);
+			auto num_tkn_ptr = ProcessAsNumber(new_ctx, vp);
 
 			if (num_tkn_ptr)
 			{
 				// We've got a number. Is it in the right range?
-				VerifyWaveMagnitude(new_zzz, num_tkn_ptr);
+				VerifyWaveMagnitude(new_ctx, num_tkn_ptr);
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+				LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(zzz, DfxVerifyResult::RmsMissing);
+				LogError(ctx, DfxVerifyResult::RmsMissing);
 			}
 		}
 
 		return errcnt == save_errcnt;
 	}
 
-	token_ptr DfxParser::ProcessAsNumber(const std::string zzz, std::shared_ptr<Value> &vp)
+	token_ptr DfxParser::ProcessAsNumber(const std::string ctx, std::shared_ptr<Value> &vp)
 	{
 		auto svp = ToSimpleValue(vp);
 
@@ -753,7 +753,7 @@ namespace bryx
 		{
 			if (svp->is_number())
 			{
-				// Okay, it's a number. Verify that it is of the right type, and has the right
+				// Okay, it's already a number.
 			}
 			else
 			{
@@ -764,44 +764,32 @@ namespace bryx
 				// Lexi would kick out things like -30 db (with space in between) so 
 				// we're mostly okay here.
 
-				if (svp->is_string())
+				// Returns error token if wasn't already a number or couldn't convert to one.
+				token_ptr t = svp->CompatibleWithNumber();
+
+				if (std::dynamic_pointer_cast<NumberToken>(t))
 				{
-					auto t = Lexi::ParseBryxNumber(svp->tkn->to_string());
-					// @@ warning: if there was an error, the errcnt was not incremented.
-					// but no biggie, the extra error msg below will at least inc the counter.
+					// Okay, the quoted string is compatible with a number.
+					// We really want to do some surgery to the parse
+					// tree and represent this value as a number. 
+					// At first, I wasn't sure how to pull this off.
 
-					if (std::dynamic_pointer_cast<NumberToken>(t))
-					{
-						// Okay, the quoted string is actually a number.
-						// We really want to do some surgery to the parse
-						// tree and represent this value as a number. 
-						// Not sure how to pull that off.
-
-						svp->tkn = t; // @@ Maybe this is all I need!
-						svp->type = ValueEnum::Number; // Except have to do this too. Yikes!
-					}
-					else
-					{
-						// t contains an error token with further info
-						auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
-						auto& err_pkg = err_t->result_pkg;
-						LogError(zzz, DfxVerifyResult::RmsMustBeNumber, err_pkg);
-						return nullptr;
-					}
+					svp->tkn = t;                  // Maybe this is all I need!
+					svp->type = ValueEnum::Number; // Except have to do this too.
 				}
 				else
 				{
-					// @@ TODO Need to fix this. Need to return an error token (?)
-					//svp->tkn = err_t;
-					//svp->type = ValueEnum::
-					LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+					// t is actually an error token with further info
+					auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
+					auto& err_pkg = err_t->result_pkg;
+					LogError(ctx, DfxVerifyResult::RmsMustBeNumber, err_pkg);
 					return nullptr;
 				}
 			}
 		}
 		else
 		{
-			LogError(zzz, DfxVerifyResult::RmsMustBeNumber);
+			LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
 			return nullptr;
 		}
 
@@ -809,7 +797,7 @@ namespace bryx
 		return svp->tkn; 
 	}
 
-	bool DfxParser::VerifyWaveMagnitude(const std::string zzz, const token_ptr& tkn)
+	bool DfxParser::VerifyWaveMagnitude(const std::string ctx, const token_ptr& tkn)
 	{
 		// Here, we know it's a number. But is it a properly formed number
 		// that would serve as a wave file's peak or rms value? In these
@@ -828,7 +816,7 @@ namespace bryx
 
 		if (traits.HasExponent() || traits.HasMetricPrefix())
 		{
-			LogError(zzz, DfxVerifyResult::ValueNotLegal);
+			LogError(ctx, DfxVerifyResult::ValueNotLegal);
 		}
 		else
 		{
@@ -842,7 +830,7 @@ namespace bryx
 
 				if (num < 0.0 || num > 1.0)
 				{
-					LogError(zzz, DfxVerifyResult::ValueNotLegal);
+					LogError(ctx, DfxVerifyResult::ValueNotLegal);
 				}
 			}
 			else if (engr_num.units == UnitEnum::None)
@@ -854,12 +842,12 @@ namespace bryx
 
 				if (num < 0.0 || num > 1.0)
 				{
-					LogError(zzz, DfxVerifyResult::ValueNotLegal);
+					LogError(ctx, DfxVerifyResult::ValueNotLegal);
 				}
 			}
 			else
 			{
-				LogError(zzz, DfxVerifyResult::ValueHasWrongUnits);
+				LogError(ctx, DfxVerifyResult::ValueHasWrongUnits);
 			}
 		}
 
