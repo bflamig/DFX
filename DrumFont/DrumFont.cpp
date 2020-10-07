@@ -148,8 +148,8 @@ namespace bryx
 
 		auto drum_path_opt = GetSimpleProperty(drum_map_ptr, "path");
 
-		std::cout << "drum name " << drum_name << std::endl;
-		std::cout << "  path " << *drum_path_opt << std::endl;
+		std::cout << "drum " << drum_name << std::endl;
+		std::cout << "  path " << '"' << *drum_path_opt << '"' << std::endl;
 		std::cout << "  note " << midiNote << std::endl;
 
 		//auto drum = std::make_shared<MultiLayeredDrum>(drum_name, drum_path_opt, midiNote);
@@ -189,7 +189,7 @@ namespace bryx
 		auto vlayer_path_opt = GetSimpleProperty(vlayer_body_map_ptr, "path");
 
 		std::cout << "  velocity layer " << vel_code_str << std::endl;
-		std::cout << "    path " << *vlayer_path_opt << std::endl;
+		std::cout << "    path " << '"' << *vlayer_path_opt << '"' << std::endl;
 
 		auto vlayer = std::make_shared<VelocityLayer>(*vlayer_path_opt, vel_code);
 
@@ -269,7 +269,7 @@ namespace bryx
 		//auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
 		//auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
 
-		std::cout << "      robin fname " << *fname_opt << std::endl;
+		std::cout << "      robin " << '"' << *fname_opt << '"' << std::endl;
 		std::cout << "        offset " << offset << std::endl;
 		std::cout << "        peak " << peak << std::endl;
 		std::cout << "        rms " << rms << std::endl;
