@@ -536,40 +536,19 @@ namespace bryx
 
 	void Lexi::LogError(LexiResult result_, std::string msg_, const Extent &extent_)
 	{
-		last_lexical_error.ResetMsg();
-		last_lexical_error.msg = msg_;
-		last_lexical_error.code = result_;
-		last_lexical_error.extent = extent_;
-
-		// @@ Experimental. @@ TODO: WHAT IS THIS? WHY?
-
-		Extent extent(extent_);
-		extent.ecol = extent.scol + 1;
-
-		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
-		et->SetResult(last_lexical_error);
-
+		auto et = MakeErrorToken(result_, msg_, extent_);
 		AcceptToken(et, false); // false: don't absorb character to preserve stream position for debugging purposes
+		last_lexical_error = et->result_pkg;
 	}
 
 	// A static function for those cases where we need to be independent from a lexi object
 
 	std::shared_ptr<SimpleToken> Lexi::MakeErrorToken(LexiResult result_, std::string msg_, const Extent& extent_)
 	{
-		LexiResultPkg errpkg;
-		errpkg.ResetMsg();
-		errpkg.msg = msg_;
-		errpkg.code = result_;
-		errpkg.extent = extent_;
-
-		// @@ Experimental. @@ TODO: WHAT IS THIS? WHY?
-
-		Extent extent(extent_);
-		extent.ecol = extent.scol + 1;
-
-		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, extent);
+		LexiResultPkg errpkg(msg_, result_, extent_);
+		//extent.ecol = extent.scol + 1; // @@ Why do this?
+		auto et = std::make_shared<SimpleToken>(TokenEnum::ERROR, msg_, errpkg.extent);
 		et->SetResult(errpkg);
-
 		return et;
 	}
 
