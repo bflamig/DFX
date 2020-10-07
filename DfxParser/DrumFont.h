@@ -29,7 +29,7 @@ namespace bryx
 		void BuildFont();
 
 		std::shared_ptr<DrumKit> BuildKit(const nv_type& kit);
-		void BuildInstruments(std::shared_ptr<DrumKit>& kit, const object_map_type* instrument_map_ptr);
+		void BuildInstruments(std::shared_ptr<DrumKit>& kit, const curly_list_type* instrument_map_ptr);
 		void BuildInstrument(std::vector<MultiLayeredDrum>& drums, const nv_type& drum_nv);
 		void BuildVelocityLayer(std::vector<std::shared_ptr<VelocityLayer>>& layers, std::shared_ptr<Value>& layer_sh_ptr);
 		void BuildRobin(std::vector<Robin>& robins, NameValue* robin_nv_ptr);

@@ -77,7 +77,7 @@ int explore()
 		auto num_kits = df->NumKits();
 		std::cout << "num kits = " << num_kits << std::endl;
 
-		using kits_map = bryx::object_map_type;
+		using kits_map = bryx::curly_list_type;
 
 		df->StartLog(std::cout);
 		auto zebra = df->Verify();

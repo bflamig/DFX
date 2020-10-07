@@ -55,11 +55,11 @@ namespace bryx
 		InstrumentsMustBeList,
 		DrumValMustBeList,
 		VelocitiesMissing,
-		VelocitiesMustBeNonEmptyArray,
+		VelocitiesMustBeNonEmptySquareList,
 		VelocityMustBeNameValue,
 		InvalidVelocityCode,      // Must start with v, the rest must be a whole number 0-127
 		RobinsMissing,
-		RobinsMustBeNonEmptyArray,
+		RobinsMustBeNonEmptySquareList,
 		RobinMustBeNameValue,
 		RobinNameMustBeValidPath,
 		OffsetMustBeWholeNumber,
@@ -116,7 +116,7 @@ namespace bryx
 
 	public:
 
-		const object_map_type* GetKitsMapPtr() const
+		const curly_list_type* GetKitsMapPtr() const
 		{
 			return root_map;
 		}
@@ -135,13 +135,13 @@ namespace bryx
 
 		// Not well thought out yet, so we comment this out
 
-		const object_map_type* GetKit(std::string name) const
+		const curly_list_type* GetKit(std::string name) const
 		{
-			const object_map_type* omp = GetObjectProperty(root_map, name);
+			const curly_list_type* omp = GetCurlyListProperty(root_map, name);
 			return omp;
 		}
 
-		const std::optional<std::string> GetRelPath(const object_map_type* kit_map_ptr) const
+		const std::optional<std::string> GetRelPath(const curly_list_type* kit_map_ptr) const
 		{
 			// Returns "" string if no path found
 
@@ -152,21 +152,21 @@ namespace bryx
 
 #endif
 
-		const object_map_type* GetInstruments(const object_map_type* kit) const
+		const curly_list_type* GetInstruments(const curly_list_type* kit) const
 		{
-			return GetObjectProperty(kit, "instruments"); 
+			return GetCurlyListProperty(kit, "instruments"); 
 		}
 
 #if 0
 
-		const object_map_type* GetInstrument(const object_map_type* instruments, std::string name) const
+		const curly_list_type* GetInstrument(const curly_list_type* instruments, std::string name) const
 		{
 			// Really need to wrap these with try-catches, because at() throws
 			// an exception if thingy not found.
 			try
 			{
 				auto freaky = instruments->at(name);
-				return ToObjectMap(freaky);
+				return ToCurlyList(freaky);
 			}
 			catch (...)
 			{
@@ -180,18 +180,18 @@ namespace bryx
 
 		bool Verify();
 		bool VerifyKit(const std::string ctx, const nv_type& kit);
-		bool VerifyPath(const std::string ctx, const object_map_type* parent_map, bool path_must_be_specified = false);
-		bool VerifyInstruments(const std::string ctx, const object_map_type* instrument_map_ptr);
+		bool VerifyPath(const std::string ctx, const curly_list_type* parent_map, bool path_must_be_specified = false);
+		bool VerifyInstruments(const std::string ctx, const curly_list_type* instrument_map_ptr);
 		bool VerifyInstrument(const std::string ctx, const nv_type& drum_nv);
-		bool VerifyNote(const std::string ctx, const object_map_type* parent_map, bool note_must_be_specified);
-		bool VerifyVelocityLayers(const std::string ctx, const object_map_type* parent_map);
+		bool VerifyNote(const std::string ctx, const curly_list_type* parent_map, bool note_must_be_specified);
+		bool VerifyVelocityLayers(const std::string ctx, const curly_list_type* parent_map);
 		bool VerifyVelocityLayer(const std::string ctx, std::shared_ptr<Value>& vlayer_sh_ptr);
-		bool VerifyRobins(const std::string ctx, const object_map_type* parent_map_ptr);
+		bool VerifyRobins(const std::string ctx, const curly_list_type* parent_map_ptr);
 		bool VerifyRobin(const std::string ctx, std::shared_ptr<NameValue>& robin_nv_ptr);
-		bool VerifyFname(const std::string ctx, const object_map_type* parent_map, bool must_be_specified);
-		bool VerifyOffset(const std::string ctx, const object_map_type* parent_map, bool offset_must_be_specified);
-		bool VerifyPeak(const std::string ctx, const object_map_type* parent_map, bool peak_must_be_specified);
-		bool VerifyRMS(const std::string ctx, const object_map_type* parent_map, bool rms_must_be_specified);
+		bool VerifyFname(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified);
+		bool VerifyOffset(const std::string ctx, const curly_list_type* parent_map, bool offset_must_be_specified);
+		bool VerifyPeak(const std::string ctx, const curly_list_type* parent_map, bool peak_must_be_specified);
+		bool VerifyRMS(const std::string ctx, const curly_list_type* parent_map, bool rms_must_be_specified);
 		bool VerifyWaveMagnitude(const std::string ctx, const token_ptr& tkn);
 		token_ptr ProcessAsNumber(const std::string ctx, std::shared_ptr<Value>& svp);
 

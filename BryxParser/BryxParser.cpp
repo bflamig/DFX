@@ -76,8 +76,8 @@ namespace bryx
 			case ValueEnum::False: "False"; break;
 			case ValueEnum::Null: "Null"; break;
 			case ValueEnum::NameValuePair: "NameValuePair"; break;
-			case ValueEnum::Object: "Object"; break;
-			case ValueEnum::Array: "Array"; break;
+			case ValueEnum::CurlyList: "CurlyList"; break;
+			case ValueEnum::SquareList: "SquareList"; break;
 
 			default: break;
 		}
@@ -159,18 +159,18 @@ namespace bryx
 
 	// WARNING! Have to make this struct or msvc compiler complains when using polymorphic make_unique() construction
 
-	Array::Array()
-		: Value(ValueEnum::Array)
+	SquareList::SquareList()
+		: Value(ValueEnum::SquareList)
 	{
-		//std::cout << "Array default ctor called\n"; 
+		//std::cout << "SquareList default ctor called\n"; 
 	}
 
-	Array::~Array()
+	SquareList::~SquareList()
 	{
-		//std::cout << "Array dtor called\n"; 
+		//std::cout << "SquareList dtor called\n"; 
 	}
 
-	void Array::Add(std::shared_ptr <Value>& v)
+	void SquareList::Add(std::shared_ptr <Value>& v)
 	{
 		values.push_back(move(v));
 	}
@@ -211,9 +211,21 @@ namespace bryx
 	// Property-value helpers
 	// NOTE: These are static functions.
 
-	object_map_type* Parser::ToObjectMap(std::shared_ptr<Value>& valPtr)
+	const curly_list_type* Parser::ToCurlyList(const std::shared_ptr<Value>& valPtr)
 	{
-		auto fred = std::dynamic_pointer_cast<Object>(valPtr);
+		auto objptr = std::dynamic_pointer_cast<CurlyList>(valPtr);
+
+		if (objptr)
+		{
+			auto& obj_map_ptr = objptr->dict;
+			return &obj_map_ptr;
+		}
+		else return nullptr;
+	}
+
+	curly_list_type* Parser::ToCurlyList(std::shared_ptr<Value>& valPtr)
+	{
+		auto fred = std::dynamic_pointer_cast<CurlyList>(valPtr);
 
 		if (fred)
 		{
@@ -223,20 +235,7 @@ namespace bryx
 		else return nullptr;
 	}
 
-
-	const object_map_type* Parser::ToObjectMap(const std::shared_ptr<Value>& valPtr)
-	{
-		auto objptr = std::dynamic_pointer_cast<Object>(valPtr);
-			
-		if (objptr)
-		{
-			auto& obj_map_ptr = objptr->dict;
-			return &obj_map_ptr;
-		}
-		else return nullptr;
-	}
-
-	object_map_type* Parser::GetObjectProperty(const object_map_type* parent_map_ptr, const std::string prop_name)
+	curly_list_type* Parser::GetCurlyListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		// Really need to wrap these with try-catches, because at() throws
 		// an exception if thingy not found.
@@ -244,7 +243,7 @@ namespace bryx
 		try
 		{
 			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return ToObjectMap(sh_val_ptr);
+			return ToCurlyList(sh_val_ptr);
 		}
 		catch (...)
 		{
@@ -252,9 +251,9 @@ namespace bryx
 		}
 	}
 
-	array_type* Parser::ToArray(std::shared_ptr<Value>& valPtr)
+	square_list_type* Parser::ToSquareList(std::shared_ptr<Value>& valPtr)
 	{
-		auto fred = std::dynamic_pointer_cast<Array>(valPtr);
+		auto fred = std::dynamic_pointer_cast<SquareList>(valPtr);
 
 		if (fred)
 		{
@@ -265,7 +264,7 @@ namespace bryx
 	}
 
 
-	array_type* Parser::GetArrayProperty(const object_map_type* parent_map_ptr, const std::string prop_name)
+	square_list_type* Parser::GetSquareListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		// Really need to wrap these with try-catches, because at() throws
 		// an exception if thingy not found.
@@ -273,7 +272,7 @@ namespace bryx
 		try
 		{
 			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return ToArray(sh_val_ptr);
+			return ToSquareList(sh_val_ptr);
 		}
 		catch (...)
 		{
@@ -289,7 +288,7 @@ namespace bryx
 
 #if 0
 	// @@ PROBLEMATIC
-	std::optional<NameValue> Parser::GetNameValueProperty(const object_map_type* parent_map_ptr, const std::string prop_name)
+	std::optional<NameValue> Parser::GetNameValueProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		try
 		{
@@ -310,7 +309,7 @@ namespace bryx
 		return std::dynamic_pointer_cast<SimpleValue>(valPtr);
 	}
 
-	std::shared_ptr<Value> Parser::PropertyExists(const object_map_type* parent_map_ptr, const std::string prop_name)
+	std::shared_ptr<Value> Parser::PropertyExists(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		try
 		{
@@ -323,7 +322,7 @@ namespace bryx
 		}
 	}
 
-	std::optional<std::string> Parser::GetSimpleProperty(const object_map_type* parent_map_ptr, const std::string prop_name)
+	std::optional<std::string> Parser::GetSimpleProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		try
 		{
@@ -652,18 +651,18 @@ namespace bryx
 			if (dfx_mode && !file_moniker.empty())
 			{
 				// This implies we have a name-value pair. Collect the value part
-				// of that pair which should have an object type.
+				// of that pair which should have a curly list (aka json object) type.
 
 				if (NotAtEnd())
 				{
-					result = CollectObject(root);
+					result = CollectCurlyList(root);
 
-					// We'll store the object map pointer
+					// We'll store the curly list map pointer
 					// (aka dictionary) as a convenience.
 
 					if (result == ParserResult::NoError)
 					{
-						root_map = ToObjectMap(root);
+						root_map = ToCurlyList(root);
 
 						if (root_map == nullptr)
 						{
@@ -678,7 +677,7 @@ namespace bryx
 			else
 			{
 				// If you have no file moniker then the file can be structured as
-				// any value (might be an object, an array, or a single value 
+				// any value (might be an curly list, square list, or a single value 
 				// of type string, number, atom, etc. This is per json.org.
 
 				bool expect = true;
@@ -703,7 +702,7 @@ namespace bryx
 					{
 						result = ParserResult::UnexpectedToken;
 						std::ostringstream msg;
-						msg << "CollectObject(): token " << to_string(lexi.curr_token->type);
+						msg << "CollectCurlyList(): token " << to_string(lexi.curr_token->type);
 						LogError(result, msg.str(), curr_token_index);
 					}
 				}
@@ -714,8 +713,10 @@ namespace bryx
 		return result;
 	}
 
-	ParserResult Parser::CollectObject(std::shared_ptr<Value>& place_holder)
+	ParserResult Parser::CollectCurlyList(std::shared_ptr<Value>& place_holder)
 	{
+		// Collect {}-list (aka json objects)
+
 		auto result = ParserResult::NoError;
 
 		bool silent = false; // want to record eof event
@@ -728,7 +729,7 @@ namespace bryx
 			{
 				result = ParserResult::InvalidStartingToken;
 				std::ostringstream msg;
-				msg << "CollectObject(): token " << to_string(tkn->type);
+				msg << "CollectCurlyList(): token " << to_string(tkn->type);
 				LogError(result, msg.str(), curr_token_index);
 			}
 			else
@@ -757,7 +758,7 @@ namespace bryx
 				else
 				{
 					std::ostringstream msg;
-					msg << "CollectObject(): token " << to_string(tkn->type);
+					msg << "CollectCurlyList(): token " << to_string(tkn->type);
 					LogError(result, msg.str(), curr_token_index);
 				}
 			}
@@ -766,7 +767,7 @@ namespace bryx
 		return result;
 	}
 
-	ParserResult Parser::CollectArray(std::shared_ptr<Value>& place_holder)
+	ParserResult Parser::CollectSquareList(std::shared_ptr<Value>& place_holder)
 	{
 		auto result = ParserResult::NoError;
 
@@ -780,7 +781,7 @@ namespace bryx
 			{
 				result = ParserResult::InvalidStartingToken;
 				std::ostringstream msg;
-				msg << "CollectArray(): token " << to_string(tkn->type);
+				msg << "CollectSquareList(): token " << to_string(tkn->type);
 				LogError(result, msg.str(), curr_token_index);
 			}
 			else
@@ -820,8 +821,8 @@ namespace bryx
 		if (NotAtEnd())
 		{
 			// value
-			//   object
-			//   array
+			//   curly list (object)
+			//   square list (array)
 			//   string
 			//   number
 			//   true
@@ -832,11 +833,11 @@ namespace bryx
 
 			if (tkn->type == TokenEnum::LeftBrace)
 			{
-				result = CollectObject(place_holder); // skips past automatically
+				result = CollectCurlyList(place_holder); // skips past automatically
 			}
 			else if (tkn->type == TokenEnum::LeftSquareBracket)
 			{
-				result = CollectArray(place_holder); // skips past automatically
+				result = CollectSquareList(place_holder); // skips past automatically
 			}
 			else if (tkn->type == TokenEnum::QuotedChars || tkn->type == TokenEnum::UnquotedChars)
 			{
@@ -942,13 +943,13 @@ namespace bryx
 
 	ParserResult Parser::CollectMembers(std::shared_ptr<Value>& head_ptr)
 	{
-		// Collect a {}-list. By definition, such lists are implemented as maps,
-		// and as such, each element MUST be in name-value form. No other type
-		// of member is allowed.
+		// Collect members of a {}-list. By definition, such lists are
+		// implemented as maps, and as such, each element MUST be in
+		// name-value form. No other type of member is allowed.
 
 		auto result = ParserResult::NoError;
 
-		auto lp = std::make_unique<Object>(MapTypeEnum::Unordered_Map);
+		auto lp = std::make_unique<CurlyList>(MapTypeEnum::Map);
 
 		while (NotAtEnd())
 		{
@@ -1020,8 +1021,8 @@ namespace bryx
 
 		head_ptr = move(lp);
 
-		// @@ BUG FIX: Must set this in case this object is the only thing in the file and
-		// we have error on the last member of the object.
+		// @@ BUG FIX: Must set this in case this curly list is the only thing in the file and
+		// we have error on the last member of the curly list.
 
 		// We might be sitting on an error, so ...
 
@@ -1035,9 +1036,10 @@ namespace bryx
 
 	ParserResult Parser::CollectMember(std::shared_ptr<NameValue>& place_holder)
 	{
+		// Collect member of a {}-list.
 		// If member found, it's instantiated, soon to be owned by place_holder.
 		// If not found, place_holder stays untouched. Tough if no ending brace
-		// found an error is returned.
+		// found, an error is returned.
 
 		auto result = ParserResult::NoError;
 
@@ -1120,11 +1122,11 @@ namespace bryx
 
 	ParserResult Parser::CollectElements(std::shared_ptr<Value>& head_ptr)
 	{
-		// Collect a []-list
+		// Collect elements of a []-list (aka json array)
 
 		auto result = ParserResult::NoError;
 
-		auto lp = std::make_unique<Array>();
+		auto lp = std::make_unique<SquareList>();
 
 		while (NotAtEnd())
 		{
@@ -1206,6 +1208,7 @@ namespace bryx
 
 	ParserResult Parser::CollectElement(std::shared_ptr<Value>& place_holder)
 	{
+		// Collect element of a []-list.
 		// If element found, it's instantiated, soon to be owned by place_holder.
 		// If not found, place_holder stays untouched. Tough if noending brace
 		// found an error is returned.
@@ -1353,9 +1356,9 @@ namespace bryx
 				PrintWalk(sout, legs, indentpp);
 			}
 			break;
-			case ValueEnum::Object:       // Bryx object
+			case ValueEnum::CurlyList:       // Bryx object
 			{
-				auto& jvobj = dynamic_cast<const Object&>(jv);
+				auto& jvobj = dynamic_cast<const CurlyList&>(jv);
 				auto& dict = jvobj.dict;
 
 				if (dict.size() == 0)
@@ -1389,9 +1392,9 @@ namespace bryx
 				}
 			}
 			break;
-			case ValueEnum::Array:          // Bryx array
+			case ValueEnum::SquareList:          // Bryx array
 			{
-				auto& jvarr = dynamic_cast<const Array&>(jv);
+				auto& jvarr = dynamic_cast<const SquareList&>(jv);
 				const auto& vs = jvarr.values;
 
 				if (vs.size() == 0)

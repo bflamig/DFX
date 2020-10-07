@@ -78,8 +78,8 @@ namespace bryx
 		False,           // Bryx boolean that's false
 		Null,            // Bryx value that's null
 		NameValuePair,   // Bryx name value pair
-		Object,          // Bryx object
-		Array            // Bryx array
+		CurlyList,       // Bryx object
+		SquareList       // Bryx array
 	};
 
 	extern std::string to_string(ValueEnum v);
@@ -125,14 +125,14 @@ namespace bryx
 			return false;
 		}
 
-		bool is_object() const
+		bool is_curly_list() const
 		{
-			return type == ValueEnum::Object;
+			return type == ValueEnum::CurlyList;
 		}
 
-		bool is_array() const
+		bool is_square_list() const
 		{
-			return type == ValueEnum::Array;
+			return type == ValueEnum::SquareList;
 		}
 
 		bool is_boolean() const
@@ -194,14 +194,14 @@ namespace bryx
 
 	// WARNING! Have to make this struct or msvc compiler complains when using polymorphic make_unique() construction
 
-	using array_type = std::vector<std::shared_ptr<Value>>;
+	using square_list_type = std::vector<std::shared_ptr<Value>>;
 
-	struct Array : Value {
+	struct SquareList : Value {
 	public:
-		array_type values;
+		square_list_type values;
 	public:
-		Array();
-		virtual ~Array();
+		SquareList();
+		virtual ~SquareList();
 	public:
 		void Add(std::shared_ptr <Value>& v);
 	};
@@ -209,11 +209,11 @@ namespace bryx
 	// NOTE: Even though unordered_map below is typed to store "strings" for values, what are really
 	// stored are const strings, or at least that's what you get back.
 
-	using object_map_type = std::map<std::string, std::shared_ptr<Value>>;
+	using curly_list_type = std::map<std::string, std::shared_ptr<Value>>;
 
 	// WARNING! Have to make this struct or msvc compiler complains when using polymorphic make_unique() construction
 
-	struct Object : Value {
+	struct CurlyList : Value {
 	public:
 
 #if 0
@@ -235,22 +235,22 @@ namespace bryx
 		using unordered_multimap_type = std::unordered_multimap<std::string, std::shared_ptr<Value>>;
 #endif
 
-		object_map_type dict;
+		curly_list_type dict;
 
 		MapTypeEnum map_code;
 
 	public:
 
-		Object(MapTypeEnum map_code_)
-		: Value(ValueEnum::Object)
+		CurlyList(MapTypeEnum map_code_)
+		: Value(ValueEnum::CurlyList)
 		, map_code(map_code_)
 		{
-			//std::cout << "Object default ctor called\n";
+			//std::cout << "CurlyList default ctor called\n";
 		}
 
-		virtual ~Object()
+		virtual ~CurlyList()
 		{
-			//std::cout << "Object dtor called\n";
+			//std::cout << "CurlyList dtor called\n";
 		}
 
 		void Insert(std::shared_ptr<NameValue>& nvp)
@@ -288,7 +288,7 @@ namespace bryx
 		ParserResultPkg last_parser_error;
 
 		std::shared_ptr<Value> root;
-		object_map_type* root_map; // Only valid if we start out with an object
+		curly_list_type* root_map; // Only valid if we start out with a curly list!
 
 		//std::string file_type_candidates[2];
 		//int file_type_code; // index into array above (?)
@@ -327,21 +327,21 @@ namespace bryx
 
 		// This stuff is useful when "reading" the loaded parse tree
 
-		static const object_map_type* ToObjectMap(const std::shared_ptr<Value>& valPtr);
-		static object_map_type* ToObjectMap(std::shared_ptr<Value>& valPtr);
+		static const curly_list_type* ToCurlyList(const std::shared_ptr<Value>& valPtr);
+		static curly_list_type* ToCurlyList(std::shared_ptr<Value>& valPtr);
 
-		static std::shared_ptr<Value> PropertyExists(const object_map_type* parent_map_ptr, const std::string prop_name);
+		static std::shared_ptr<Value> PropertyExists(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
-		static object_map_type* GetObjectProperty(const object_map_type* parent_map_ptr, const std::string prop_name);
+		static curly_list_type* GetCurlyListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
-		static array_type* ToArray(std::shared_ptr<Value>& valPtr);
-		static array_type* GetArrayProperty(const object_map_type* parent_map_ptr, const std::string prop_name);
+		static square_list_type* ToSquareList(std::shared_ptr<Value>& valPtr);
+		static square_list_type* GetSquareListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 		static std::shared_ptr<NameValue> ToNameValue(std::shared_ptr<Value>& valPtr);
-		// @@ problematic: static std::optional<NameValue> GetNameValueProperty(const object_map_type* parent_map_ptr, const std::string prop_name);
+		// @@ problematic: static std::optional<NameValue> GetNameValueProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 		static std::shared_ptr<SimpleValue> ToSimpleValue(std::shared_ptr<Value>& valPtr);
-		static std::optional<std::string> GetSimpleProperty(const object_map_type* parent_map_ptr, const std::string prop_name);
+		static std::optional<std::string> GetSimpleProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 	public:
 
@@ -387,8 +387,8 @@ namespace bryx
 		virtual ParserResult Preparse();
 		virtual ParserResult Parse();
 
-		ParserResult CollectObject(std::shared_ptr<Value>& place_holder);
-		ParserResult CollectArray(std::shared_ptr<Value>& place_holder);
+		ParserResult CollectCurlyList(std::shared_ptr<Value>& place_holder);
+		ParserResult CollectSquareList(std::shared_ptr<Value>& place_holder);
 		ParserResult CollectValue(std::shared_ptr<Value>& place_holder, bool expect, bool dont_allow_nv_pair = false);
 		ParserResult CollectMembers(std::shared_ptr<Value>& head_ptr);
 		ParserResult CollectMember(std::shared_ptr<NameValue>& place_holder);
@@ -405,7 +405,7 @@ namespace bryx
 		void PrintWalkPair(std::ostream& sout, const nv_type& pair, int indent);
 
 #if 0
-		// @@ THIS IS A HACK FOR vector type Object mapping. Notice not const keyword on std::string
+		// @@ THIS IS A HACK FOR vector type CurlyList mapping. Notice not const keyword on std::string
 		void PrintWalkPair(std::ostream& sout, const std::pair<std::string, std::shared_ptr<Value>>& pair, int indent); // @@ exp
 #endif
 

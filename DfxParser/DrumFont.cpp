@@ -36,7 +36,7 @@ namespace bryx
 
 	void DrumFont::BuildFont()
 	{
-		using kits_map = bryx::object_map_type;
+		using kits_map = bryx::curly_list_type;
 
 		const kits_map* kits = GetKitsMapPtr();
 
@@ -72,7 +72,7 @@ namespace bryx
 		auto& kit_name = kit.first;
 		auto& kit_val = kit.second;
 
-		auto kitmap_ptr = ToObjectMap(kit_val);
+		auto kitmap_ptr = ToCurlyList(kit_val);
 
 		auto kit_path_opt = GetSimpleProperty(kitmap_ptr, "path");
 
@@ -85,7 +85,7 @@ namespace bryx
 		return dk;
 	}
 
-	void DrumFont::BuildInstruments(std::shared_ptr<DrumKit>& kit, const object_map_type* instrument_map_ptr)
+	void DrumFont::BuildInstruments(std::shared_ptr<DrumKit>& kit, const curly_list_type* instrument_map_ptr)
 	{
 		auto ninstruments = instrument_map_ptr->size();
 		kit->drums.reserve(ninstruments);
@@ -101,7 +101,7 @@ namespace bryx
 		auto& drum_name = drum_nv.first;
 		auto& drum_val = drum_nv.second;
 
-		const object_map_type* drum_map_ptr = ToObjectMap(drum_val);
+		const curly_list_type* drum_map_ptr = ToCurlyList(drum_val);
 
 		auto vp = PropertyExists(drum_map_ptr, "note");
 
@@ -124,7 +124,7 @@ namespace bryx
 		// We should have a []-list of velocity layers. Each layer is represented
 		// in the Parser as a name-value pair.
 
-		const array_type* vlayers = GetArrayProperty(drum_map_ptr, "velocities");
+		const square_list_type* vlayers = GetSquareListProperty(drum_map_ptr, "velocities");
 
 		int nlayers = vlayers->size();
 		drum.velocityLayers.reserve(nlayers);
@@ -149,7 +149,7 @@ namespace bryx
 
 		int vel_code = std::stoi(vel_code_str.substr(1));
 
-		auto vlayer_body_map_ptr = ToObjectMap(vlayer_body);
+		auto vlayer_body_map_ptr = ToCurlyList(vlayer_body);
 
 		auto vlayer_path_opt = GetSimpleProperty(vlayer_body_map_ptr, "path");
 
@@ -161,7 +161,7 @@ namespace bryx
 		// We should have a []-list of robins. Each robin is represented
 		// in the Parser as a name-value pair.
 
-		auto robins_arr_ptr = GetArrayProperty(vlayer_body_map_ptr, "robins");
+		auto robins_arr_ptr = GetSquareListProperty(vlayer_body_map_ptr, "robins");
 
 		auto nrobins = robins_arr_ptr->size();
 
@@ -181,7 +181,7 @@ namespace bryx
 		// new: first is just a robin name. Note used. auto& fname = robin_nv_ptr->pair.first;
 		auto& robin_body = robin_nv_ptr->pair.second;
 
-		auto robin_body_map_ptr = ToObjectMap(robin_body);
+		auto robin_body_map_ptr = ToCurlyList(robin_body);
 
 		auto fname_opt = GetSimpleProperty(robin_body_map_ptr, "fname");
 

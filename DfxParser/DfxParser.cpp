@@ -51,15 +51,15 @@ namespace bryx
 			case DfxVerifyResult::NoteMissing: s = "Drum note missing"; break;
 			case DfxVerifyResult::NoteMustBeWholeNumber: s = "Note must be whole number"; break;
 			case DfxVerifyResult::KitsMissing: s = "Kits are missing"; break;
-			case DfxVerifyResult::KitValWrongType: s = "Kit value must be object type"; break;
+			case DfxVerifyResult::KitValWrongType: s = "Kit value must be a {}-list type"; break;
 			case DfxVerifyResult::InstrumentsMissing: s = "Instruments are missing"; break;
 			case DfxVerifyResult::InstrumentsMustBeList: s = "Instruments must be in a {}-list"; break;
 			case DfxVerifyResult::DrumValMustBeList: s = "Drum info must be in a {}-list"; break;
 			case DfxVerifyResult::VelocitiesMissing: s = "Velocity layers are missing"; break;
-			case DfxVerifyResult::VelocitiesMustBeNonEmptyArray: s = "Velocity layers must be in a non-empty array"; break;
+			case DfxVerifyResult::VelocitiesMustBeNonEmptySquareList: s = "Velocity layers must be in a non-empty array"; break;
 			case DfxVerifyResult::InvalidVelocityCode: s = "Invalid velocity code"; break;
 			case DfxVerifyResult::RobinsMissing: s = "Robins are missing"; break;
-			case DfxVerifyResult::RobinsMustBeNonEmptyArray: s = "Robins must be in a non-empty []-list"; break;
+			case DfxVerifyResult::RobinsMustBeNonEmptySquareList: s = "Robins must be in a non-empty []-list"; break;
 			case DfxVerifyResult::RobinMustBeNameValue: s = "Robin must be a name-value pair"; break;
 			case DfxVerifyResult::RobinNameMustBeValidPath: s = "Robin name must be valid path"; break;
 			case DfxVerifyResult::OffsetMustBeWholeNumber: s = "Offset must be whole number"; break;
@@ -159,7 +159,7 @@ namespace bryx
 
 		// A dynamic type cast to a {}-list (aka "object map").
 
-		auto kitmap_ptr = ToObjectMap(kit_val); 
+		auto kitmap_ptr = ToCurlyList(kit_val); 
 
 		if (kitmap_ptr)
 		{
@@ -183,7 +183,7 @@ namespace bryx
 				// Well, there is an instrument property. Is it the right type?
 				// Ie. a object map using a {}-list?
 
-				auto instrument_map_ptr = ToObjectMap(vp);
+				auto instrument_map_ptr = ToCurlyList(vp);
 
 				if (instrument_map_ptr)
 				{
@@ -208,7 +208,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyPath(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyPath(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -257,7 +257,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyInstruments(const std::string ctx, const object_map_type* instrument_map_ptr)
+	bool DfxParser::VerifyInstruments(const std::string ctx, const curly_list_type* instrument_map_ptr)
 	{
 		int save_errcnt = errcnt;
 
@@ -285,9 +285,9 @@ namespace bryx
 		// The value part of a kit should be another {}-list. If it's not,
 		// we are out of here!
 
-		// A dynamic type cast to a {}-list (aka "object map").
+		// A dynamic type cast to a {}-list
 
-		auto drum_map_ptr = ToObjectMap(drum_val);
+		auto drum_map_ptr = ToCurlyList(drum_val);
 
 		if (drum_map_ptr)
 		{
@@ -316,7 +316,7 @@ namespace bryx
 		return save_errcnt == errcnt;
 	}
 
-	bool DfxParser::VerifyNote(const std::string ctx, const object_map_type* parent_map, bool note_must_be_specified)
+	bool DfxParser::VerifyNote(const std::string ctx, const curly_list_type* parent_map, bool note_must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -361,11 +361,11 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyVelocityLayers(const std::string ctx, const object_map_type* parent_map)
+	bool DfxParser::VerifyVelocityLayers(const std::string ctx, const curly_list_type* parent_map)
 	{
 		int save_errcnt = errcnt;
 
-		// See if the velocity layers object is present
+		// See if the velocity layers property is present
 
 		auto vlp = PropertyExists(parent_map, "velocities");
 
@@ -375,7 +375,7 @@ namespace bryx
 			// so we return a pointer to the vector below if
 			// valid, else a nullptr
 
-			auto velocities_ptr = ToArray(vlp);
+			auto velocities_ptr = ToSquareList(vlp);
 
 			if (velocities_ptr)
 			{
@@ -389,12 +389,12 @@ namespace bryx
 				}
 				else
 				{
-					LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
+					LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptySquareList);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptyArray);
+				LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptySquareList);
 			}
 
 		}
@@ -448,7 +448,7 @@ namespace bryx
 
 			auto& vlayer_body = corby->pair.second;
 
-			auto vlayer_body_map_ptr =  ToObjectMap(vlayer_body);
+			auto vlayer_body_map_ptr =  ToCurlyList(vlayer_body);
 
 			if (vlayer_body_map_ptr)
 			{
@@ -479,11 +479,11 @@ namespace bryx
 	}
 
 
-	bool DfxParser::VerifyRobins(const std::string ctx, const object_map_type* parent_map_ptr)
+	bool DfxParser::VerifyRobins(const std::string ctx, const curly_list_type* parent_map_ptr)
 	{
 		int save_errcnt = errcnt;
 
-		auto robins_arr_ptr = GetArrayProperty(parent_map_ptr, "robins");
+		auto robins_arr_ptr = GetSquareListProperty(parent_map_ptr, "robins");
 
 		if (robins_arr_ptr)
 		{
@@ -509,12 +509,12 @@ namespace bryx
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptyArray);
+				LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptySquareList);
 			}
 		}
 		else
 		{
-			LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptyArray);
+			LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptySquareList);
 		}
 
 		return errcnt == save_errcnt;
@@ -540,7 +540,7 @@ namespace bryx
 
 		auto& robin_body = robin_nv_ptr->pair.second;
 
-		auto robin_body_map_ptr = ToObjectMap(robin_body);
+		auto robin_body_map_ptr = ToCurlyList(robin_body);
 
 		if (robin_body_map_ptr)
 		{
@@ -570,7 +570,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyFname(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyFname(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -619,7 +619,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyOffset(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyOffset(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -663,7 +663,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyPeak(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyPeak(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
@@ -704,7 +704,7 @@ namespace bryx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyRMS(const std::string ctx, const object_map_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyRMS(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
