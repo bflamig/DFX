@@ -211,7 +211,7 @@ namespace bryx
 	// Property-value helpers
 	// NOTE: These are static functions.
 
-	const curly_list_type* Parser::ToCurlyList(const std::shared_ptr<Value>& valPtr)
+	const curly_list_type* Parser::AsCurlyList(const std::shared_ptr<Value>& valPtr)
 	{
 		auto objptr = std::dynamic_pointer_cast<CurlyList>(valPtr);
 
@@ -223,7 +223,7 @@ namespace bryx
 		else return nullptr;
 	}
 
-	curly_list_type* Parser::ToCurlyList(std::shared_ptr<Value>& valPtr)
+	curly_list_type* Parser::AsCurlyList(std::shared_ptr<Value>& valPtr)
 	{
 		auto fred = std::dynamic_pointer_cast<CurlyList>(valPtr);
 
@@ -243,7 +243,7 @@ namespace bryx
 		try
 		{
 			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return ToCurlyList(sh_val_ptr);
+			return AsCurlyList(sh_val_ptr);
 		}
 		catch (...)
 		{
@@ -251,7 +251,7 @@ namespace bryx
 		}
 	}
 
-	square_list_type* Parser::ToSquareList(std::shared_ptr<Value>& valPtr)
+	square_list_type* Parser::AsSquareList(std::shared_ptr<Value>& valPtr)
 	{
 		auto fred = std::dynamic_pointer_cast<SquareList>(valPtr);
 
@@ -272,7 +272,7 @@ namespace bryx
 		try
 		{
 			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return ToSquareList(sh_val_ptr);
+			return AsSquareList(sh_val_ptr);
 		}
 		catch (...)
 		{
@@ -280,7 +280,7 @@ namespace bryx
 		}
 	}
 
-	std::shared_ptr<NameValue> Parser::ToNameValue(std::shared_ptr<Value>& valPtr)
+	std::shared_ptr<NameValue> Parser::AsNameValue(std::shared_ptr<Value>& valPtr)
 	{
 		return std::dynamic_pointer_cast<NameValue>(valPtr);
 	}
@@ -304,7 +304,7 @@ namespace bryx
 	}
 #endif
 
-	std::shared_ptr<SimpleValue> Parser::ToSimpleValue(std::shared_ptr<Value>& valPtr)
+	std::shared_ptr<SimpleValue> Parser::AsSimpleValue(std::shared_ptr<Value>& valPtr)
 	{
 		return std::dynamic_pointer_cast<SimpleValue>(valPtr);
 	}
@@ -662,7 +662,7 @@ namespace bryx
 
 					if (result == ParserResult::NoError)
 					{
-						root_map = ToCurlyList(root);
+						root_map = AsCurlyList(root);
 
 						if (root_map == nullptr)
 						{

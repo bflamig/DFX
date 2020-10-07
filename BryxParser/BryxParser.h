@@ -206,7 +206,7 @@ namespace bryx
 		void Add(std::shared_ptr <Value>& v);
 	};
 
-	// NOTE: Even though unordered_map below is typed to store "strings" for values, what are really
+	// NOTE: Even though map below is typed to store "strings" for values, what are really
 	// stored are const strings, or at least that's what you get back.
 
 	using curly_list_type = std::map<std::string, std::shared_ptr<Value>>;
@@ -216,27 +216,7 @@ namespace bryx
 	struct CurlyList : Value {
 	public:
 
-#if 0
-		//using raw_map_type = std::vector<std::shared_ptr<NameValue>>;
-
-		using raw_map_type = std::vector<std::pair<std::string, std::shared_ptr<Value>>>;
-
-		// NOTE: Using const std::string as a key will fail to compile for undordered_maps, due to
-		// quirk in the standard C++ library (then change the documentation jerks, or at least
-		// mention it somewhere. - I wasted hours and hours on this. It works perfectly fine on
-		// ordered maps. In either case, it's not necessary to say it at all.
-		// Weird too, that my name value type usings const std::string, and the compiler complains
-		// not one bit when I passed said string into a std::pair constructor.
-
-		using ordered_map_type = std::map<std::string, std::shared_ptr<Value>>;
-		using ordered_multimap_type = std::multimap<std::string, std::shared_ptr<Value>>;
-
-		// Can't use const string here! std::unordered_map<const std::string, int> mymap;
-		using unordered_multimap_type = std::unordered_multimap<std::string, std::shared_ptr<Value>>;
-#endif
-
 		curly_list_type dict;
-
 		MapTypeEnum map_code;
 
 	public:
@@ -281,8 +261,6 @@ namespace bryx
 	class Parser {
 	public:
 
-		//using nv_type = std::pair<std::string, std::shared_ptr<Value>>;
-
 		Lexi lexi;
 
 		ParserResultPkg last_parser_error;
@@ -290,15 +268,11 @@ namespace bryx
 		std::shared_ptr<Value> root;
 		curly_list_type* root_map; // Only valid if we start out with a curly list!
 
-		//std::string file_type_candidates[2];
-		//int file_type_code; // index into array above (?)
-
 		std::string file_moniker;
 
 		int curr_token_index;
 
 		bool dfx_mode;
-
 		bool debug_mode;
 
 	public:
@@ -327,20 +301,20 @@ namespace bryx
 
 		// This stuff is useful when "reading" the loaded parse tree
 
-		static const curly_list_type* ToCurlyList(const std::shared_ptr<Value>& valPtr);
-		static curly_list_type* ToCurlyList(std::shared_ptr<Value>& valPtr);
+		static const curly_list_type* AsCurlyList(const std::shared_ptr<Value>& valPtr);
+		static curly_list_type* AsCurlyList(std::shared_ptr<Value>& valPtr);
 
 		static std::shared_ptr<Value> PropertyExists(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 		static curly_list_type* GetCurlyListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
-		static square_list_type* ToSquareList(std::shared_ptr<Value>& valPtr);
+		static square_list_type* AsSquareList(std::shared_ptr<Value>& valPtr);
 		static square_list_type* GetSquareListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
-		static std::shared_ptr<NameValue> ToNameValue(std::shared_ptr<Value>& valPtr);
+		static std::shared_ptr<NameValue> AsNameValue(std::shared_ptr<Value>& valPtr);
 		// @@ problematic: static std::optional<NameValue> GetNameValueProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
-		static std::shared_ptr<SimpleValue> ToSimpleValue(std::shared_ptr<Value>& valPtr);
+		static std::shared_ptr<SimpleValue> AsSimpleValue(std::shared_ptr<Value>& valPtr);
 		static std::optional<std::string> GetSimpleProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 	public:
