@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <utility>
 
 namespace bryx
 {
@@ -28,24 +29,86 @@ namespace bryx
 	};
 
 
+	// In the code below, I'm just playing around learning how to use move semantics
+
+	class ResultBase {
+	public:
+		std::string msg;
+		Extent extent;
+	public:
+		ResultBase() : msg(), extent() { }
+		ResultBase(std::string_view msg_, const Extent& extent_) : msg(msg_), extent(extent_) { }
+
+		ResultBase(const ResultBase& other)
+		: ResultBase(other.msg, other.extent)
+		{
+			// Copy constructor
+		}
+
+		ResultBase(ResultBase&& other) noexcept
+		: msg(std::move(other.msg))
+		, extent(other.extent)
+		{
+			// Move constructor
+		}
+
+		virtual ~ResultBase() {};
+
+		void operator=(const ResultBase& other)
+		{
+			// copy assignment 
+
+			if (this != &other)
+			{
+				msg = other.msg;
+				extent = other.extent;
+			}
+		}
+
+		void operator=(ResultBase&& other) noexcept
+		{
+			// move assignment
+
+			if (this != &other)
+			{
+				msg = std::move(other.msg);
+				extent = other.extent;
+				other.extent.Clear();
+			}
+		}
+
+		virtual void Clear()
+		{
+			ResetMsg();
+			extent.Clear();
+		}
+
+		void ResetMsg()
+		{
+			//std::ostringstream().swap(msg); // swap with a default constructed stringstream
+			msg.clear();
+		}
+
+
+		virtual void Print(std::ostream& sout) const = 0;
+	};
+
+
 	// T must be an enumerated type with a NoError member
 	// It must have a companion to_string() function
 
 	template<typename T>
-	class ResultPkg {
+	class ResultPkg : public ResultBase {
 	public:
-		std::string msg;
 		T code;
-		Extent extent;
 	public:
 
-		ResultPkg() : msg(), code(T::NoError), extent() { }
+		ResultPkg() : ResultBase(), code(T::NoError) { }
 
 		ResultPkg(std::string_view msg_, T code_, const Extent& extent_)
+		: ResultBase(msg_, extent_)
 		{
-			msg = msg_;
 			code = code_;
-			extent = extent_;
 		}
 
 		ResultPkg(const ResultPkg& other)
@@ -55,12 +118,14 @@ namespace bryx
 		}
 
 		ResultPkg(ResultPkg&& other) noexcept
-		: ResultPkg(move(other.msg), other.code, other.extent)
+		: ResultBase(std::move(other.msg), other.extent)
 		{
 			// Move constructor
+			code = other.code;
 			other.code = T::NoError;
-			other.extent.Clear();
 		}
+
+		virtual ~ResultPkg() { }
 
 		ResultPkg& operator=(const ResultPkg& other)
 		{
@@ -68,9 +133,8 @@ namespace bryx
 
 			if (this != &other)
 			{
-				msg = other.msg;
+				ResultBase::operator=(other);
 				code = other.code;
-				extent = other.extent;
 			}
 
 			return *this;
@@ -82,27 +146,21 @@ namespace bryx
 
 			if (this != &other)
 			{
-				msg = move(other.msg);
+				ResultBase::operator=(std::move(other));
 				code = other.code;
-				extent = other.extent;
+				other.code = T::NoError;
 			}
 
 			return *this;
 		}
 
-		void Clear()
+		virtual void Clear()
 		{
+			ResultBase::Clear();
 			code = T::NoError;
-			ResetMsg();
 		}
 
-		void ResetMsg()
-		{
-			//std::ostringstream().swap(msg); // swap with a default constructed stringstream
-			msg.clear();
-		}
-
-		void Print(std::ostream& sout) const
+		virtual void Print(std::ostream& sout) const
 		{
 			sout << to_string(code) << " --> " << msg << '\n';
 		}
