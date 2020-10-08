@@ -102,7 +102,10 @@ void Robin::FinishPaths(std::filesystem::path& cumulativePath_)
 	fullPath = fullPath.generic_string();
 }
 
-
+void Robin::LoadWave()
+{
+	wave.Load(fullPath);
+}
 
 // ////////////////////////////////////////////////////
 
@@ -161,7 +164,13 @@ void RobinMgr::FinishPaths(std::filesystem::path& cumulativePath_)
 	}
 }
 
-
+void RobinMgr::LoadWaves()
+{
+	for (auto& r : robins)
+	{
+		r.LoadWave();
+	}
+}
 
 
 #if 0
@@ -245,4 +254,10 @@ Robin& RobinMgr::ChooseRobin()
 	}
 
 	return robins[lastRobinChosen];
+}
+
+MemWave& RobinMgr::ChooseWave()
+{
+	auto& robin = ChooseRobin();
+	return robin.wave;
 }

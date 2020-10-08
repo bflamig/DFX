@@ -34,51 +34,49 @@
  *
 \******************************************************************************/
 
-#include <filesystem>
-#include "RobinMgr.h"
+#include <vector>
+#include <ostream>
+#include "MemWave.h"
+//#include "OnePole.h"
 
-struct VelocityRange
+namespace bryx
 {
-	// Scaled 0 - 127 
+	class PolyTableElem {
+	public:
 
-	int velCode;  // As given in the drum font - the nominal iMinVel
+		MemWave wave;      // resident wave storage
+		//OnePole filter;  // optional filter 
 
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
+		double gain;
 
-	// Scaled 0 - 1.0 versions of the above
+		int soundNumber;  // Used if wanting to reset active wave of same note as new one.
+		int younger;      // (younger) for doubly linked active list
+		int older;        // (older) for doubly linked active list, and singly linked inactive list
 
-	double fMinVel;
-	double fMaxVel;
+	public:
 
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
-
-	void clear();
-};
+		PolyTableElem();
+	};
 
 
-class VelocityLayer {
-public:
+	class PolyTable {
+	public:
+		std::vector<PolyTableElem> elems;
+		int aHead;    // to first active slot
+		int iHead;    // to first inactive slot
+		int aOldest;  // to oldest (last) active slot
+	public:
+		PolyTable(int nsoundings);
+		virtual ~PolyTable();
+	public:
+		bool IsFull() const { return iHead == -1; }
+		int ActivateSlot(int noteNumber);
+		void Deactivate(int slot);
+	protected:
+		void MakeYoungest(int slot); // moves to first of the actives
+	public:
+		void DumpActive(std::ostream& s);
+		void DumpInactive(std::ostream& s);
+	};
 
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
-
-	VelocityRange vrange;
-
-	RobinMgr robinMgr;
-
-public:
-
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
-
-	void FinishPaths(std::filesystem::path& cumulativePath_);
-
-	void LoadWaves();
-
-};
-
+} // end of namespace

@@ -33,52 +33,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
-
 #include <filesystem>
-#include "RobinMgr.h"
 
-struct VelocityRange
-{
-	// Scaled 0 - 127 
-
-	int velCode;  // As given in the drum font - the nominal iMinVel
-
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
-
-	// Scaled 0 - 1.0 versions of the above
-
-	double fMinVel;
-	double fMaxVel;
-
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
-
-	void clear();
-};
-
-
-class VelocityLayer {
+class MemWave {
 public:
-
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
-
-	VelocityRange vrange;
-
-	RobinMgr robinMgr;
-
-public:
-
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
-
-	void FinishPaths(std::filesystem::path& cumulativePath_);
-
-	void LoadWaves();
-
+	std::filesystem::path path;
+	void Load(const std::filesystem::path& path_);
+	void Reset();
+	void AliasSamples(MemWave& other);
+	void StereoTick(double& left, double& right);
+	bool IsFinished();
 };
-

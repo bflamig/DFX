@@ -189,3 +189,28 @@ RobinMgr& MultiLayeredDrum::SelectVelocityLayer(double vel)
 	auto r = FindVelocityLayer(vel);
 	return velocityLayers[r]->robinMgr;
 }
+
+MemWave& MultiLayeredDrum::ChooseWave(int vel) // Mostly for debugging
+{
+	auto& rm = SelectVelocityLayer(vel);
+	auto& mw = rm.ChooseWave();
+	return mw;
+}
+
+
+
+MemWave& MultiLayeredDrum::ChooseWave(double vel)
+{
+	auto& rm = SelectVelocityLayer(vel);
+	auto &mw = rm.ChooseWave();
+	return mw;
+}
+
+
+void MultiLayeredDrum::LoadWaves()
+{
+	for (auto& lp : velocityLayers)
+	{
+		lp->LoadWaves();
+	}
+}

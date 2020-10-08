@@ -105,3 +105,8 @@ void VelocityLayer::FinishPaths(std::filesystem::path& cumulativePath_)
 	robinMgr.FinishPaths(cumulativePath);
 }
 
+void VelocityLayer::LoadWaves()
+{
+	robinMgr.LoadWaves();
+}
+

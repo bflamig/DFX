@@ -1,5 +1,3 @@
-#pragma once
-
 /******************************************************************************\
  * DFX - "Drum font exchange format" - source code
  *
@@ -34,51 +32,76 @@
  *
 \******************************************************************************/
 
-#include <filesystem>
-#include "RobinMgr.h"
+#include <iostream>
+#include "PolyTable.h"
 
-struct VelocityRange
+using namespace bryx;
+
+int polytest1()
 {
-	// Scaled 0 - 127 
+	PolyTable pt(3);
 
-	int velCode;  // As given in the drum font - the nominal iMinVel
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
 
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
+	int note;
 
-	// Scaled 0 - 1.0 versions of the above
+	note = 87;
+	pt.ActivateSlot(note);
 
-	double fMinVel;
-	double fMaxVel;
+	std::cout << "--- After activating slot with note " << note << " ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
 
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
+	note = 36;
+	pt.ActivateSlot(note);
 
-	void clear();
-};
+	std::cout << "--- After activating slot with note " << note << " ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	note = 55;
+	pt.ActivateSlot(note);
+
+	std::cout << "--- After activating slot with note " << note << " ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	//pt.Deactivate(0);
+	//pt.Deactivate(1);
+	//pt.Deactivate(2);
+
+	note = 75;
+	pt.ActivateSlot(note); // Full, so need to reuse oldest
+
+	std::cout << "--- After activating slot with note " << note << " in full table ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	pt.Deactivate(1);
+
+	std::cout << "--- After deactivating slot 1 ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	pt.Deactivate(2);
+
+	std::cout << "--- After deactivating slot 2 ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	pt.Deactivate(0);
+
+	std::cout << "--- After deactivating slot 0 ---" << "\n\n";
+	pt.DumpActive(std::cout);
+	pt.DumpInactive(std::cout);
+
+	return 0;
+}
 
 
-class VelocityLayer {
-public:
-
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
-
-	VelocityRange vrange;
-
-	RobinMgr robinMgr;
-
-public:
-
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
-
-	void FinishPaths(std::filesystem::path& cumulativePath_);
-
-	void LoadWaves();
-
-};
+int main()
+{
+	polytest1();
+}
 

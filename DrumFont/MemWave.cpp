@@ -1,5 +1,3 @@
-#pragma once
-
 /******************************************************************************\
  * DFX - "Drum font exchange format" - source code
  *
@@ -34,51 +32,32 @@
  *
 \******************************************************************************/
 
-#include <filesystem>
-#include "RobinMgr.h"
+#include "MemWave.h"
 
-struct VelocityRange
+
+void MemWave::Reset()
 {
-	// Scaled 0 - 127 
 
-	int velCode;  // As given in the drum font - the nominal iMinVel
-
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
-
-	// Scaled 0 - 1.0 versions of the above
-
-	double fMinVel;
-	double fMaxVel;
-
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
-
-	void clear();
-};
+}
 
 
-class VelocityLayer {
-public:
+void MemWave::Load(const std::filesystem::path& path_)
+{
+	path = path_;
+}
 
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
 
-	VelocityRange vrange;
+void MemWave::AliasSamples(MemWave& other)
+{
 
-	RobinMgr robinMgr;
+}
 
-public:
+void MemWave::StereoTick(double& left, double& right)
+{
 
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
+}
 
-	void FinishPaths(std::filesystem::path& cumulativePath_);
-
-	void LoadWaves();
-
-};
-
+bool MemWave::IsFinished()
+{
+	return true;
+}

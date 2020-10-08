@@ -34,51 +34,60 @@
  *
 \******************************************************************************/
 
-#include <filesystem>
-#include "RobinMgr.h"
+#include "PolyTable.h"
+#include "DrumKit.h"
 
-struct VelocityRange
+namespace bryx
 {
-	// Scaled 0 - 127 
+	struct Frame
+	{
+		double left;
+		double right;
+	};
 
-	int velCode;  // As given in the drum font - the nominal iMinVel
+	constexpr int DRUM_POLYPHONY = 16;
 
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
+	class PolyDrummer {
+	public:
 
-	// Scaled 0 - 1.0 versions of the above
+		PolyTable polyTable;
+		DrumKit drumKit;
 
-	double fMinVel;
-	double fMaxVel;
+		bool interrupt_same_note; // If true, only one playback of each note active at a time.
 
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
+	public:
 
-	void clear();
-};
+		PolyDrummer(int polyPhony = DRUM_POLYPHONY);
+
+		virtual ~PolyDrummer();
+
+		void LoadKit();
+
+		void SetInterruptSameNoteScheme(bool reuse_flag)
+		{
+			interrupt_same_note = reuse_flag;
+		}
+
+		//! Start a note with the given drum type and amplitude.
+
+		void noteOnDirect(int number, double amplitude);
+
+		//! Start a note with the given drum type and amplitude.
+		//void noteOn(double instrument, double amplitude);
+
+		//! Stop a note with the given amplitude (speed of decay).
+		void noteOff(double amplitude);
+
+		//! Compute and return one output sample.
+		//double tick(unsigned int channel = 0);
+
+		void StereoTick(double& left, double& right);
+
+		//! Fill a channel of the Frame object with computed outputs.
+		//Frame& tick(Frame& frame, unsigned int channel = 0);
 
 
-class VelocityLayer {
-public:
+	};
 
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
 
-	VelocityRange vrange;
-
-	RobinMgr robinMgr;
-
-public:
-
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
-
-	void FinishPaths(std::filesystem::path& cumulativePath_);
-
-	void LoadWaves();
-
-};
-
+} // end of namespace

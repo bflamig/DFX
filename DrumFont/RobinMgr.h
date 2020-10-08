@@ -37,9 +37,13 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include "MemWave.h"
 
 class Robin {
 public:
+
+	MemWave wave;
+
 	std::filesystem::path fullPath;
 	std::filesystem::path fileName;
 	double peak; // In db, as given in the drum font
@@ -54,11 +58,12 @@ public:
 	Robin& operator=(Robin&& other) noexcept;
 
 	void FinishPaths(std::filesystem::path& cumulativePath_);
+
+	void LoadWave();
 };
 
 
-
-class RobinMgr { // : Stk {
+class RobinMgr { 
 public:
 
 	std::vector<Robin> robins;
@@ -76,10 +81,14 @@ public:
 
 	void FinishPaths(std::filesystem::path& cumulativePath_);
 
+	void LoadWaves();
+
 	//void LoadWaves(std::string pathToWaves, bool is_directory, FileEncoding encoding);
 
 	//MemWvIn& ChooseRobin();
 
-	Robin& ChooseRobin();
+	Robin& ChooseRobin(); // Lower level
+
+	MemWave& ChooseWave(); // What will be used most of the time.
 };
 

@@ -64,5 +64,11 @@ public:
 	RobinMgr& SelectVelocityLayer(int vel);  // Mostly for debugging
 	RobinMgr& SelectVelocityLayer(double vel);
 
+public:
+
+	void LoadWaves();
+
+	MemWave& ChooseWave(int vel);    // Mostly for debugging
+	MemWave& ChooseWave(double vel);
 };
 
