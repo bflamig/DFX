@@ -97,11 +97,11 @@ VelocityLayer::VelocityLayer(VelocityLayer&& other) noexcept
 }
 
 
-void VelocityLayer::FinishUp(std::filesystem::path& cumulativePath_)
+void VelocityLayer::FinishPaths(std::filesystem::path& cumulativePath_)
 {
 	cumulativePath = cumulativePath_;
 	cumulativePath /= localPath;
 	cumulativePath = cumulativePath.generic_string();
-	robinMgr.FinishUp(cumulativePath);
+	robinMgr.FinishPaths(cumulativePath);
 }
 

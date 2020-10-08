@@ -44,7 +44,9 @@ public:
 	std::filesystem::path kitPath;        // Relative to sound font location
 	std::string name;
 
-	std::vector<MultiLayeredDrum> drums;
+	std::vector<std::shared_ptr<MultiLayeredDrum>> drums;
+	std::vector<std::shared_ptr<MultiLayeredDrum>> noteMap;
+
 public:
 
 	DrumKit();
@@ -56,7 +58,9 @@ public:
 
 public:
 
-	void FinishUp(std::filesystem::path& soundFontPath_);
+	void ClearNotes();
+	void FinishPaths(std::filesystem::path& soundFontPath_);
+	void BuildNoteMap();
 
 };
 

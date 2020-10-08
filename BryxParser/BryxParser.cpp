@@ -309,7 +309,7 @@ namespace bryx
 		return std::dynamic_pointer_cast<SimpleValue>(valPtr);
 	}
 
-	std::shared_ptr<Value> Parser::PropertyExists(const curly_list_type* parent_map_ptr, const std::string prop_name)
+	std::shared_ptr<Value> Parser::GetPropertyValue(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
 		try
 		{

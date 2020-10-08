@@ -53,7 +53,7 @@ public:
 	Robin& operator=(const Robin& other);
 	Robin& operator=(Robin&& other) noexcept;
 
-	void FinishUp(std::filesystem::path& cumulativePath_);
+	void FinishPaths(std::filesystem::path& cumulativePath_);
 };
 
 
@@ -74,7 +74,7 @@ public:
 	RobinMgr& operator=(const RobinMgr& other);
 	RobinMgr& operator=(RobinMgr&& other) noexcept;
 
-	void FinishUp(std::filesystem::path& cumulativePath_);
+	void FinishPaths(std::filesystem::path& cumulativePath_);
 
 	//void LoadWaves(std::string pathToWaves, bool is_directory, FileEncoding encoding);
 

@@ -304,7 +304,7 @@ namespace bryx
 		static const curly_list_type* AsCurlyList(const std::shared_ptr<Value>& valPtr);
 		static curly_list_type* AsCurlyList(std::shared_ptr<Value>& valPtr);
 
-		static std::shared_ptr<Value> PropertyExists(const curly_list_type* parent_map_ptr, const std::string prop_name);
+		static std::shared_ptr<Value> GetPropertyValue(const curly_list_type* parent_map_ptr, const std::string prop_name);
 
 		static curly_list_type* GetCurlyListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name);
 

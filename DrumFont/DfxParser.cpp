@@ -176,7 +176,7 @@ namespace bryx
 
 			// Okay, on to the main show: the {}-list of instruments.
 
-			auto vp = PropertyExists(kitmap_ptr, "instruments");
+			auto vp = GetPropertyValue(kitmap_ptr, "instruments");
 
 			if (vp)
 			{
@@ -218,7 +218,7 @@ namespace bryx
 
 		auto new_ctx = ctx + '/' + "path";
 
-		auto vp = PropertyExists(parent_map, "path");
+		auto vp = GetPropertyValue(parent_map, "path");
 
 		if (vp)
 		{
@@ -324,7 +324,7 @@ namespace bryx
 		// If we find such a note property, we make sure the value of that 
 		// path is a whole number.
 
-		auto vp = PropertyExists(parent_map, "note");
+		auto vp = GetPropertyValue(parent_map, "note");
 
 		if (vp)
 		{
@@ -367,7 +367,7 @@ namespace bryx
 
 		// See if the velocity layers property is present
 
-		auto vlp = PropertyExists(parent_map, "velocities");
+		auto vlp = GetPropertyValue(parent_map, "velocities");
 
 		if (vlp)
 		{
@@ -575,7 +575,7 @@ namespace bryx
 
 		auto new_ctx = ctx + '/' + "fname";
 
-		auto vp = PropertyExists(parent_map, "fname");
+		auto vp = GetPropertyValue(parent_map, "fname");
 
 		if (vp)
 		{
@@ -620,7 +620,7 @@ namespace bryx
 		// Check for a possibly optional offset.
 		// If we find such a property, we make sure the value it's a whole number.
 
-		auto vp = PropertyExists(parent_map, "offset");
+		auto vp = GetPropertyValue(parent_map, "offset");
 
 		if (vp)
 		{
@@ -668,12 +668,11 @@ namespace bryx
 		// whole or floating point doesn't matter. It may have an optional 
 		// db unit on it.
 
-		auto vp = PropertyExists(parent_map, "peak");
+		auto vp = GetPropertyValue(parent_map, "peak");
 
 		if (vp)
 		{
-			// We found the property. Is it the right type?
-			// Is it a number? With the right range?
+			// We found the property. Is it a number with the right range?
 
 			auto num_tkn_ptr = ProcessAsNumber(new_ctx, vp);
 
@@ -709,12 +708,11 @@ namespace bryx
 
 		auto new_ctx = ctx + '/' + "rms";
 
-		auto vp = PropertyExists(parent_map, "rms");
+		auto vp = GetPropertyValue(parent_map, "rms");
 
 		if (vp)
 		{
-			// We found the property. Is it the right type?
-			// Is it a number? With the right range?
+			// We found the property. Is it a number with the right range?
 
 			auto num_tkn_ptr = ProcessAsNumber(new_ctx, vp);
 
@@ -754,16 +752,16 @@ namespace bryx
 				// It might be a number in a quoted string. (This would happen in
 				// Json sytnax, for sure, but also allowed in bryx syntax.)
 
-				// NOTE: Allows unquoted number with units here too. Is this a problem?
-				// Lexi would kick out things like -30 db (with space in between) so 
-				// we're mostly okay here.
+				// NOTE: Allows bryx unquoted number with units here too. Is this a problem?
+				// Only if there were spaces. Lexi would kick out things like -30 db (with
+				// space in between) so we're mostly okay here.
 
 				// Returns error token if wasn't already a number or couldn't convert to one.
 				token_ptr t = svp->CompatibleWithNumber();
 
 				if (std::dynamic_pointer_cast<NumberToken>(t))
 				{
-					// Okay, the quoted string is compatible with a number.
+					// Okay, the text string is compatible with a number.
 					// We really want to do some surgery to the parse
 					// tree and represent this value as a number. 
 					// At first, I wasn't sure how to pull this off.

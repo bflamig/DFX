@@ -41,7 +41,6 @@ namespace bryx
 	DrumFont::DrumFont()
 	: drumKits{}
 	{
-
 	}
 
 	DfxVerifyResult DrumFont::LoadFile(std::ostream& slog, std::string fname)
@@ -78,7 +77,8 @@ namespace bryx
 		for (auto nvkit : *kits)
 		{
 			auto kit_ptr = BuildKit(nvkit);
-			kit_ptr->FinishUp(sound_font_path);
+			kit_ptr->FinishPaths(sound_font_path);
+			kit_ptr->BuildNoteMap();
 			drumKits.push_back(kit_ptr);
 			int i = 42;
 		}
@@ -86,11 +86,11 @@ namespace bryx
 
 	void DrumFont::DumpRobins(std::ostream& sout)
 	{
-		for (auto kit : drumKits)
+		for (auto& kit : drumKits)
 		{
 			for (auto& drum : kit->drums)
 			{
-				for (auto& layer : drum.velocityLayers)
+				for (auto& layer : drum->velocityLayers)
 				{
 					for (auto& robin : layer->robinMgr.robins)
 					{
@@ -131,14 +131,14 @@ namespace bryx
 		}
 	}
 
-	void DrumFont::BuildInstrument(std::vector<MultiLayeredDrum>& drums, const nv_type& drum_nv)
+	void DrumFont::BuildInstrument(std::vector<std::shared_ptr<MultiLayeredDrum>>& drums, const nv_type& drum_nv)
 	{
 		auto& drum_name = drum_nv.first;
 		auto& drum_val = drum_nv.second;
 
 		const curly_list_type* drum_map_ptr = AsCurlyList(drum_val);
 
-		auto vp = PropertyExists(drum_map_ptr, "note");
+		auto vp = GetPropertyValue(drum_map_ptr, "note");
 
 		auto svp = AsSimpleValue(vp);
 
@@ -152,9 +152,9 @@ namespace bryx
 		std::cout << "  path " << '"' << *drum_path_opt << '"' << std::endl;
 		std::cout << "  note " << midiNote << std::endl;
 
-		//auto drum = std::make_shared<MultiLayeredDrum>(drum_name, drum_path_opt, midiNote);
+		auto drum = std::make_shared<MultiLayeredDrum>(drum_name, *drum_path_opt, midiNote);
 		//auto drum = MultiLayeredDrum(drum_name, *drum_path_opt, midiNote);
-		MultiLayeredDrum drum(drum_name, *drum_path_opt, midiNote);
+		//MultiLayeredDrum drum(drum_name, *drum_path_opt, midiNote);
 
 		// We should have a []-list of velocity layers. Each layer is represented
 		// in the Parser as a name-value pair.
@@ -162,23 +162,22 @@ namespace bryx
 		const square_list_type* vlayers = GetSquareListProperty(drum_map_ptr, "velocities");
 
 		int nlayers = vlayers->size();
-		drum.velocityLayers.reserve(nlayers);
+		drum->velocityLayers.reserve(nlayers);
 
 		for (auto vlayer_sh_ptr : *vlayers)
 		{
-			BuildVelocityLayer(drum.velocityLayers, vlayer_sh_ptr);
+			BuildVelocityLayer(drum->velocityLayers, vlayer_sh_ptr);
 		}
 
 		drums.emplace_back(std::move(drum));
 	}
 
-
 	void DrumFont::BuildVelocityLayer(std::vector<std::shared_ptr<VelocityLayer>>& vlayers, std::shared_ptr<Value>& vlayer_sh_ptr)
 	{
-		auto frog = dynamic_cast<NameValue*>(vlayer_sh_ptr.get());
+		auto nvp = dynamic_cast<NameValue*>(vlayer_sh_ptr.get());
 
-		auto& vel_code_str = frog->pair.first;
-		auto& vlayer_body = frog->pair.second;
+		auto& vel_code_str = nvp->pair.first;
+		auto& vlayer_body = nvp->pair.second;
 
 		// vel_code starts with a "v", so skip past that
 
@@ -220,7 +219,7 @@ namespace bryx
 
 		auto fname_opt = GetSimpleProperty(robin_body_map_ptr, "fname");
 
-		auto offset_vp = PropertyExists(robin_body_map_ptr, "offset");
+		auto offset_vp = GetPropertyValue(robin_body_map_ptr, "offset");
 		int offset;
 
 		if (offset_vp)
@@ -235,7 +234,7 @@ namespace bryx
 			offset = 0;
 		}
 
-		auto peak_vp = PropertyExists(robin_body_map_ptr, "peak");
+		auto peak_vp = GetPropertyValue(robin_body_map_ptr, "peak");
 		double peak;
 
 		if (peak_vp)
@@ -250,7 +249,7 @@ namespace bryx
 			peak = 1.0;
 		}
 
-		auto rms_vp = PropertyExists(robin_body_map_ptr, "rms");
+		auto rms_vp = GetPropertyValue(robin_body_map_ptr, "rms");
 		double rms;
 
 		if (rms_vp)
@@ -265,19 +264,10 @@ namespace bryx
 			rms = 1.0;
 		}
 
-		//auto offset_opt = GetSimpleProperty(robin_body_map_ptr, "offset");
-		//auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
-		//auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
-
 		std::cout << "      robin " << '"' << *fname_opt << '"' << std::endl;
 		std::cout << "        offset " << offset << std::endl;
 		std::cout << "        peak " << peak << std::endl;
 		std::cout << "        rms " << rms << std::endl;
-
-		//size_t offset = std::stoi(*offset_opt); // @@ TODO: Typing issue
-
-		//double peak = std::stod(*peak_opt); // @@ TODO: handle dB units
-		//double rms = std::stod(*rms_opt); // @@ TODO: handle dB units
 
 		Robin robin(*fname_opt, peak, rms, offset);
 

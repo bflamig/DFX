@@ -76,7 +76,7 @@ public:
 	VelocityLayer(VelocityLayer&& other) noexcept;
 	virtual ~VelocityLayer() { }
 
-	void FinishUp(std::filesystem::path& cumulativePath_);
+	void FinishPaths(std::filesystem::path& cumulativePath_);
 
 };
 
