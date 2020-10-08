@@ -17,6 +17,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)DfxParser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DrumFont.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DrumKit.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FrameBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MemWave.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)PolyDrummer.cpp" />
@@ -28,6 +29,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)DfxParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DrumFont.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DrumKit.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FrameBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MemWave.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)PolyDrummer.h" />

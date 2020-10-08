@@ -1,5 +1,3 @@
-#pragma once
-
 /******************************************************************************\
  * DFX - "Drum font exchange format" - source code
  *
@@ -33,39 +31,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
-#include <filesystem>
+
 #include "FrameBuffer.h"
 
 namespace dfx
 {
-	class MemWave {
-	public:
 
-		FrameBuffer<double> buff;
-		std::filesystem::path path;
-
-		double sampleRate;   // In Hz.
-		double time;         // Floating posn through the frames
-		double rate;         // buff.sampleRate / sampleRate
-		bool finished;       // Time's up! (At end of the waves)
-
-		bool interpolate;
-
-	public:
-
-		MemWave();
-		virtual ~MemWave() {}
-
-		void Load(const std::filesystem::path& path_);
-		void Reset();
-		void AliasSamples(MemWave& other);
-
-		void SetRate(double sampleRate_);
-		void AddTime(double delta_);
-
-		void MonoTick(double& sample);
-		void StereoTick(double& left, double& right);
-		bool IsFinished();
-	};
-
-} // end of namespace
+} // End of namespace

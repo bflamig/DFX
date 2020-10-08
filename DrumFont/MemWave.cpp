@@ -34,30 +34,156 @@
 
 #include "MemWave.h"
 
-
-void MemWave::Reset()
+namespace dfx
 {
+	MemWave::MemWave()
+	: buff{}
+	, path{}
+	, sampleRate(44100.0)
+	, rate{ 1.0 }
+	, time{}
+	, finished{}
+	, interpolate{}
+	{
 
-}
+	}
+
+	void MemWave::Reset()
+	{
+		time = 0.0;
+		finished = false;
+	}
+
+	void MemWave::Load(const std::filesystem::path& path_)
+	{
+		path = path_;
+		// fill buffer, set numFrames; data rate, etc 
+	}
+
+	void MemWave::AliasSamples(MemWave& other)
+	{
+		buff.Alias(other.buff);
+	}
+
+	void MemWave::SetRate(double sampleRate_)
+	{
+		sampleRate = sampleRate_;
+
+		rate = buff.sampleRate / sampleRate;
+
+		// @@ TODO: DO we really want to implement this backwards stuff?
+		// If negative rate and at beginning of sound, move pointer to end
+		// of sound.
+		if ((rate < 0) && (time == 0.0)) time = buff.nFrames - 1.0;
+
+		if (fmod(rate, 1.0) != 0.0) interpolate = true;
+		else interpolate = false;
+	}
 
 
-void MemWave::Load(const std::filesystem::path& path_)
-{
-	path = path_;
-}
+	void MemWave::AddTime(double delta_)
+	{
+		time += delta_;
+
+		if (time < 0.0) time = 0.0;
+
+		unsigned nFrames = buff.nFrames;
+
+		if (time > nFrames - 1.0)
+		{
+			time = nFrames - 1.0;
+			// @@ TODO: Fill last frame with zero?
+			finished = true;
+		}
+	}
+
+	void MemWave::MonoTick(double& sample)
+	{
+		if (buff.nFrames != 1)
+		{
+			throw std::exception("Buffer isn't in mono. MemWave::MonoTick()");
+		}
+
+		if (finished)
+		{
+			sample = 0.0; 
+			return;
+		}
+
+		unsigned nFrames = buff.nFrames;
+
+		if (time > nFrames - 1.0)
+		{
+			time = nFrames - 1.0;
+			finished = true;
+			sample = 0.0;
+			return;
+		}
+
+		if (interpolate)
+		{
+			sample = buff.MonoInterpolate(time);
+		}
+		else
+		{
+			sample = buff.GetMonoFrame(static_cast<unsigned>(time));
+		}
+
+		// Increment time, which might be by a negative amount
+
+		time += rate;
+
+		// @@ TODO: IF time goes <= 0, shouldn't we flag finished?
+	}
 
 
-void MemWave::AliasSamples(MemWave& other)
-{
+	void MemWave::StereoTick(double& left, double& right)
+	{
+		if (buff.nFrames != 2)
+		{
+			throw std::exception("Buffer isn't in stereo. MemWave::StereoTick()");
+		}
 
-}
+		if (finished)
+		{
+			left = 0.0; right = 0.0;
+			return;
+		}
 
-void MemWave::StereoTick(double& left, double& right)
-{
+		unsigned nFrames = buff.nFrames;
 
-}
+		if (time > nFrames - 1.0)
+		{
+			time = nFrames - 1.0;
+			finished = true;
+			left = 0.0; right = 0.0;
+			return;
+		}
 
-bool MemWave::IsFinished()
-{
-	return true;
-}
+		if (interpolate)
+		{
+			// @@ Can we optimize the returns here?
+			auto fred = buff.StereoInterpolate(time);
+			left = fred.first;
+			right = fred.second;
+		}
+		else
+		{
+			auto fred = buff.GetStereoFrame(static_cast<unsigned>(time));
+			left = fred.first;
+			right = fred.second;
+		}
+
+		// Increment time, which might be by a negative amount
+
+		time += rate;
+
+		// @@ TODO: IF time goes <= 0, shouldn't we flag finished?
+	}
+
+	bool MemWave::IsFinished()
+	{
+		return true;
+	}
+
+} // end of namspace
