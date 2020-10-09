@@ -51,7 +51,7 @@ namespace dfx
 
 	public:
 
-		DfxVerifyResult LoadFile(std::ostream& slog, std::string fname);
+		DfxResult LoadFile(std::ostream& slog, std::string fname);
 		void DumpRobins(std::ostream& sout); // For testing purposes
 
 

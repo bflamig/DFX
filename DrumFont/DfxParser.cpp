@@ -36,41 +36,41 @@
 
 namespace dfx
 {
-	std::string to_string(DfxVerifyResult result)
+	std::string to_string(DfxResult result)
 	{
 		std::string s;
 
 		switch (result)
 		{
-			case DfxVerifyResult::NoError: s = "NoError"; break;
-			case DfxVerifyResult::FileNotFound: s = "File not found"; break;
-			case DfxVerifyResult::InvalidFileType: s = "Invalid file type"; break;
-			case DfxVerifyResult::MustBeSpecified: s = "Must be specified"; break;
-			case DfxVerifyResult::MustBeString: s = "Must be a double quoted string"; break;
-			case DfxVerifyResult::NoteMissing: s = "Drum note missing"; break;
-			case DfxVerifyResult::NoteMustBeWholeNumber: s = "Note must be whole number"; break;
-			case DfxVerifyResult::KitsMissing: s = "Kits are missing"; break;
-			case DfxVerifyResult::KitValWrongType: s = "Kit value must be a {}-list type"; break;
-			case DfxVerifyResult::InstrumentsMissing: s = "Instruments are missing"; break;
-			case DfxVerifyResult::InstrumentsMustBeList: s = "Instruments must be in a {}-list"; break;
-			case DfxVerifyResult::DrumValMustBeList: s = "Drum info must be in a {}-list"; break;
-			case DfxVerifyResult::VelocitiesMissing: s = "Velocity layers are missing"; break;
-			case DfxVerifyResult::VelocitiesMustBeNonEmptySquareList: s = "Velocity layers must be in a non-empty array"; break;
-			case DfxVerifyResult::InvalidVelocityCode: s = "Invalid velocity code"; break;
-			case DfxVerifyResult::RobinsMissing: s = "Robins are missing"; break;
-			case DfxVerifyResult::RobinsMustBeNonEmptySquareList: s = "Robins must be in a non-empty []-list"; break;
-			case DfxVerifyResult::RobinMustBeNameValue: s = "Robin must be a name-value pair"; break;
-			case DfxVerifyResult::RobinNameMustBeValidPath: s = "Robin name must be valid path"; break;
-			case DfxVerifyResult::OffsetMustBeWholeNumber: s = "Offset must be whole number"; break;
-			case DfxVerifyResult::OffsetMissing: s = "offset must be specified"; break;
-			case DfxVerifyResult::PeakMustBeNumber: s = "Peak must be whole or floating point number (suffix units allowed)"; break;
-			case DfxVerifyResult::PeakMissing: s = "peak must be specified"; break;
-			case DfxVerifyResult::RmsMustBeNumber: s = "Rms must be whole or floating point number (suffix units allowed)"; break;
-			case DfxVerifyResult::RmsMissing: s = "rms must be specified"; break;
-			case DfxVerifyResult::ValueHasWrongUnits: s = "value can only have ratio units"; break;
-			case DfxVerifyResult::ValueNotLegal: s = "value when converted to unitless number must be in range 0 < val <= 1.0"; break;
-			case DfxVerifyResult::VerifyFailed: s = "Verify failed"; break;
-			case DfxVerifyResult::UnspecifiedError: s = "Unspecified error"; break;
+			case DfxResult::NoError: s = "NoError"; break;
+			case DfxResult::FileNotFound: s = "File not found"; break;
+			case DfxResult::InvalidFileType: s = "Invalid file type"; break;
+			case DfxResult::MustBeSpecified: s = "Must be specified"; break;
+			case DfxResult::MustBeString: s = "Must be a double quoted string"; break;
+			case DfxResult::NoteMissing: s = "Drum note missing"; break;
+			case DfxResult::NoteMustBeWholeNumber: s = "Note must be whole number"; break;
+			case DfxResult::KitsMissing: s = "Kits are missing"; break;
+			case DfxResult::KitValWrongType: s = "Kit value must be a {}-list type"; break;
+			case DfxResult::InstrumentsMissing: s = "Instruments are missing"; break;
+			case DfxResult::InstrumentsMustBeList: s = "Instruments must be in a {}-list"; break;
+			case DfxResult::DrumValMustBeList: s = "Drum info must be in a {}-list"; break;
+			case DfxResult::VelocitiesMissing: s = "Velocity layers are missing"; break;
+			case DfxResult::VelocitiesMustBeNonEmptySquareList: s = "Velocity layers must be in a non-empty array"; break;
+			case DfxResult::InvalidVelocityCode: s = "Invalid velocity code"; break;
+			case DfxResult::RobinsMissing: s = "Robins are missing"; break;
+			case DfxResult::RobinsMustBeNonEmptySquareList: s = "Robins must be in a non-empty []-list"; break;
+			case DfxResult::RobinMustBeNameValue: s = "Robin must be a name-value pair"; break;
+			case DfxResult::RobinNameMustBeValidPath: s = "Robin name must be valid path"; break;
+			case DfxResult::OffsetMustBeWholeNumber: s = "Offset must be whole number"; break;
+			case DfxResult::OffsetMissing: s = "offset must be specified"; break;
+			case DfxResult::PeakMustBeNumber: s = "Peak must be whole or floating point number (suffix units allowed)"; break;
+			case DfxResult::PeakMissing: s = "peak must be specified"; break;
+			case DfxResult::RmsMustBeNumber: s = "Rms must be whole or floating point number (suffix units allowed)"; break;
+			case DfxResult::RmsMissing: s = "rms must be specified"; break;
+			case DfxResult::ValueHasWrongUnits: s = "value can only have ratio units"; break;
+			case DfxResult::ValueNotLegal: s = "value when converted to unitless number must be in range 0 < val <= 1.0"; break;
+			case DfxResult::VerifyFailed: s = "Verify failed"; break;
+			case DfxResult::UnspecifiedError: s = "Unspecified error"; break;
 			default: break;
 		}
 
@@ -140,7 +140,7 @@ namespace dfx
 		}
 		else
 		{
-			LogError(file_moniker, DfxVerifyResult::KitsMissing);
+			LogError(file_moniker, DfxResult::KitsMissing);
 		}
 
 		return errcnt == 0;
@@ -191,17 +191,17 @@ namespace dfx
 				}
 				else
 				{
-					LogError(kit_name, DfxVerifyResult::InstrumentsMustBeList);
+					LogError(kit_name, DfxResult::InstrumentsMustBeList);
 				}
 			}
 			else
 			{
-				LogError(kit_name, DfxVerifyResult::InstrumentsMissing);
+				LogError(kit_name, DfxResult::InstrumentsMissing);
 			}
 		}
 		else
 		{
-			LogError(kit_name, DfxVerifyResult::KitValWrongType);
+			LogError(kit_name, DfxResult::KitValWrongType);
 		}
 
 		return errcnt == save_errcnt;
@@ -237,19 +237,19 @@ namespace dfx
 				}
 				else
 				{
-					LogError(new_ctx, DfxVerifyResult::MustBeString);
+					LogError(new_ctx, DfxResult::MustBeString);
 				}
 			}
 			else
 			{
-				LogError(new_ctx, DfxVerifyResult::MustBeString);
+				LogError(new_ctx, DfxResult::MustBeString);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(new_ctx, DfxVerifyResult::MustBeSpecified);
+				LogError(new_ctx, DfxResult::MustBeSpecified);
 			}
 		}
 
@@ -309,7 +309,7 @@ namespace dfx
 		}
 		else
 		{
-			LogError(new_ctx, DfxVerifyResult::DrumValMustBeList);
+			LogError(new_ctx, DfxResult::DrumValMustBeList);
 		}
 
 		return save_errcnt == errcnt;
@@ -341,19 +341,19 @@ namespace dfx
 				}
 				else
 				{
-					LogError(ctx, DfxVerifyResult::NoteMustBeWholeNumber);
+					LogError(ctx, DfxResult::NoteMustBeWholeNumber);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::NoteMustBeWholeNumber);
+				LogError(ctx, DfxResult::NoteMustBeWholeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(ctx, DfxVerifyResult::NoteMissing);
+				LogError(ctx, DfxResult::NoteMissing);
 			}
 		}
 
@@ -388,18 +388,18 @@ namespace dfx
 				}
 				else
 				{
-					LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptySquareList);
+					LogError(ctx, DfxResult::VelocitiesMustBeNonEmptySquareList);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::VelocitiesMustBeNonEmptySquareList);
+				LogError(ctx, DfxResult::VelocitiesMustBeNonEmptySquareList);
 			}
 
 		}
 		else
 		{
-			LogError(ctx, DfxVerifyResult::VelocitiesMissing);
+			LogError(ctx, DfxResult::VelocitiesMissing);
 		}
 
 		return errcnt == save_errcnt;
@@ -429,7 +429,7 @@ namespace dfx
 				{
 					if (!Lexi::IsDigit(*p))
 					{
-						LogError(ctx, DfxVerifyResult::InvalidVelocityCode);
+						LogError(ctx, DfxResult::InvalidVelocityCode);
 						break;
 					}
 					++p;
@@ -437,7 +437,7 @@ namespace dfx
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::InvalidVelocityCode);
+				LogError(ctx, DfxResult::InvalidVelocityCode);
 			}
 
 			// Okay, regardless of whether we have a valid velocity code,
@@ -466,12 +466,12 @@ namespace dfx
 			{
 				// We shouldn't get here, seein's how we already checked for
 				// name value earlier, so vlayer_body *will* be value
-				LogError(ctx, DfxVerifyResult::VelocityMustBeNameValue);
+				LogError(ctx, DfxResult::VelocityMustBeNameValue);
 			}
 		}
 		else
 		{
-			LogError(ctx, DfxVerifyResult::VelocityMustBeNameValue);
+			LogError(ctx, DfxResult::VelocityMustBeNameValue);
 		}
 
 		return errcnt == save_errcnt;
@@ -502,18 +502,18 @@ namespace dfx
 					}
 					else
 					{
-						LogError(ctx, DfxVerifyResult::RobinMustBeNameValue);
+						LogError(ctx, DfxResult::RobinMustBeNameValue);
 					}
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptySquareList);
+				LogError(ctx, DfxResult::RobinsMustBeNonEmptySquareList);
 			}
 		}
 		else
 		{
-			LogError(ctx, DfxVerifyResult::RobinsMustBeNonEmptySquareList);
+			LogError(ctx, DfxResult::RobinsMustBeNonEmptySquareList);
 		}
 
 		return errcnt == save_errcnt;
@@ -558,7 +558,7 @@ namespace dfx
 		{
 			// Should never reach here, cause we alerady verified earlier
 			// it's a name value
-			LogError(ctx, DfxVerifyResult::RobinMustBeNameValue);
+			LogError(ctx, DfxResult::RobinMustBeNameValue);
 		}
 
 		return errcnt == save_errcnt;
@@ -593,19 +593,19 @@ namespace dfx
 				}
 				else
 				{
-					LogError(new_ctx, DfxVerifyResult::MustBeString);
+					LogError(new_ctx, DfxResult::MustBeString);
 				}
 			}
 			else
 			{
-				LogError(new_ctx, DfxVerifyResult::MustBeString);
+				LogError(new_ctx, DfxResult::MustBeString);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(new_ctx, DfxVerifyResult::MustBeSpecified);
+				LogError(new_ctx, DfxResult::MustBeSpecified);
 			}
 		}
 
@@ -637,19 +637,19 @@ namespace dfx
 				}
 				else
 				{
-					LogError(ctx, DfxVerifyResult::OffsetMustBeWholeNumber);
+					LogError(ctx, DfxResult::OffsetMustBeWholeNumber);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::OffsetMustBeWholeNumber);
+				LogError(ctx, DfxResult::OffsetMustBeWholeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(ctx, DfxVerifyResult::OffsetMissing);
+				LogError(ctx, DfxResult::OffsetMissing);
 			}
 		}
 
@@ -682,14 +682,14 @@ namespace dfx
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
+				LogError(ctx, DfxResult::RmsMustBeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(ctx, DfxVerifyResult::PeakMissing);
+				LogError(ctx, DfxResult::PeakMissing);
 			}
 		}
 
@@ -722,14 +722,14 @@ namespace dfx
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
+				LogError(ctx, DfxResult::RmsMustBeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(ctx, DfxVerifyResult::RmsMissing);
+				LogError(ctx, DfxResult::RmsMissing);
 			}
 		}
 
@@ -773,14 +773,14 @@ namespace dfx
 					// t is actually an error token with further info
 					auto err_t = std::dynamic_pointer_cast<SimpleToken>(t);
 					auto& err_pkg = err_t->result_pkg;
-					LogError(ctx, DfxVerifyResult::RmsMustBeNumber, err_pkg);
+					LogError(ctx, DfxResult::RmsMustBeNumber, err_pkg);
 					return nullptr;
 				}
 			}
 		}
 		else
 		{
-			LogError(ctx, DfxVerifyResult::RmsMustBeNumber);
+			LogError(ctx, DfxResult::RmsMustBeNumber);
 			return nullptr;
 		}
 
@@ -807,7 +807,7 @@ namespace dfx
 
 		if (traits.HasExponent() || traits.HasMetricPrefix())
 		{
-			LogError(ctx, DfxVerifyResult::ValueNotLegal);
+			LogError(ctx, DfxResult::ValueNotLegal);
 		}
 		else
 		{
@@ -821,7 +821,7 @@ namespace dfx
 
 				if (num < 0.0 || num > 1.0)
 				{
-					LogError(ctx, DfxVerifyResult::ValueNotLegal);
+					LogError(ctx, DfxResult::ValueNotLegal);
 				}
 			}
 			else if (engr_num.units == UnitEnum::None)
@@ -833,12 +833,12 @@ namespace dfx
 
 				if (num < 0.0 || num > 1.0)
 				{
-					LogError(ctx, DfxVerifyResult::ValueNotLegal);
+					LogError(ctx, DfxResult::ValueNotLegal);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxVerifyResult::ValueHasWrongUnits);
+				LogError(ctx, DfxResult::ValueHasWrongUnits);
 			}
 		}
 
@@ -879,7 +879,7 @@ namespace dfx
 		errcnt = 0;
 	}
 
-	DfxVerifyResult DfxParser::LogError(const std::string prop, DfxVerifyResult err)
+	DfxResult DfxParser::LogError(const std::string prop, DfxResult err)
 	{
 		std::ostream & sl = *slog;
 		sl << "Property " << prop << ": ";
@@ -888,7 +888,7 @@ namespace dfx
 		return err;
 	}
 
-	DfxVerifyResult DfxParser::LogError(const std::string prop, DfxVerifyResult err, LexiResultPkg &err_pkg)
+	DfxResult DfxParser::LogError(const std::string prop, DfxResult err, LexiResultPkg &err_pkg)
 	{
 		std::ostream& sl = *slog;
 		sl << "Property " << prop << ": ";

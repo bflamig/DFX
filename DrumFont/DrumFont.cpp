@@ -43,9 +43,9 @@ namespace dfx
 	{
 	}
 
-	DfxVerifyResult DrumFont::LoadFile(std::ostream& slog, std::string fname)
+	DfxResult DrumFont::LoadFile(std::ostream& slog, std::string fname)
 	{
-		auto rv = DfxVerifyResult::NoError;
+		auto rv = DfxResult::NoError;
 
 		auto rvp = DfxParser::LoadFile(fname);
 
@@ -55,7 +55,7 @@ namespace dfx
 			auto zebra = Verify();
 			if (!zebra)
 			{
-				rv = DfxVerifyResult::VerifyFailed;
+				rv = DfxResult::VerifyFailed;
 			}
 			else
 			{
@@ -63,7 +63,7 @@ namespace dfx
 			}
 			EndLog();
 		}
-		else rv = DfxVerifyResult::UnspecifiedError; // @@ TODO: Last error?
+		else rv = DfxResult::UnspecifiedError; // @@ TODO: Last error?
 
 		return rv;
 	}

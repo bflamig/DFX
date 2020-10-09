@@ -42,7 +42,7 @@ namespace dfx
 {
 	using namespace bryx;
 
-	enum class DfxVerifyResult
+	enum class DfxResult
 	{
 		NoError,
 		FileNotFound,
@@ -76,9 +76,9 @@ namespace dfx
 		UnspecifiedError
 	};
 
-	extern std::string to_string(DfxVerifyResult result);
+	extern std::string to_string(DfxResult result);
 
-	using DfxVerifyResultPkg = ResultPkg<DfxVerifyResult>;
+	using DfxResultPkg = ResultPkg<DfxResult>;
 
 	// ////////////////////////////////////////////////////////////////////
 	// 
@@ -200,8 +200,8 @@ namespace dfx
 	public:
 
 		void StartLog(std::ostream& slog);
-		DfxVerifyResult LogError(const std::string prop, DfxVerifyResult err);
-		DfxVerifyResult LogError(const std::string prop, DfxVerifyResult err, LexiResultPkg& err_pkg);
+		DfxResult LogError(const std::string prop, DfxResult err);
+		DfxResult LogError(const std::string prop, DfxResult err, LexiResultPkg& err_pkg);
 		void EndLog();
 
 		void WriteDfx(std::ostream& sout);
