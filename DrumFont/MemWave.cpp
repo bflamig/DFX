@@ -40,7 +40,7 @@ namespace dfx
 	: buff{}
 	, path{}
 	, sampleRate(44100.0)
-	, rate{ 1.0 }
+	, deltaTime{ 1.0 }
 	, time{}
 	, finished{}
 	, interpolate{}
@@ -68,16 +68,8 @@ namespace dfx
 	void MemWave::SetRate(double sampleRate_)
 	{
 		sampleRate = sampleRate_;
-
-		rate = buff.sampleRate / sampleRate;
-
-		// @@ TODO: DO we really want to implement this backwards stuff?
-		// If negative rate and at beginning of sound, move pointer to end
-		// of sound.
-		if ((rate < 0) && (time == 0.0)) time = buff.nFrames - 1.0;
-
-		if (fmod(rate, 1.0) != 0.0) interpolate = true;
-		else interpolate = false;
+		deltaTime = buff.sampleRate / sampleRate;
+		interpolate = fmod(deltaTime, 1.0) != 0.0 ? true : false;
 	}
 
 
@@ -92,7 +84,6 @@ namespace dfx
 		if (time > nFrames - 1.0)
 		{
 			time = nFrames - 1.0;
-			// @@ TODO: Fill last frame with zero?
 			finished = true;
 		}
 	}
@@ -129,11 +120,9 @@ namespace dfx
 			sample = buff.GetMonoFrame(static_cast<unsigned>(time));
 		}
 
-		// Increment time, which might be by a negative amount
+		// Get ready for next go round
 
-		time += rate;
-
-		// @@ TODO: IF time goes <= 0, shouldn't we flag finished?
+		time += deltaTime;
 	}
 
 
@@ -162,7 +151,6 @@ namespace dfx
 
 		if (interpolate)
 		{
-			// @@ Can we optimize the returns here?
 			auto fred = buff.StereoInterpolate(time);
 			left = fred.first;
 			right = fred.second;
@@ -174,11 +162,9 @@ namespace dfx
 			right = fred.second;
 		}
 
-		// Increment time, which might be by a negative amount
+		// Get ready for next go round
 
-		time += rate;
-
-		// @@ TODO: IF time goes <= 0, shouldn't we flag finished?
+		time += deltaTime;
 	}
 
 	bool MemWave::IsFinished()
