@@ -71,6 +71,14 @@ namespace dfx
 			samples = nullptr; // Release our claim on the samples
 		}
 
+		void Clear()
+		{
+			for (unsigned i = 0; i < nSamples; i++)
+			{
+				samples[i] = 0.0;
+			}
+		}
+
 		void Resize(unsigned nFrames_, unsigned nChannels_)
 		{
 			if (nFrames_ != nFrames || nChannels_ != nChannels)

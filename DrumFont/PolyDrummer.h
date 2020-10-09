@@ -81,7 +81,7 @@ namespace dfx
 		//! Compute and return one output sample.
 		//double tick(unsigned int channel = 0);
 
-		void StereoTick(double& left, double& right);
+		std::pair<double, double> StereoTick();
 
 		//! Fill a channel of the Frame object with computed outputs.
 		//Frame& tick(Frame& frame, unsigned int channel = 0);

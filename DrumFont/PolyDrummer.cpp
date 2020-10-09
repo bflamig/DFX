@@ -78,7 +78,6 @@ namespace dfx
 		if (amplitude < 0.0 || amplitude > 1.0)
 		{
 			//oStream_ << "PolyDrum::noteOn: amplitude parameter is out of bounds!";
-			//handleError(StkError::WARNING); return;
 		}
 
 		int slot = -1;
@@ -111,7 +110,7 @@ namespace dfx
 			if (polyTable.IsFull())
 			{
 				// Turn off oldest since we're going to be using its slot. 
-				// (Actually, don't need to do anything here).
+				// @@ Actually, don't need to do anything here.
 			}
 
 			// grab a slot to use and place on active list
@@ -122,20 +121,11 @@ namespace dfx
 			// Point to the proper sound wave to use
 
 			auto& e = polyTable.elems[slot];
-			// already done: e.soundNumber = noteNumber;
 
-#if 0
-			int waveFileIndex = pianoKeyToDrumMap[noteNumber];
-			e.wave.AliasSamples(drumKit.residentWaves[waveFileIndex]);
-#else
-			// Kludge
-			int mapped_note = pianoKeyToDrumMap[noteNumber];
+			int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
 			auto& drum = drumKit.noteMap[mapped_note];
 			auto& mw = drum->ChooseWave(amplitude);
 			e.wave.AliasSamples(mw);
-#endif
-
-
 		}
 
 		auto& e = polyTable.elems[slot];
@@ -173,10 +163,10 @@ namespace dfx
 	}
 
 
-	void PolyDrummer::StereoTick(double& left, double& right)
+	std::pair<double, double> PolyDrummer::StereoTick()
 	{
-		left = 0.0;
-		right = 0.0;
+		double left = 0.0;
+		double right = 0.0;
 
 		int i = polyTable.aHead;
 
@@ -191,28 +181,15 @@ namespace dfx
 			else
 			{
 				auto& e = polyTable.elems[i];
-#if 0
-				auto ss = e.wave.tick(input_channel);
-				lastFrame_[input_channel] += e.filter.tick(ss);  // seems to help clipping (?)
-#else
-#if 0
-				lastFrame_[0] += e.wave.tick(0) * e.gain;
-				lastFrame_[1] += e.wave.tick(1) * e.gain;
-#else
 				auto rv = e.wave.StereoTick();
 				left += rv.first;   // @@ TODO: l * e.gain?
 				right += rv.second;  // @@ TODO: r * e.gain?
-#endif
-#endif
 			}
 
 			i = nxt;
 		}
 
-		//lastFrame_[0] = left;
-		//lastFrame_[1] = right;
-
-		return;
+		return { left, right };
 	}
 
 }
