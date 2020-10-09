@@ -37,7 +37,7 @@
 #include "PolyTable.h"
 #include "DrumKit.h"
 
-namespace bryx
+namespace dfx
 {
 	struct Frame
 	{

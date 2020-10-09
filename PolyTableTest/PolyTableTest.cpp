@@ -35,7 +35,7 @@
 #include <iostream>
 #include "PolyTable.h"
 
-using namespace bryx;
+using namespace dfx;
 
 int polytest1()
 {

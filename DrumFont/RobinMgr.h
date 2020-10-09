@@ -39,56 +39,55 @@
 #include <filesystem>
 #include "MemWave.h"
 
-class Robin {
-public:
+namespace dfx
+{
+	class Robin {
+	public:
 
-	MemWave wave;
+		MemWave wave;
 
-	std::filesystem::path fullPath;
-	std::filesystem::path fileName;
-	double peak; // In db, as given in the drum font
-	double rms;  // In db, as given in the drum font
-	size_t offset; // in frames, as given in the drum font
+		std::filesystem::path fullPath;
+		std::filesystem::path fileName;
+		double peak; // In db, as given in the drum font
+		double rms;  // In db, as given in the drum font
+		size_t offset; // in frames, as given in the drum font
 
-	Robin(std::string fileName_, double peak_, double rms_, size_t offset_);
-	Robin(const Robin& other);
-	Robin(Robin&& other) noexcept;
+		Robin(std::string fileName_, double peak_, double rms_, size_t offset_);
+		Robin(const Robin& other);
+		Robin(Robin&& other) noexcept;
 
-	Robin& operator=(const Robin& other);
-	Robin& operator=(Robin&& other) noexcept;
+		Robin& operator=(const Robin& other);
+		Robin& operator=(Robin&& other) noexcept;
 
-	void FinishPaths(std::filesystem::path& cumulativePath_);
+		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-	void LoadWave();
-};
+		void LoadWave();
+	};
 
 
-class RobinMgr { 
-public:
+	class RobinMgr {
+	public:
 
-	std::vector<Robin> robins;
-	size_t lastRobinChosen;
+		std::vector<Robin> robins;
+		size_t lastRobinChosen;
 
-public:
+	public:
 
-	RobinMgr();
-	RobinMgr(const RobinMgr& other);
-	RobinMgr(RobinMgr&& other) noexcept;
-	virtual ~RobinMgr();
+		RobinMgr();
+		RobinMgr(const RobinMgr& other);
+		RobinMgr(RobinMgr&& other) noexcept;
+		virtual ~RobinMgr();
 
-	RobinMgr& operator=(const RobinMgr& other);
-	RobinMgr& operator=(RobinMgr&& other) noexcept;
+		RobinMgr& operator=(const RobinMgr& other);
+		RobinMgr& operator=(RobinMgr&& other) noexcept;
 
-	void FinishPaths(std::filesystem::path& cumulativePath_);
+		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-	void LoadWaves();
+		void LoadWaves();
 
-	//void LoadWaves(std::string pathToWaves, bool is_directory, FileEncoding encoding);
+		Robin& ChooseRobin(); // Lower level
 
-	//MemWvIn& ChooseRobin();
+		MemWave& ChooseWave(); // What will be used most of the time.
+	};
 
-	Robin& ChooseRobin(); // Lower level
-
-	MemWave& ChooseWave(); // What will be used most of the time.
-};
-
+} // end of namespace

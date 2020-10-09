@@ -37,7 +37,7 @@
 #include <iostream>
 #include "DrumFont.h"
 
-using namespace bryx;
+using namespace dfx;
 
 void test()
 {

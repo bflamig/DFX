@@ -34,9 +34,9 @@
  *
 \******************************************************************************/
 
-
-namespace bryx
+namespace dfx
 {
+	using namespace bryx;
 
 	DrumFont::DrumFont()
 	: drumKits{}

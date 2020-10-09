@@ -37,48 +37,51 @@
 #include <filesystem>
 #include "RobinMgr.h"
 
-struct VelocityRange
+namespace dfx
 {
-	// Scaled 0 - 127 
+	struct VelocityRange
+	{
+		// Scaled 0 - 127 
 
-	int velCode;  // As given in the drum font - the nominal iMinVel
+		int velCode;  // As given in the drum font - the nominal iMinVel
 
-	int iMinVel;  // Determined after sorting
-	int iMaxVel;  // Determined after sorting
+		int iMinVel;  // Determined after sorting
+		int iMaxVel;  // Determined after sorting
 
-	// Scaled 0 - 1.0 versions of the above
+		// Scaled 0 - 1.0 versions of the above
 
-	double fMinVel;
-	double fMaxVel;
+		double fMinVel;
+		double fMaxVel;
 
-	VelocityRange();
-	explicit VelocityRange(int velCode_);
+		VelocityRange();
+		explicit VelocityRange(int velCode_);
 
-	void clear();
-};
+		void clear();
+	};
 
 
-class VelocityLayer {
-public:
+	class VelocityLayer {
+	public:
 
-	std::filesystem::path cumulativePath;
-	std::filesystem::path localPath;
+		std::filesystem::path cumulativePath;
+		std::filesystem::path localPath;
 
-	VelocityRange vrange;
+		VelocityRange vrange;
 
-	RobinMgr robinMgr;
+		RobinMgr robinMgr;
 
-public:
+	public:
 
-	VelocityLayer();
-	VelocityLayer(std::string& localPath_, int vel_code_);
-	VelocityLayer(const VelocityLayer &other);
-	VelocityLayer(VelocityLayer&& other) noexcept;
-	virtual ~VelocityLayer() { }
+		VelocityLayer();
+		VelocityLayer(std::string& localPath_, int vel_code_);
+		VelocityLayer(const VelocityLayer& other);
+		VelocityLayer(VelocityLayer&& other) noexcept;
+		virtual ~VelocityLayer() { }
 
-	void FinishPaths(std::filesystem::path& cumulativePath_);
+		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-	void LoadWaves();
+		void LoadWaves();
 
-};
+	};
 
+} // end of namespace

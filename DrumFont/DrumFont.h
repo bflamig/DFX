@@ -37,8 +37,10 @@
 #include "DfxParser.h"
 #include "DrumKit.h"
 
-namespace bryx
+namespace dfx
 {
+	using namespace bryx;
+
 	class DrumFont : public DfxParser {
 	public:
 

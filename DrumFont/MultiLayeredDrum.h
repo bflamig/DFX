@@ -38,37 +38,40 @@
 #include <filesystem>
 #include "VelocityLayer.h"
 
-class MultiLayeredDrum {
-public:
+namespace dfx
+{
+	class MultiLayeredDrum {
+	public:
 
-	std::filesystem::path cumulativePath;  // For ease of recursing down
-	std::filesystem::path drumPath;        // Relative to kit location
-	std::string name;
+		std::filesystem::path cumulativePath;  // For ease of recursing down
+		std::filesystem::path drumPath;        // Relative to kit location
+		std::string name;
 
-	std::vector<std::shared_ptr<VelocityLayer>> velocityLayers;
+		std::vector<std::shared_ptr<VelocityLayer>> velocityLayers;
 
-	int midiNote; // 0 - 127
+		int midiNote; // 0 - 127
 
-public:
+	public:
 
-	MultiLayeredDrum(const std::string &name_, const std::string& drumPath_, int midiNote_);
-	MultiLayeredDrum(const MultiLayeredDrum& other);
-	MultiLayeredDrum(MultiLayeredDrum&& other) noexcept;
-	virtual ~MultiLayeredDrum() { }
+		MultiLayeredDrum(const std::string& name_, const std::string& drumPath_, int midiNote_);
+		MultiLayeredDrum(const MultiLayeredDrum& other);
+		MultiLayeredDrum(MultiLayeredDrum&& other) noexcept;
+		virtual ~MultiLayeredDrum() { }
 
-	void SortLayers();
+		void SortLayers();
 
-	int FindVelocityLayer(int vel);         // Mostly for debugging
-	int FindVelocityLayer(double vel);
+		int FindVelocityLayer(int vel);         // Mostly for debugging
+		int FindVelocityLayer(double vel);
 
-	RobinMgr& SelectVelocityLayer(int vel);  // Mostly for debugging
-	RobinMgr& SelectVelocityLayer(double vel);
+		RobinMgr& SelectVelocityLayer(int vel);  // Mostly for debugging
+		RobinMgr& SelectVelocityLayer(double vel);
 
-public:
+	public:
 
-	void LoadWaves();
+		void LoadWaves();
 
-	MemWave& ChooseWave(int vel);    // Mostly for debugging
-	MemWave& ChooseWave(double vel);
-};
+		MemWave& ChooseWave(int vel);    // Mostly for debugging
+		MemWave& ChooseWave(double vel);
+	};
 
+} // end of namespace

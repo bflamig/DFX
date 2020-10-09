@@ -34,9 +34,8 @@
 
 #include "DfxParser.h"
 
-namespace bryx
+namespace dfx
 {
-
 	std::string to_string(DfxVerifyResult result)
 	{
 		std::string s;

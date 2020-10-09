@@ -38,8 +38,10 @@
 #include <filesystem>
 #include "BryxParser.h"
 
-namespace bryx
+namespace dfx
 {
+	using namespace bryx;
+
 	enum class DfxVerifyResult
 	{
 		NoError,

@@ -39,7 +39,7 @@
 #include "MemWave.h"
 //#include "OnePole.h"
 
-namespace bryx
+namespace dfx
 {
 	class PolyTableElem {
 	public:

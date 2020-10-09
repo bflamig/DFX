@@ -35,7 +35,7 @@
 #include <iostream> 
 #include "DfxParser.h"
 
-using namespace bryx;
+using namespace dfx;
 
 std::shared_ptr<DfxParser> OpeningCredits()
 {

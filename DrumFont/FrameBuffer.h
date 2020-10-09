@@ -33,66 +33,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
+#include <memory>
 
 namespace dfx
 {
-
-#if 0
-	template<typename T>
-	struct MonoFrame
-	{
-		T sample;
-
-		MonoFrame() = default;
-
-		MonoFrame(const MonoFrame& other) : sample(other) { }
-
-		explicit MonoFrame(const T& sample_) : sample(sample_) { }
-
-		int NumChannels() { return 1; }
-
-		static MonoFrame Lerp(const MonoFrame &a, const MonoFrame &b, double alpha)
-		{
-			T output = a;
-			output += alpha * (b - a);
-			return MonoFrame(output);
-		}
-	};
-
-	template<typename T>
-	struct StereoFrame
-	{
-		T left_sample;
-		T right_sample;
-
-		StereoFrame() = default;
-
-		StereoFrame(const StereoFrame& other) 
-		: left_sample(other.left_sample), right_sample(other.right_sample) 
-		{ 
-		}
-
-		StereoFrame(const T& left, const T& right) 
-		: left_sample(left), right_sample(right) 
-		{ 
-		}
-
-		int NumChannels() { return 2; }
-
-		static StereoFrame Lerp(const StereoFrame& a, const StereoFrame& b, double alpha)
-		{
-			T output_l = a.left_sample;
-			output_l += alpha * (b.left_sample - a.left_sample);
-
-			T output_r = a.right_sample;
-			output_r += alpha * (b.right_sample - a.right_sample);
-
-			return StereoFrame(output_l, output_r);
-		}
-	};
-
-#endif
-
 	template<typename T>
 	class FrameBuffer {
 	public:

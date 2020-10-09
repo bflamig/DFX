@@ -35,91 +35,96 @@
 #include <iostream>
 #include "DrumKit.h"
 
-DrumKit::DrumKit()
-: noteMap{128}
+namespace dfx
 {
-	std::cout << "DrumKit default ctor called" << std::endl;
-}
 
-DrumKit::DrumKit(const std::string& name_, const std::string& kitPath_)
-: kitPath(kitPath_)
-, name(name_)
-, drums()
-, noteMap{128}
-{
-	std::cout << "DrumKit ctor called" << std::endl;
-}
-
-DrumKit::DrumKit(const DrumKit& other)
-: kitPath(other.kitPath)
-, name(other.name)
-, drums(other.drums)
-, noteMap{128}
-{
-	std::cout << "Drumkit copy ctor called" << std::endl;
-}
-
-DrumKit::DrumKit(DrumKit&& other) noexcept
-: kitPath(other.kitPath)
-, name(other.name)
-, drums(other.drums)
-, noteMap(other.noteMap)
-{
-	std::cout << "DrumKit mtor called" << std::endl;
-}
-
-DrumKit::~DrumKit()
-{
-	std::cout << "DrumKit dtor called" << std::endl;
-}
-
-void DrumKit::ClearNotes()
-{
-	for (auto& n : noteMap)
+	DrumKit::DrumKit()
+		: noteMap{ 128 }
 	{
-		n = nullptr;
+		std::cout << "DrumKit default ctor called" << std::endl;
 	}
-}
 
-void DrumKit::FinishPaths(std::filesystem::path& soundFontPath_)
-{
-	basePath = soundFontPath_;
-	basePath.remove_filename();
-
-	cumulativePath = basePath;
-	cumulativePath /= kitPath;
-	cumulativePath = cumulativePath.generic_string(); // Sigh! THey just had to do it wrong!
-
-	for (auto &d : drums)
+	DrumKit::DrumKit(const std::string& name_, const std::string& kitPath_)
+		: kitPath(kitPath_)
+		, name(name_)
+		, drums()
+		, noteMap{ 128 }
 	{
-		d->cumulativePath = cumulativePath;
-		d->cumulativePath /= d->drumPath;
-		d->cumulativePath = d->cumulativePath.generic_string();
+		std::cout << "DrumKit ctor called" << std::endl;
+	}
 
-		d->SortLayers();
+	DrumKit::DrumKit(const DrumKit& other)
+		: kitPath(other.kitPath)
+		, name(other.name)
+		, drums(other.drums)
+		, noteMap{ 128 }
+	{
+		std::cout << "Drumkit copy ctor called" << std::endl;
+	}
 
-		for (auto layer : d->velocityLayers)
+	DrumKit::DrumKit(DrumKit&& other) noexcept
+		: kitPath(other.kitPath)
+		, name(other.name)
+		, drums(other.drums)
+		, noteMap(other.noteMap)
+	{
+		std::cout << "DrumKit mtor called" << std::endl;
+	}
+
+	DrumKit::~DrumKit()
+	{
+		std::cout << "DrumKit dtor called" << std::endl;
+	}
+
+	void DrumKit::ClearNotes()
+	{
+		for (auto& n : noteMap)
 		{
-			layer->FinishPaths(d->cumulativePath);
+			n = nullptr;
 		}
 	}
-}
 
-void DrumKit::BuildNoteMap()
-{
-	ClearNotes();
-
-	for (auto& d : drums)
+	void DrumKit::FinishPaths(std::filesystem::path& soundFontPath_)
 	{
-		auto m = d->midiNote;
+		basePath = soundFontPath_;
+		basePath.remove_filename();
 
-		if (noteMap[m] == nullptr)
+		cumulativePath = basePath;
+		cumulativePath /= kitPath;
+		cumulativePath = cumulativePath.generic_string(); // Sigh! THey just had to do it wrong!
+
+		for (auto& d : drums)
 		{
-			noteMap[m] = d;
-		}
-		else
-		{
-			// @@ Error! Note conflict! Perhaps catch this at verify parse time ?
+			d->cumulativePath = cumulativePath;
+			d->cumulativePath /= d->drumPath;
+			d->cumulativePath = d->cumulativePath.generic_string();
+
+			d->SortLayers();
+
+			for (auto layer : d->velocityLayers)
+			{
+				layer->FinishPaths(d->cumulativePath);
+			}
 		}
 	}
-}
+
+	void DrumKit::BuildNoteMap()
+	{
+		ClearNotes();
+
+		for (auto& d : drums)
+		{
+			auto m = d->midiNote;
+
+			if (noteMap[m] == nullptr)
+			{
+				noteMap[m] = d;
+			}
+			else
+			{
+				// @@ Error! Note conflict! Perhaps catch this at verify parse time ?
+			}
+		}
+	}
+
+} // end of namespace

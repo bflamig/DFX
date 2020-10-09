@@ -37,30 +37,34 @@
 #include <filesystem>
 #include "MultiLayeredDrum.h"
 
-class DrumKit {
-public:
-	std::filesystem::path cumulativePath; // For ease of recursing down
-	std::filesystem::path basePath;       // Usually the path of the sound font file
-	std::filesystem::path kitPath;        // Relative to sound font location
-	std::string name;
+namespace dfx
+{
 
-	std::vector<std::shared_ptr<MultiLayeredDrum>> drums;
-	std::vector<std::shared_ptr<MultiLayeredDrum>> noteMap;
+	class DrumKit {
+	public:
+		std::filesystem::path cumulativePath; // For ease of recursing down
+		std::filesystem::path basePath;       // Usually the path of the sound font file
+		std::filesystem::path kitPath;        // Relative to sound font location
+		std::string name;
 
-public:
+		std::vector<std::shared_ptr<MultiLayeredDrum>> drums;
+		std::vector<std::shared_ptr<MultiLayeredDrum>> noteMap;
 
-	DrumKit();
-	DrumKit(const std::string& name_, const std::string& kitPath_);
-	DrumKit(const DrumKit& other);
-	DrumKit(DrumKit&& other) noexcept;
+	public:
 
-	virtual ~DrumKit();
+		DrumKit();
+		DrumKit(const std::string& name_, const std::string& kitPath_);
+		DrumKit(const DrumKit& other);
+		DrumKit(DrumKit&& other) noexcept;
 
-public:
+		virtual ~DrumKit();
 
-	void ClearNotes();
-	void FinishPaths(std::filesystem::path& soundFontPath_);
-	void BuildNoteMap();
+	public:
 
-};
+		void ClearNotes();
+		void FinishPaths(std::filesystem::path& soundFontPath_);
+		void BuildNoteMap();
 
+	};
+
+} // end of namespace

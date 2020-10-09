@@ -34,7 +34,7 @@
 
 #include "PolyDrummer.h"
 
-namespace bryx
+namespace dfx
 {
     // Just a starter kludge
 
@@ -132,7 +132,7 @@ namespace bryx
 			int mapped_note = pianoKeyToDrumMap[noteNumber];
 			auto& drum = drumKit.noteMap[mapped_note];
 			auto& mw = drum->ChooseWave(amplitude);
-			// @@ TODO: ADD SOON: e.wave.AliasSamples(mw);
+			e.wave.AliasSamples(mw);
 #endif
 
 
@@ -199,10 +199,9 @@ namespace bryx
 				lastFrame_[0] += e.wave.tick(0) * e.gain;
 				lastFrame_[1] += e.wave.tick(1) * e.gain;
 #else
-				double l, r;
-				e.wave.StereoTick(l, r);
-				left += l;   // @@ TODO: l * e.gain?
-				right += r;  // @@ TODO: r * e.gain?
+				auto rv = e.wave.StereoTick();
+				left += rv.first;   // @@ TODO: l * e.gain?
+				right += rv.second;  // @@ TODO: r * e.gain?
 #endif
 #endif
 			}
