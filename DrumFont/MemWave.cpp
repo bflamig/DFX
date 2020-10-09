@@ -88,7 +88,7 @@ namespace dfx
 		}
 	}
 
-	void MemWave::MonoTick(double& sample)
+	double MemWave::MonoTick()
 	{
 		if (buff.nFrames != 1)
 		{
@@ -97,8 +97,7 @@ namespace dfx
 
 		if (finished)
 		{
-			sample = 0.0; 
-			return;
+			return 0.0;
 		}
 
 		unsigned nFrames = buff.nFrames;
@@ -107,9 +106,10 @@ namespace dfx
 		{
 			time = nFrames - 1.0;
 			finished = true;
-			sample = 0.0;
-			return;
+			return 0.0;
 		}
+
+		double sample;
 
 		if (interpolate)
 		{
@@ -123,10 +123,12 @@ namespace dfx
 		// Get ready for next go round
 
 		time += deltaTime;
+
+		return sample;
 	}
 
 
-	void MemWave::StereoTick(double& left, double& right)
+	std::pair<double, double> MemWave::StereoTick()
 	{
 		if (buff.nFrames != 2)
 		{
@@ -135,8 +137,7 @@ namespace dfx
 
 		if (finished)
 		{
-			left = 0.0; right = 0.0;
-			return;
+			return { 0.0, 0.0 };
 		}
 
 		unsigned nFrames = buff.nFrames;
@@ -145,26 +146,25 @@ namespace dfx
 		{
 			time = nFrames - 1.0;
 			finished = true;
-			left = 0.0; right = 0.0;
-			return;
+			return { 0.0, 0.0 };
 		}
+
+		std::pair<double, double> frame;
 
 		if (interpolate)
 		{
-			auto fred = buff.StereoInterpolate(time);
-			left = fred.first;
-			right = fred.second;
+			frame = buff.StereoInterpolate(time);
 		}
 		else
 		{
-			auto fred = buff.GetStereoFrame(static_cast<unsigned>(time));
-			left = fred.first;
-			right = fred.second;
+			frame = buff.GetStereoFrame(static_cast<unsigned>(time));
 		}
 
 		// Get ready for next go round
 
 		time += deltaTime;
+
+		return frame;
 	}
 
 	bool MemWave::IsFinished()

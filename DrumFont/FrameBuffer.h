@@ -157,7 +157,7 @@ namespace dfx
 		{
 			if (i >= nSamples)
 			{
-				throw std::exception("Out of bounds at FrameBuffer::MonoSample() const");
+				throw std::exception("Out of bounds at FrameBuffer::MonoSample()");
 			}
 
 			return samples[i];
@@ -167,12 +167,12 @@ namespace dfx
 		{
 			if (nChannels != 2)
 			{
-				throw std::exception("Invalid buffer configuration at FrameBuffer::StereoSample() const");
+				throw std::exception("Invalid buffer configuration at FrameBuffer::StereoSample()");
 			}
 
 			if (i >= nFrames)
 			{
-				throw std::exception("Out of bounds at FrameBuffer::StereoSample() const");
+				throw std::exception("Out of bounds at FrameBuffer::StereoSample()");
 			}
 
 			return { samples[i * nChannels], samples[i * nChannels + 1] };
@@ -282,8 +282,5 @@ namespace dfx
 
 		}
 	};
-
-
-
 
 } // End of namespace
