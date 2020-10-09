@@ -63,8 +63,8 @@ namespace dfx
 		void SetRate(double sampleRate_);
 		void AddTime(double delta_);
 
-		double MonoTick();
-		std::pair<double, double> StereoTick();
+		MonoFrame<double> MonoTick();
+		StereoFrame<double> StereoTick();
 		bool IsFinished();
 	};
 

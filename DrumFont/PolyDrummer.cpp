@@ -163,7 +163,7 @@ namespace dfx
 	}
 
 
-	std::pair<double, double> PolyDrummer::StereoTick()
+	StereoFrame<double> PolyDrummer::StereoTick()
 	{
 		double left = 0.0;
 		double right = 0.0;

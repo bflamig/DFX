@@ -37,6 +37,9 @@
 
 namespace dfx
 {
+	template<typename T> using MonoFrame = T;
+	template<typename T> using StereoFrame = std::pair<T, T>;
+
 	template<typename T>
 	class FrameBuffer {
 	public:
@@ -105,7 +108,7 @@ namespace dfx
 
 	public:
 
-		T GetMonoFrame(unsigned i) const
+		MonoFrame<T> GetMonoFrame(unsigned i) const
 		{
 			if (i >= nSamples)
 			{
@@ -115,7 +118,7 @@ namespace dfx
 			return samples[i];
 		}
 
-		std::pair<T, T> GetStereoFrame(unsigned i) const
+		StereoFrame<T> GetStereoFrame(unsigned i) const
 		{
 			if (nChannels != 2)
 			{
@@ -130,7 +133,7 @@ namespace dfx
 			return { samples[i * nChannels], samples[i * nChannels + 1] };
 		}
 
-		T MonoInterpolate(double pos) const
+		MonoFrame<T> MonoInterpolate(double pos) const
 		{
 			if (pos < 0.0)
 			{
@@ -177,7 +180,7 @@ namespace dfx
 
 		}
 
-		std::pair<T, T> StereoInterpolate(double pos) const
+		StereoFrame<T> StereoInterpolate(double pos) const
 		{
 			if (nChannels != 2)
 			{

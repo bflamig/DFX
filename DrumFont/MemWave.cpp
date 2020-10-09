@@ -88,7 +88,7 @@ namespace dfx
 		}
 	}
 
-	double MemWave::MonoTick()
+	MonoFrame<double> MemWave::MonoTick()
 	{
 		if (buff.nFrames != 1)
 		{
@@ -128,7 +128,7 @@ namespace dfx
 	}
 
 
-	std::pair<double, double> MemWave::StereoTick()
+	StereoFrame<double> MemWave::StereoTick()
 	{
 		if (buff.nFrames != 2)
 		{
@@ -149,7 +149,7 @@ namespace dfx
 			return { 0.0, 0.0 };
 		}
 
-		std::pair<double, double> frame;
+		StereoFrame<double> frame;
 
 		if (interpolate)
 		{
