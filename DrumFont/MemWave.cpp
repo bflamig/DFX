@@ -68,7 +68,7 @@ namespace dfx
 	void MemWave::SetRate(double sampleRate_)
 	{
 		sampleRate = sampleRate_;
-		deltaTime = buff.sampleRate / sampleRate;
+		deltaTime = buff.dataRate / sampleRate;
 		interpolate = fmod(deltaTime, 1.0) != 0.0 ? true : false;
 	}
 
@@ -90,10 +90,12 @@ namespace dfx
 
 	MonoFrame<double> MemWave::MonoTick()
 	{
+#ifdef DFX_DEBUG
 		if (buff.nFrames != 1)
 		{
 			throw std::exception("Buffer isn't in mono. MemWave::MonoTick()");
 		}
+#endif
 
 		if (finished)
 		{
@@ -130,10 +132,12 @@ namespace dfx
 
 	StereoFrame<double> MemWave::StereoTick()
 	{
+#ifdef DFX_DEBUG
 		if (buff.nFrames != 2)
 		{
 			throw std::exception("Buffer isn't in stereo. MemWave::StereoTick()");
 		}
+#endif
 
 		if (finished)
 		{

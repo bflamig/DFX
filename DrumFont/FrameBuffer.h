@@ -48,8 +48,7 @@ namespace dfx
 		unsigned nFrames;
 		unsigned nSamples;
 		unsigned nChannels;
-
-		double sampleRate; // In Hz
+		double dataRate; // In Hz
 
 	public:
 
@@ -58,13 +57,13 @@ namespace dfx
 		, nFrames{}
 		, nSamples{}
 		, nChannels{}
-		, sampleRate{ 44100.0 }
+		, dataRate{ 44100.0 }
 		{
 		}
 
 		FrameBuffer(unsigned nFrames_, unsigned nChannels_)
 		: samples{}
-		, sampleRate{ 44100.0 }
+		, dataRate{ 44100.0 }
 		{
 			Resize(nFrames_, nChannels_);
 		}
@@ -90,6 +89,7 @@ namespace dfx
 				nChannels = nChannels_;
 				nSamples = nFrames * nChannels;
 				samples = new T[nSamples]; // We auto release claim on old samples
+				Clear();
 			}
 		}
 
@@ -101,44 +101,62 @@ namespace dfx
 			nSamples = other.nSamples;
 		}
 
-		void SetSamplingRate(double sampleRate_)
+		void SetDataRate(double dataRate_)
 		{
-			sampleRate = sampleRate_;
+			dataRate = dataRate_;
 		}
 
 	public:
 
 		MonoFrame<T> GetMonoFrame(unsigned i) const
 		{
-			if (i >= nSamples)
+#ifdef DFX_DEBUG
+
+			if (nChannels != 1)
+			{
+				throw std::exception("Invalid buffer configuration at FrameBuffer::GetMonoFrame()");
+			}
+
+			if (i >= nFrames)
 			{
 				throw std::exception("Out of bounds at FrameBuffer::MonoSample()");
 			}
+#endif
 
 			return samples[i];
 		}
 
 		StereoFrame<T> GetStereoFrame(unsigned i) const
 		{
+#ifdef DFX_DEBUG
 			if (nChannels != 2)
 			{
-				throw std::exception("Invalid buffer configuration at FrameBuffer::StereoSample()");
+				throw std::exception("Invalid buffer configuration at FrameBuffer::GetStereoFrame()");
 			}
 
 			if (i >= nFrames)
 			{
 				throw std::exception("Out of bounds at FrameBuffer::StereoSample()");
 			}
+#endif
 
 			return { samples[i * nChannels], samples[i * nChannels + 1] };
 		}
 
 		MonoFrame<T> MonoInterpolate(double pos) const
 		{
+#ifdef DFX_DEBUG
+
+			if (nChannels != 1)
+			{
+				throw std::exception("Invalid buffer configuration at FrameBuffer::MonoInterpolate()");
+			}
+
 			if (pos < 0.0)
 			{
 				throw std::exception("Out of bounds at FrameBuffer::MonoInterpolate() - 1");
 			}
+#endif
 
 			unsigned indx = (unsigned)pos;
 			double frac = pos - indx;
@@ -170,10 +188,12 @@ namespace dfx
 			}
 			else
 			{
+#ifdef DFX_DEBUG
 				if (indx >= nSamples)
 				{
 					throw std::exception("Out of bounds at FrameBuffer::MonoInterpolate() - 3");
 				}
+#endif
 
 				return samples[indx];
 			}
@@ -182,6 +202,7 @@ namespace dfx
 
 		StereoFrame<T> StereoInterpolate(double pos) const
 		{
+#ifdef DFX_DEBUG
 			if (nChannels != 2)
 			{
 				throw std::exception("Invalid buffer configuration at FrameBuffer::StereoInterpolate() - 1");
@@ -191,7 +212,7 @@ namespace dfx
 			{
 				throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 2");
 			}
-
+#endif
 			unsigned indx = (unsigned)pos;
 			double frac = pos - indx;
 
@@ -227,11 +248,12 @@ namespace dfx
 			}
 			else
 			{
+#ifdef DFX_DEBUG
 				if (indx >= nFrames)
 				{
 					throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 4");
 				}
-
+#endif
 				return { samples[indx], samples[indx + 1] };
 			}
 

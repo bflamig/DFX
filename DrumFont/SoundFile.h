@@ -1,3 +1,5 @@
+#pragma once
+
 /******************************************************************************\
  * DFX - "Drum font exchange format" - source code
  *
@@ -31,86 +33,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
-
-#include "VelocityLayer.h"
+#include <cstdio>
+#include <string>
+#include "FrameBuffer.h"
+#include "Swap.h"
 
 namespace dfx
 {
+	class SoundFile {
+	protected:
 
-	VelocityRange::VelocityRange()
-	{
-		clear();
-	}
+		std::string fileName;
 
-	VelocityRange::VelocityRange(int velCode_)
-	: VelocityRange()
-	{
-		velCode = velCode_;
-		iMinVel = velCode;
-		iMaxVel = velCode;
-		fMinVel = velCode / 127.0;
-		fMaxVel = velCode / 127.0;
-	}
+		FILE* fd;
+		bool byteswap;
+		bool isWaveFile;
+		unsigned fileSize;
+		unsigned dataOffset;
+		unsigned nChannels;
+		SampleFormat dataType;
+		double fileRate;
 
-	void VelocityRange::clear()
-	{
-		velCode = 0;
-		iMinVel = 0;
-		iMaxVel = 0;
-		fMinVel = 0;
-		fMaxVel = 0;
-	}
+	public:
 
-	///
+		SoundFile();
+		virtual ~SoundFile();
 
-	VelocityLayer::VelocityLayer()
-	: cumulativePath{}
-	, localPath{}
-	, vrange{}
-	, robinMgr{}
-	{
+		void Clear();
+		
+		void Open(std::string fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
-	}
+		void Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
 
+		void Close();
 
-	VelocityLayer::VelocityLayer(std::string& localPath_, int vel_code_)
-	: VelocityLayer{}
-	{
-		localPath = localPath_;
-		localPath = localPath.generic_string();
-		vrange.velCode = vel_code_;
-		vrange.iMinVel = vel_code_;
-	}
+		bool isOpen() { return fd != 0; }
 
-	VelocityLayer::VelocityLayer(const VelocityLayer& other)
-	: cumulativePath(other.cumulativePath)
-	, localPath(other.localPath)
-	, vrange(other.vrange)
-	, robinMgr(other.robinMgr)
-	{
-	}
+	protected:
 
-	VelocityLayer::VelocityLayer(VelocityLayer&& other) noexcept
-	: cumulativePath(std::move(other.cumulativePath))
-	, localPath(std::move(other.localPath))
-	, vrange(other.vrange)
-	, robinMgr(std::move(other.robinMgr))
-	{
-		other.vrange.clear();
-	}
-
-
-	void VelocityLayer::FinishPaths(std::filesystem::path& cumulativePath_)
-	{
-		cumulativePath = cumulativePath_;
-		cumulativePath /= localPath;
-		cumulativePath = cumulativePath.generic_string();
-		robinMgr.FinishPaths(cumulativePath);
-	}
-
-	void VelocityLayer::LoadWaves()
-	{
-		robinMgr.LoadWaves();
-	}
+		bool getRawInfo(unsigned int nChannels_, SampleFormat format_, double FileRate_);
+		bool getWavInfo();
+		bool getSndInfo();
+		bool getAifInfo();
+		bool getMatInfo();
+	};
 
 } // end of namespace

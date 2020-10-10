@@ -5,7 +5,6 @@
 
 namespace bryx
 {
-
 	struct Extent
 	{
 		int srow; // starting row of token
@@ -89,6 +88,10 @@ namespace bryx
 			msg.clear();
 		}
 
+		virtual const char* what()
+		{
+			return msg.c_str();
+		}
 
 		virtual void Print(std::ostream& sout) const = 0;
 	};

@@ -75,10 +75,12 @@ namespace dfx
 
 	void PolyDrummer::noteOnDirect(int noteNumber, double amplitude)
 	{
+#ifdef DFX_DEBUG
 		if (amplitude < 0.0 || amplitude > 1.0)
 		{
-			//oStream_ << "PolyDrum::noteOn: amplitude parameter is out of bounds!";
+			throw std::exception("PolyDrum::noteOn: amplitude parameter is out of bounds");
 		}
+#endif
 
 		int slot = -1;
 

@@ -31,86 +31,51 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
-
-#include "VelocityLayer.h"
+#include <cstdint>
+#include "Swap.h"
 
 namespace dfx
 {
-
-	VelocityRange::VelocityRange()
+	void endian_swap_16(void* samples, int n)
 	{
-		clear();
+		auto s = reinterpret_cast<int16_t*>(samples);
+
+		for (int i = 0; i < n; i++)
+		{
+			swap16(s++);
+		}
 	}
 
-	VelocityRange::VelocityRange(int velCode_)
-	: VelocityRange()
+	void endian_swap_24(void* samples, int n)
 	{
-		velCode = velCode_;
-		iMinVel = velCode;
-		iMaxVel = velCode;
-		fMinVel = velCode / 127.0;
-		fMaxVel = velCode / 127.0;
+		auto s = reinterpret_cast<int32_t*>(samples);
+
+		for (int i = 0; i < n; i++)
+		{
+			swap32(s);
+			// @@ TODO: Clear out the unused byte?
+			++s;
+		}
 	}
 
-	void VelocityRange::clear()
+	void endian_swap_32(void* samples, int n)
 	{
-		velCode = 0;
-		iMinVel = 0;
-		iMaxVel = 0;
-		fMinVel = 0;
-		fMaxVel = 0;
+		auto s = reinterpret_cast<int32_t*>(samples);
+
+		for (int i = 0; i < n; i++)
+		{
+			swap32(s++);
+		}
 	}
-
-	///
-
-	VelocityLayer::VelocityLayer()
-	: cumulativePath{}
-	, localPath{}
-	, vrange{}
-	, robinMgr{}
+	
+	void endian_swap_64(void* samples, int n)
 	{
+		auto s = reinterpret_cast<int64_t*>(samples);
 
-	}
-
-
-	VelocityLayer::VelocityLayer(std::string& localPath_, int vel_code_)
-	: VelocityLayer{}
-	{
-		localPath = localPath_;
-		localPath = localPath.generic_string();
-		vrange.velCode = vel_code_;
-		vrange.iMinVel = vel_code_;
-	}
-
-	VelocityLayer::VelocityLayer(const VelocityLayer& other)
-	: cumulativePath(other.cumulativePath)
-	, localPath(other.localPath)
-	, vrange(other.vrange)
-	, robinMgr(other.robinMgr)
-	{
-	}
-
-	VelocityLayer::VelocityLayer(VelocityLayer&& other) noexcept
-	: cumulativePath(std::move(other.cumulativePath))
-	, localPath(std::move(other.localPath))
-	, vrange(other.vrange)
-	, robinMgr(std::move(other.robinMgr))
-	{
-		other.vrange.clear();
-	}
-
-
-	void VelocityLayer::FinishPaths(std::filesystem::path& cumulativePath_)
-	{
-		cumulativePath = cumulativePath_;
-		cumulativePath /= localPath;
-		cumulativePath = cumulativePath.generic_string();
-		robinMgr.FinishPaths(cumulativePath);
-	}
-
-	void VelocityLayer::LoadWaves()
-	{
-		robinMgr.LoadWaves();
+		for (int i = 0; i < n; i++)
+		{
+			swap64(s++);
+		}
 	}
 
 } // end of namespace

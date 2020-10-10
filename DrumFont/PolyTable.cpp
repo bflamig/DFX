@@ -40,12 +40,12 @@ namespace dfx
 	// //////////////////////////////////////////////////////////
 
 	PolyTableElem::PolyTableElem()
-		: wave()
-		//, filter()
-		, gain(0)
-		, soundNumber(0)
-		, younger(-1)
-		, older(-1)
+	: wave()
+	//, filter()
+	, gain(0)
+	, soundNumber(0)
+	, younger(-1)
+	, older(-1)
 	{
 
 	}
@@ -54,7 +54,7 @@ namespace dfx
 	// ///////////////////////////////////////////////////////////
 
 	PolyTable::PolyTable(int nsoundings)
-		: elems(nsoundings)
+	: elems(nsoundings)
 	{
 		// Set up inactive linked list to take up entire table.
 

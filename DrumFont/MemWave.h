@@ -46,7 +46,7 @@ namespace dfx
 
 		double sampleRate;   // In Hz.
 		double time;         // Floating posn through the frames
-		double deltaTime;    // buff.sampleRate / sampleRate
+		double deltaTime;    // buff.dataRate / sampleRate
 		bool finished;       // Time's up! (At end of the waves.)
 
 		bool interpolate;

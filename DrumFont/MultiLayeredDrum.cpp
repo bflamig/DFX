@@ -39,32 +39,32 @@ namespace dfx
 {
 
 	MultiLayeredDrum::MultiLayeredDrum(const std::string& name_, const std::string& drumPath_, int midiNote_)
-		: cumulativePath()
-		, drumPath(drumPath_)
-		, name(name_)
-		, velocityLayers()
-		, midiNote(midiNote_)
+	: cumulativePath()
+	, drumPath(drumPath_)
+	, name(name_)
+	, velocityLayers()
+	, midiNote(midiNote_)
 	{
 
 	}
 
 	MultiLayeredDrum::MultiLayeredDrum(const MultiLayeredDrum& other)
-		: cumulativePath(other.cumulativePath)
-		, drumPath(other.drumPath)
-		, name(other.name)
-		, velocityLayers(other.velocityLayers)
-		, midiNote(other.midiNote)
+	: cumulativePath(other.cumulativePath)
+	, drumPath(other.drumPath)
+	, name(other.name)
+	, velocityLayers(other.velocityLayers)
+	, midiNote(other.midiNote)
 	{
 		// Copy constructor
 	}
 
 
 	MultiLayeredDrum::MultiLayeredDrum(MultiLayeredDrum&& other) noexcept
-		: cumulativePath(std::move(other.cumulativePath))
-		, drumPath(std::move(other.drumPath))
-		, name(std::move(other.name))
-		, velocityLayers(std::move(other.velocityLayers))
-		, midiNote(other.midiNote)
+	: cumulativePath(std::move(other.cumulativePath))
+	, drumPath(std::move(other.drumPath))
+	, name(std::move(other.name))
+	, velocityLayers(std::move(other.velocityLayers))
+	, midiNote(other.midiNote)
 	{
 		// Move constructor
 	}
@@ -93,7 +93,7 @@ namespace dfx
 			if (next_vel_code == prev_vel_code)
 			{
 				//oStream_ << "MultiLayeredDrum::SortVelocityRanges(): There is a least one duplicate velocity code in the set.\n";
-				//handleError(StkError::FILE_CONFIGURATION);
+				//handleError(FILE_CONFIGURATION);
 			}
 			prev_vel_code = next_vel_code;
 		}
@@ -137,7 +137,7 @@ namespace dfx
 		if (vel < 0 || vel > 127)
 		{
 			//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Velocity " << vel << " out of range.\n";
-			//handleError(StkError::FUNCTION_ARGUMENT);
+			//handleError(FUNCTION_ARGUMENT);
 		}
 
 		auto n = velocityLayers.size();
@@ -149,7 +149,7 @@ namespace dfx
 		}
 
 		//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Couldn't find a range for velocity " << vel << "\n";
-		//handleError(StkError::UNSPECIFIED);
+		//handleError(UNSPECIFIED);
 		//return -1; // Won't get here, but whatever
 
 		return idx;
@@ -162,7 +162,7 @@ namespace dfx
 		if (vel < 0.0 || vel > 1.0)
 		{
 			//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Velocity " << vel << " out of range.\n";
-			//handleError(StkError::FUNCTION_ARGUMENT);
+			//handleError(FUNCTION_ARGUMENT);
 		}
 
 		auto n = velocityLayers.size();
@@ -174,7 +174,7 @@ namespace dfx
 		}
 
 		//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Couldn't find a range for velocity " << vel << "\n";
-		//handleError(StkError::UNSPECIFIED);
+		//handleError(UNSPECIFIED);
 		//return -1; // Won't get here, but whatever
 
 		return idx;
