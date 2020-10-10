@@ -63,11 +63,40 @@
  *
 \******************************************************************************/
 
+#include <sstream>
 #include "SoundFile.h"
 
 namespace dfx
 {
+	std::string to_string(AudioResult r)
+	{
+		switch (r)
+		{
+			case AudioResult::NoError: return "everything fine";
+			case AudioResult::STATUS: return "STATUS";
+			case AudioResult::WARNING: return "WARNING";
+			case AudioResult::DEBUG_PRINT: return "DEBUG_PRINT";
+			case AudioResult::MEMORY_ALLOCATION: return "MEMORY_ALLOCATION";
+			case AudioResult::MEMORY_ACCESS: return "MEMORY_ACCESS";
+			case AudioResult::FUNCTION_ARGUMENT: return "FUNCTION_ARGUMENT";
+			case AudioResult::FILE_NOT_FOUND: return "FILE_NOT_FOUND";
+			case AudioResult::FILE_UNKNOWN_FORMAT: return "FILE_UNKNOWN_FORMAT";
+			case AudioResult::FILE_NAMING: return "FILE_NAMING";
+			case AudioResult::FILE_CONFIGURATION: return "FILE_CONFIGURATION";
+			case AudioResult::FILE_ERROR: return "FILE_ERROR";
+			case AudioResult::PROCESS_THREAD: return "PROCESS_THREAD";
+			case AudioResult::PROCESS_SOCKET: return "PROCESS_SOCKET";
+			case AudioResult::PROCESS_SOCKET_IPADDR: return "PROCESS_SOCKET_IPADDR";
+			case AudioResult::AUDIO_SYSTEM: return "AUDIO_SYSTEM";
+			case AudioResult::MIDI_SYSTEM: return "MIDI_SYSTEM";
+			case AudioResult::UNSPECIFIED: 
+			default: return "UNSPECIFIED";
+		}
+	}
+
+
 	SoundFile::SoundFile()
+	: errors()
 	{
 		Clear();
 	}
@@ -79,15 +108,26 @@ namespace dfx
 
 	void SoundFile::Clear()
 	{
+		errors.clear();
 		fileName = "";
 		fd = 0;
 		byteswap = false;
 		isWaveFile = false;
-		fileSize = 0;
+		fileFrames = 0;
 		dataOffset = 0;
 		nChannels = 0;
 		dataType = SampleFormat::SINT16;
 		fileRate = 0.0;
+	}
+
+	void SoundFile::LogError(AudioResult err, const std::string_view& msg)
+	{
+		errors.push_back(AudioResultPkg(msg, err));
+	}
+
+	void SoundFile::LogError(AudioResult err, const std::stringstream& msg)
+	{
+		errors.push_back(AudioResultPkg(msg.str(), err));
 	}
 
 	void SoundFile::Close()
@@ -100,7 +140,7 @@ namespace dfx
 		Clear();
 	}
 
-	void SoundFile::Open(std::string fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_)
+	bool SoundFile::Open(const std::string_view &fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_)
 	{
 		Close(); // If already open, close what we got
 
@@ -114,9 +154,10 @@ namespace dfx
 #endif
 		if (!fd)
 		{
-			//oStream_ << "SoundFile::open: could not open or find file (" << fileName << ")!";
-			//handleError(FILE_NOT_FOUND);
-			return;
+			std::stringstream msg;
+			msg << "could not open or find file (" << fileName << ")";
+			LogError(AudioResult::FILE_NOT_FOUND, msg);
+			return false;
 		}
 
 		// Attempt to determine file type from header (unless RAW).
@@ -131,9 +172,10 @@ namespace dfx
 			char header[12];
 			if (fread(&header, 4, 3, fd) != 3)
 			{
-				//oStream_ << "SoundFile::open: error reading file (" << fileName_ << ")!";
-				//handleError(FILE_ERROR);
-				return;
+				std::stringstream msg;
+				msg << "problem reading header for file (" << fileName << ") on open";
+				LogError(AudioResult::FILE_ERROR, msg);
+				return false;
 			}
 
 			if (!memcmp(header, "RIFF", 4) && !memcmp(&header[8], "WAVE", 4)) // // @@ was strncmp, but to shut up compiler ...
@@ -155,16 +197,18 @@ namespace dfx
 
 				if (fseek(fd, 126, SEEK_SET) == -1)
 				{
-					//oStream_ << "SoundFile::open: error reading file (" << fileName_ << ")!";
-					//handleError(FILE_ERROR);
-					return;
+					std::stringstream msg;
+					msg << "problem reading file (" << fileName << ") on open";
+					LogError(AudioResult::FILE_ERROR, msg);
+					return false;
 				}
 
 				if (fread(&header, 2, 1, fd) != 1)
 				{
-					//oStream_ << "SoundFile::open: error reading file (" << fileName_ << ")!";
-					//handleError(FILE_ERROR);
-					return;
+					std::stringstream msg;
+					msg << "problem reading file (" << fileName << ") on open";
+					LogError(AudioResult::FILE_ERROR, msg);
+					return false;
 				}
 
 				if (!memcmp(header, "MI", 2) || !memcmp(header, "IM", 2)) // @@ was strncmp, but to shut up compiler ...
@@ -173,8 +217,10 @@ namespace dfx
 				}
 				else
 				{
-					//oStream_ << "SoundFile::open: file (" << fileName << ") format unknown.";
-					//handleError(FILE_UNKNOWN_FORMAT);
+					std::stringstream msg;
+					msg << "problem reading file (" << fileName << ") on open";
+					LogError(AudioResult::FILE_ERROR, msg);
+					return false;
 				}
 			}
 		}
@@ -182,17 +228,22 @@ namespace dfx
 		// If here, we had a file type candidate but something else went wrong.
 		if (result == false)
 		{
-			//handleError(FILE_ERROR);
+			std::stringstream msg;
+			msg << "problem reading file (" << fileName << ") on open";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
 		}
 
 		// Check for empty files.
-		if (fileSize == 0)
+		if (fileFrames == 0)
 		{
-			//oStream_ << "SoundFile::open: file (" << fileName_ << ") data size is zero!";
-			//handleError(FILE_ERROR);
+			std::stringstream msg;
+			msg << "file is empty upon open (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
 		}
 
-		return;
+		return true;
 	}
 
 	bool SoundFile::getRawInfo(unsigned int nChannels_, SampleFormat format_, double fileRate_)
@@ -202,13 +253,19 @@ namespace dfx
 
 		if (stat(fileName.c_str(), &filestat) == -1) 
 		{
-			//oStream_ << "FileRead: Could not stat RAW file (" << fileName << ").";
+			std::stringstream msg;
+			msg << "could not get stats for file (" << fileName << ") during read";
+			LogError(AudioResult::FILE_ERROR, msg);
+
 			return false;
 		}
 
 		if (nChannels_ == 0) 
 		{
-			//oStream_ << "FileRead: number of channels can't be 0 (" << fileName << ").";
+			std::stringstream msg;
+			msg << "number of channels can't be 0 for file (" << fileName << ") during read";
+			LogError(AudioResult::FILE_ERROR, msg);
+
 			return false;
 		}
 
@@ -242,11 +299,13 @@ namespace dfx
 		}
 		else 
 		{
-			//oStream_ << "FileRead: StkFormat " << format << " is invalid (" << fileName << ").";
+			std::stringstream msg;
+			msg << "format " << to_string(format_) << " is invalid in file (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
 			return false;
 		}
 
-		fileSize = (long)filestat.st_size / sampleBytes / nChannels;  // length in frames
+		fileFrames = (long)filestat.st_size / sampleBytes / nChannels;  // length in frames
 
 #ifdef __LITTLE_ENDIAN__
 		byteswap = true;
@@ -315,7 +374,9 @@ namespace dfx
 		if (format_tag != 1 && format_tag != 3) 
 		{ 
 			// PCM = 1, FLOAT = 3
-			//oStream_ << "FileRead: " << fileName << " contains an unsupported data format type (" << format_tag << ").";
+			std::stringstream msg;
+			msg << "file contains unsupported format tag: " << format_tag << " in getWavInfo() for (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
 			return false;
 		}
 
@@ -388,7 +449,12 @@ namespace dfx
 		if (!good_tag) 
 		{
 			// UNSUPPORTED TYPE OR COULDN'T DETERMINE
-			//oStream_ << "FileRead: " << temp << " bits per sample with data format " << format_tag << " are not supported (" << fileName << ").";
+
+			std::stringstream msg;
+			msg << temp << "bits per sample with data format tag " << format_tag << " not supported in getWavInfo() for (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
+
 			return false;
 		}
 
@@ -418,8 +484,8 @@ namespace dfx
 #ifndef __LITTLE_ENDIAN__
 		swap32(&bytes);
 #endif
-		fileSize = bytes / temp / nChannels;  // sample frames
-		fileSize *= 8;  // sample frames
+		fileFrames = bytes / temp / nChannels;  // sample frames
+		fileFrames *= 8;  // sample frames  // @@ ?? WHAT?
 
 		dataOffset = ftell(fd);
 
@@ -433,7 +499,9 @@ namespace dfx
 		return true;
 
 	error:
-		//oStream_ << "FileRead: error reading WAV file (" << fileName << ").";
+		std::stringstream msg;
+		msg << "unspecified problem when reading file (" << fileName << ")";
+		LogError(AudioResult::FILE_ERROR, msg);
 		return false;
 	}
 
@@ -456,7 +524,9 @@ namespace dfx
 		else if (format == 7) dataType = SampleFormat::FLOAT64;
 		else
 		{
-			//oStream_ << "FileRead: data format in file " << fileName << " is not supported.";
+			std::stringstream msg;
+			msg << "data format in file " << fileName << " is not supported.";
+			LogError(AudioResult::FILE_ERROR, msg);
 			return false;
 		}
 
@@ -489,6 +559,8 @@ namespace dfx
 		dataOffset = offset;
 
 		// Get length of data from the header.
+
+		unsigned fileSize;
 		if (fread(&fileSize, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
@@ -498,23 +570,23 @@ namespace dfx
 
 		if (dataType == SampleFormat::SINT8)
 		{
-			fileSize /= nChannels;
+			fileFrames = fileSize / nChannels;
 		}
 		if (dataType == SampleFormat::SINT16)
 		{
-			fileSize /= 2 * nChannels;
+			fileFrames = fileSize / (2 * nChannels);
 		}
 		else if (dataType == SampleFormat::SINT24)
 		{
-			fileSize /= 3 * nChannels;
+			fileFrames = fileSize / (3 * nChannels);
 		}
 		else if (dataType == SampleFormat::SINT32 || dataType == SampleFormat::FLOAT32)
 		{
-			fileSize /= 4 * nChannels;
+			fileFrames = fileSize / (4 * nChannels);
 		}
 		else if (dataType == SampleFormat::FLOAT64)
 		{
-			fileSize /= 8 * nChannels;
+			fileFrames = fileSize / (8 * nChannels);
 		}
 
 #ifdef __LITTLE_ENDIAN__
@@ -526,7 +598,10 @@ namespace dfx
 		return true;
 
 	error:
-		//oStream_ << "FileRead: Error reading SND file (" << fileName << ").";
+
+		std::stringstream msg;
+		msg << "reading SND file (" << fileName << ")";
+		LogError(AudioResult::FILE_ERROR, msg);
 		return false;
 	}
 
@@ -576,7 +651,7 @@ namespace dfx
 #ifdef __LITTLE_ENDIAN__
 		swap32(&frames);
 #endif
-		fileSize = frames; // sample frames
+		fileFrames = frames; // sample frames
 
 		// Read the number of bits per sample.
 		if (fread(&temp, 2, 1, fd) != 1) goto error;
@@ -695,7 +770,9 @@ namespace dfx
 
 		if (!good_tag) 
 		{
-			//oStream_ << "FileRead: AIFF/AIFC file (" << fileName << ") has unsupported data type (" << id << ").";
+			std::stringstream msg;
+			msg << "AIFF/AIFC file (" << fileName << ") has unsupported data type (" << id << ").";
+			LogError(AudioResult::FILE_ERROR, msg);
 			return false;
 		}
 
@@ -724,13 +801,18 @@ namespace dfx
 		return true;
 
 	error:
-		//oStream_ << "FileRead: Error reading AIFF file (" << fileName << ").";
+
+		std::stringstream msg;
+		msg << "problem reading AIFF file (" << fileName << ").";
+		LogError(AudioResult::FILE_ERROR, msg);
 		return false;
 	}
 
 	bool SoundFile::getMatInfo()
 	{
-		// @@ UNSUPPORTED
+		std::stringstream msg;
+		msg << "Mat sound files are unsuported (" << fileName << ").";
+		LogError(AudioResult::FILE_ERROR, msg);
 		return false;
 	}
 
@@ -739,43 +821,50 @@ namespace dfx
 	// ///////////////////////////////////////////////
 
 
-	void SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize)
+	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize)
 	{
 		// Make sure we have an open file.
 		if (fd == 0) 
 		{
-			//oStream_ << "FileRead::read: a file is not open!";
-			//Stk::handleError(StkError::WARNING); return;
-			return;
+			std::stringstream msg;
+			msg << "file not open (" << fileName << ").";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
 		}
 
 		// Check the buffer size.
 		unsigned nFrames = buffer.nFrames;
 		if (nFrames == 0) 
 		{
-			//oStream_ << "FileRead::read: StkFrames buffer size is zero ... no data read!";
-			//Stk::handleError(StkError::WARNING); return;
-			return;
+			std::stringstream msg;
+			msg << "buffer size is zero in (" << fileName << ").";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
 		}
 
 		if (buffer.nChannels != nChannels) 
 		{
 			//oStream_ << "FileRead::read: StkFrames argument has incompatible number of channels!";
 			//Stk::handleError(StkError::FUNCTION_ARGUMENT);
-			return;
+
+			std::stringstream msg;
+			msg << "frame buffer has incompatible number of channels";
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+			return false;
 		}
 
-		if (startFrame >= fileSize) 
+		if (startFrame >= fileFrames) 
 		{
-			//oStream_ << "FileRead::read: startFrame argument is greater than or equal to the file size!";
-			//Stk::handleError(StkError::FUNCTION_ARGUMENT);
-			return;
+			std::stringstream msg;
+			msg << "startFrame argument is >= file size";
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+			return false;
 		}
 
 		// Check for file end.
-		if (startFrame + nFrames > fileSize)
+		if (startFrame + nFrames > fileFrames)
 		{
-			nFrames = fileSize - startFrame;
+			nFrames = fileFrames - startFrame;
 		}
 
 		long i;
@@ -988,12 +1077,14 @@ namespace dfx
 
 		buffer.SetDataRate(fileRate);
 
-		return;
+		return true;
 
 	error:
-		//oStream_ << "FileRead: Error reading file data.";
-		//handleError(StkError::FILE_ERROR);
-		;
+
+		std::stringstream msg;
+		msg << "unspecified problem reading file (" << fileName << ")";
+		LogError(AudioResult::FILE_ERROR, msg);
+		return false;
 	}
 
 } // end of namespace

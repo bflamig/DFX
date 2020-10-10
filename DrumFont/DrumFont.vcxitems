@@ -25,7 +25,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)RobinMgr.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SoundFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VelocityLayer.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Swap.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SampleUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)DfxParser.h" />
@@ -39,6 +39,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)RobinMgr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SoundFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VelocityLayer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Swap.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SampleUtil.h" />
   </ItemGroup>
 </Project>

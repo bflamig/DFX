@@ -65,7 +65,7 @@ namespace bryx
 
 	extern std::string to_string(ParserResult result);
 
-	using ParserResultPkg = ResultPkg<ParserResult>;
+	using ParserResultPkg = AugResultPkg<ParserResult>;
 
 	// ///////////////////////////////////////////////////////
 

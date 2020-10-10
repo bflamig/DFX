@@ -134,7 +134,7 @@ namespace bryx
 
 	extern std::string to_string(LexiResult r);
 
-	using LexiResultPkg = ResultPkg<LexiResult>;
+	using LexiResultPkg = AugResultPkg<LexiResult>;
 
 	// //////////////////////////////////////////////////////////////////////////////////
 

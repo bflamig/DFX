@@ -34,6 +34,8 @@
  *
 \******************************************************************************/
 
+#include <string>
+
 namespace dfx
 {
 	enum class SampleFormat : unsigned long
@@ -45,6 +47,8 @@ namespace dfx
 		FLOAT32, // Normalized between plus/minus 1.0.
 		FLOAT64  // Normalized between plus/minus 1.0.
 	};
+
+	extern std::string to_string(SampleFormat& x);
 
 	inline void swap16(void* ptr)
 	{

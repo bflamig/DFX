@@ -33,20 +33,18 @@ namespace bryx
 	class ResultBase {
 	public:
 		std::string msg;
-		Extent extent;
 	public:
-		ResultBase() : msg(), extent() { }
-		ResultBase(std::string_view msg_, const Extent& extent_) : msg(msg_), extent(extent_) { }
+		ResultBase() : msg() { }
+		ResultBase(std::string_view msg_) : msg(msg_) { }
 
 		ResultBase(const ResultBase& other)
-		: ResultBase(other.msg, other.extent)
+		: ResultBase(other.msg)
 		{
 			// Copy constructor
 		}
 
 		ResultBase(ResultBase&& other) noexcept
 		: msg(std::move(other.msg))
-		, extent(other.extent)
 		{
 			// Move constructor
 		}
@@ -60,7 +58,6 @@ namespace bryx
 			if (this != &other)
 			{
 				msg = other.msg;
-				extent = other.extent;
 			}
 		}
 
@@ -71,15 +68,12 @@ namespace bryx
 			if (this != &other)
 			{
 				msg = std::move(other.msg);
-				extent = other.extent;
-				other.extent.Clear();
 			}
 		}
 
 		virtual void Clear()
 		{
 			ResetMsg();
-			extent.Clear();
 		}
 
 		void ResetMsg()
@@ -93,7 +87,10 @@ namespace bryx
 			return msg.c_str();
 		}
 
-		virtual void Print(std::ostream& sout) const = 0;
+		virtual void Print(std::ostream& sout) const
+		{
+			sout << msg << '\n';
+		}
 	};
 
 
@@ -108,23 +105,23 @@ namespace bryx
 
 		ResultPkg() : ResultBase(), code(T::NoError) { }
 
-		ResultPkg(std::string_view msg_, T code_, const Extent& extent_)
-		: ResultBase(msg_, extent_)
+		ResultPkg(std::string_view msg_, T code_)
+		: ResultBase(msg_)
+		, code(code_)
 		{
-			code = code_;
 		}
 
 		ResultPkg(const ResultPkg& other)
-		: ResultPkg(other.msg, other.code, other.extent)
+		: ResultPkg(other.msg, other.code)
 		{
 			// Copy constructor
 		}
 
 		ResultPkg(ResultPkg&& other) noexcept
-		: ResultBase(std::move(other.msg), other.extent)
+		: ResultBase(std::move(other.msg))
+		, code(other.code)
 		{
-			// Move constructor
-			code = other.code;
+			// Move constructor bookkeeping
 			other.code = T::NoError;
 		}
 
@@ -168,5 +165,91 @@ namespace bryx
 			sout << to_string(code) << " --> " << msg << '\n';
 		}
 	};
+
+
+	// T must be an enumerated type with a NoError member
+	// It must have a companion to_string() function
+
+	template<typename T>
+	class AugResultPkg : public ResultPkg<T> {
+	public:
+		Extent extent;
+	public:
+
+		AugResultPkg() 
+		: ResultPkg<T>("", T::NoError)
+		, extent() 
+		{ 
+		}
+
+		AugResultPkg(std::string_view msg_, T code_, const Extent& extent_)
+		: ResultPkg<T>(msg_, code_)
+		, extent(extent_)
+		{
+		}
+
+		AugResultPkg(const AugResultPkg& other)
+		: ResultPkg<T>(other)
+		, extent(other.extent)
+		{
+			// Copy constructor
+		}
+
+		AugResultPkg(AugResultPkg&& other) noexcept
+		: ResultPkg<T>(std::move(other))
+		, extent(other.extent)
+		{
+			// Move constructor bookkeeping
+			other.extent.Clear();
+		}
+
+		virtual ~AugResultPkg() { }
+
+		AugResultPkg& operator=(const AugResultPkg& other)
+		{
+			// Copy assignment
+
+			if (this != &other)
+			{
+				ResultPkg<T>::operator=(other);
+				extent = other.extent;
+			}
+
+			return *this;
+		}
+
+		AugResultPkg& operator=(AugResultPkg&& other) noexcept
+		{
+			// Move assignment
+
+			if (this != &other)
+			{
+				ResultPkg<T>::operator=(std::move(other));
+				extent = other.extent;
+				other.extent.Clear();
+			}
+
+			return *this;
+		}
+
+		virtual void Clear()
+		{
+			ResultPkg<T>::Clear();
+			extent.Clear();
+		}
+
+#if 1
+		// @@ ?? WHY WON'T THIS COMPILE?
+		// WHY DOES IT NOT SEE code or msg unless I qualify
+		// the names?
+
+		virtual void Print(std::ostream& sout) const
+		{
+			sout << to_string(ResultPkg<T>::code) << " --> " << ResultPkg<T>::msg << '\n';
+		}
+#endif
+	};
+
+
 
 } // End of namespace

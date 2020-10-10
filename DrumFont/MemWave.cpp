@@ -111,7 +111,7 @@ namespace dfx
 			return 0.0;
 		}
 
-		double sample;
+		MonoFrame<double> sample;
 
 		if (interpolate)
 		{

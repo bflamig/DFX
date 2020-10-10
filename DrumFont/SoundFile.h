@@ -35,20 +35,50 @@
 \******************************************************************************/
 #include <cstdio>
 #include <string>
+#include <vector>
+#include <sstream>
 #include "FrameBuffer.h"
-#include "Swap.h"
+#include "SampleUtil.h"
+#include "ResultPkg.h"
 
 namespace dfx
 {
+	enum class AudioResult
+	{
+		NoError,
+		STATUS,
+		WARNING,
+		DEBUG_PRINT,
+		MEMORY_ALLOCATION,
+		MEMORY_ACCESS,
+		FUNCTION_ARGUMENT,
+		FILE_NOT_FOUND,
+		FILE_UNKNOWN_FORMAT,
+		FILE_NAMING,        // @@ BRY ADDED THIS
+		FILE_CONFIGURATION, // @@ BRY ADDED THIS
+		FILE_ERROR,
+		PROCESS_THREAD,
+		PROCESS_SOCKET,
+		PROCESS_SOCKET_IPADDR,
+		AUDIO_SYSTEM,
+		MIDI_SYSTEM,
+		UNSPECIFIED
+	};
+
+	extern std::string to_string(AudioResult r);
+
+	using AudioResultPkg = bryx::ResultPkg<AudioResult>;
+
 	class SoundFile {
 	protected:
 
+		std::vector<AudioResultPkg> errors;
 		std::string fileName;
 
 		FILE* fd;
 		bool byteswap;
 		bool isWaveFile;
-		unsigned fileSize;
+		unsigned fileFrames;
 		unsigned dataOffset;
 		unsigned nChannels;
 		SampleFormat dataType;
@@ -61,13 +91,16 @@ namespace dfx
 
 		void Clear();
 		
-		void Open(std::string fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_);
+		bool Open(const std::string_view &fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
-		void Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
+		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
 
 		void Close();
 
 		bool isOpen() { return fd != 0; }
+
+		void LogError(AudioResult err, const std::string_view& msg);
+		void LogError(AudioResult err, const std::stringstream& msg);
 
 	protected:
 

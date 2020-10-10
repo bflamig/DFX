@@ -32,10 +32,25 @@
  *
 \******************************************************************************/
 #include <cstdint>
-#include "Swap.h"
+#include "SampleUtil.h"
 
 namespace dfx
 {
+	std::string to_string(SampleFormat& x)
+	{
+		switch (x)
+		{
+			case SampleFormat::SINT8: return "SINT8";
+			case SampleFormat::SINT16: return "SINT16";
+			case SampleFormat::SINT24: return "SINT24";
+			case SampleFormat::SINT32: return "SINT32";
+			case SampleFormat::FLOAT32: return "FLOAT32";
+			case SampleFormat::FLOAT64: return "FLOAT64";
+			default:
+			return "?? Unknown Sample Format";
+		}
+	}
+
 	void endian_swap_16(void* samples, int n)
 	{
 		auto s = reinterpret_cast<int16_t*>(samples);
