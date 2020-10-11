@@ -47,7 +47,7 @@ namespace dfx
 		std::filesystem::path drumPath;        // Relative to kit location
 		std::string name;
 
-		std::vector<std::shared_ptr<VelocityLayer>> velocityLayers;
+		std::vector<VelocityLayer> velocityLayers;
 
 		int midiNote; // 0 - 127
 
@@ -57,6 +57,9 @@ namespace dfx
 		MultiLayeredDrum(const MultiLayeredDrum& other);
 		MultiLayeredDrum(MultiLayeredDrum&& other) noexcept;
 		virtual ~MultiLayeredDrum() { }
+
+		void operator=(const MultiLayeredDrum& other);
+		void operator=(MultiLayeredDrum&& other) noexcept;
 
 		void SortLayers();
 

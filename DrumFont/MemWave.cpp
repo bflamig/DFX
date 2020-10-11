@@ -48,6 +48,69 @@ namespace dfx
 
 	}
 
+	MemWave::MemWave(const MemWave& other)
+	: buff(other.buff)
+	, path(other.path)
+	, sampleRate(other.sampleRate)
+	, deltaTime(other.deltaTime)
+	, time(other.time)
+	, finished(other.finished)
+	, interpolate(other.interpolate)
+	{
+	}
+
+	MemWave::MemWave(MemWave&& other) noexcept
+	: buff(std::move(other.buff))
+	, path(std::move(other.path))
+	, sampleRate(other.sampleRate)
+	, deltaTime(other.deltaTime)
+	, time(other.time)
+	, finished(other.finished)
+	, interpolate(other.interpolate)
+	{
+		// Just keeping move pedantics :)
+
+		other.sampleRate = 0;
+		other.deltaTime = 0;
+		other.time = 0;
+		other.finished = false;
+		other.interpolate = false;
+	}
+
+	void MemWave::operator=(const MemWave& other)
+	{
+		if (this != &other)
+		{
+			buff = other.buff;
+			path = other.path;
+			sampleRate = other.sampleRate;
+			deltaTime = other.deltaTime;
+			time = other.time;
+			finished = other.finished;
+			interpolate = other.interpolate;
+		}
+	}
+
+	void MemWave::operator=(MemWave&& other) noexcept
+	{
+		buff = std::move(other.buff);
+		path = std::move(other.path);
+		sampleRate = other.sampleRate;
+		deltaTime = other.deltaTime;
+		time = other.time;
+		finished = other.finished;
+		interpolate = other.interpolate;
+
+		// Just keeping move pedantics :)
+
+		other.sampleRate = 0;
+		other.deltaTime = 0;
+		other.time = 0;
+		other.finished = false;
+		other.interpolate = false;
+	}
+
+
 	void MemWave::Reset()
 	{
 		time = 0.0;

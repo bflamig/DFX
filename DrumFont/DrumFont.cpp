@@ -92,9 +92,9 @@ namespace dfx
 			{
 				for (auto& layer : drum->velocityLayers)
 				{
-					for (auto& robin : layer->robinMgr.robins)
+					for (auto& robin : layer.robinMgr.robins)
 					{
-						sout << "[" << layer->vrange.iMinVel << " - " << layer->vrange.iMaxVel << "]  ";
+						sout << "[" << layer.vrange.iMinVel << " - " << layer.vrange.iMaxVel << "]  ";
 						sout << robin.fullPath << '\n';
 					}
 				}
@@ -131,7 +131,7 @@ namespace dfx
 		}
 	}
 
-	void DrumFont::BuildInstrument(std::vector<std::shared_ptr<MultiLayeredDrum>>& drums, const nv_type& drum_nv)
+	void DrumFont::BuildInstrument(std::vector<drum_ptr>& drums, const nv_type& drum_nv)
 	{
 		auto& drum_name = drum_nv.first;
 		auto& drum_val = drum_nv.second;
@@ -153,8 +153,6 @@ namespace dfx
 		std::cout << "  note " << midiNote << std::endl;
 
 		auto drum = std::make_shared<MultiLayeredDrum>(drum_name, *drum_path_opt, midiNote);
-		//auto drum = MultiLayeredDrum(drum_name, *drum_path_opt, midiNote);
-		//MultiLayeredDrum drum(drum_name, *drum_path_opt, midiNote);
 
 		// We should have a []-list of velocity layers. Each layer is represented
 		// in the Parser as a name-value pair.
@@ -172,7 +170,7 @@ namespace dfx
 		drums.emplace_back(std::move(drum));
 	}
 
-	void DrumFont::BuildVelocityLayer(std::vector<std::shared_ptr<VelocityLayer>>& vlayers, std::shared_ptr<Value>& vlayer_sh_ptr)
+	void DrumFont::BuildVelocityLayer(std::vector<VelocityLayer>& vlayers, std::shared_ptr<Value>& vlayer_sh_ptr)
 	{
 		auto nvp = dynamic_cast<NameValue*>(vlayer_sh_ptr.get());
 
@@ -190,7 +188,7 @@ namespace dfx
 		std::cout << "  velocity layer " << vel_code_str << std::endl;
 		std::cout << "    path " << '"' << *vlayer_path_opt << '"' << std::endl;
 
-		auto vlayer = std::make_shared<VelocityLayer>(*vlayer_path_opt, vel_code);
+		VelocityLayer vlayer(*vlayer_path_opt, vel_code);
 
 		// We should have a []-list of robins. Each robin is represented
 		// in the Parser as a name-value pair.
@@ -199,12 +197,12 @@ namespace dfx
 
 		auto nrobins = robins_arr_ptr->size();
 
-		vlayer->robinMgr.robins.reserve(nrobins);
+		vlayer.robinMgr.robins.reserve(nrobins);
 
 		for (auto robin_sh_ptr : *robins_arr_ptr)
 		{
 			auto robin_nv_ptr = dynamic_cast<NameValue*>(robin_sh_ptr.get());
-			BuildRobin(vlayer->robinMgr.robins, robin_nv_ptr);
+			BuildRobin(vlayer.robinMgr.robins, robin_nv_ptr);
 		}
 
 		vlayers.emplace_back(std::move(vlayer));

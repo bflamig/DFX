@@ -40,7 +40,8 @@ namespace dfx
 	// ////////////////////////////////////////////////////
 
 	Robin::Robin(std::string fileName_, double peak_, double rms_, size_t offset_)
-	: fullPath()
+	: wave()
+	, fullPath()
 	, fileName(fileName_)
 	, peak(peak_)
 	, rms(rms_)
@@ -50,7 +51,8 @@ namespace dfx
 	}
 
 	Robin::Robin(const Robin& other)
-	: fullPath(other.fullPath)
+	: wave(other.wave)
+	, fullPath(other.fullPath)
 	, fileName(other.fileName)
 	, peak(other.peak)
 	, rms(other.rms)
@@ -60,12 +62,17 @@ namespace dfx
 	}
 
 	Robin::Robin(Robin&& other) noexcept
-	: fullPath(std::move(other.fullPath))
+	: wave(std::move(other.wave))
+	, fullPath(std::move(other.fullPath))
 	, fileName(std::move(other.fileName))
 	, peak(other.peak)
 	, rms(other.rms)
 	, offset(other.offset)
 	{
+		// Just keeping move pedantics :)
+		other.peak = 0;
+		other.rms = 0;
+		other.offset = 0;
 	}
 
 
@@ -73,6 +80,7 @@ namespace dfx
 	{
 		if (this != &other)
 		{
+			wave = other.wave;
 			fullPath = other.fullPath;
 			fileName = other.fileName;
 			peak = other.peak;
@@ -87,11 +95,17 @@ namespace dfx
 	{
 		if (this != &other)
 		{
+			wave = std::move(other.wave);
 			fullPath = std::move(other.fullPath);
 			fileName = std::move(other.fileName);
 			peak = other.peak;
 			rms = other.rms;
 			offset = other.offset;
+
+			// Just keeping move pedantics :)
+			other.peak = 0;
+			other.rms = 0;
+			other.offset = 0;
 		}
 
 		return *this;

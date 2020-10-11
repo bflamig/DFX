@@ -41,40 +41,77 @@ namespace dfx
 	DrumKit::DrumKit()
 	: noteMap{ 128 }
 	{
-		std::cout << "DrumKit default ctor called" << std::endl;
+		//std::cout << "DrumKit default ctor called" << std::endl;
 	}
 
 	DrumKit::DrumKit(const std::string& name_, const std::string& kitPath_)
-	: kitPath(kitPath_)
+	: cumulativePath()
+	, basePath()
+	, kitPath(kitPath_)
 	, name(name_)
 	, drums()
 	, noteMap{ 128 }
 	{
-		std::cout << "DrumKit ctor called" << std::endl;
+		//std::cout << "DrumKit ctor called" << std::endl;
 	}
 
 	DrumKit::DrumKit(const DrumKit& other)
-	: kitPath(other.kitPath)
+	: cumulativePath(other.cumulativePath)
+	, basePath(other.basePath)
+	, kitPath(other.kitPath)
 	, name(other.name)
 	, drums(other.drums)
 	, noteMap{ 128 }
 	{
-		std::cout << "Drumkit copy ctor called" << std::endl;
+		//std::cout << "Drumkit copy ctor called" << std::endl;
 	}
 
 	DrumKit::DrumKit(DrumKit&& other) noexcept
-	: kitPath(other.kitPath)
-	, name(other.name)
-	, drums(other.drums)
-	, noteMap(other.noteMap)
+	: cumulativePath(std::move(other.cumulativePath))
+	, basePath(std::move(other.basePath))
+	, kitPath(std::move(other.kitPath))
+	, name(std::move(other.name))
+	, drums(std::move(other.drums))
+	, noteMap(std::move(other.noteMap))
 	{
-		std::cout << "DrumKit mtor called" << std::endl;
+		//std::cout << "DrumKit mtor called" << std::endl;
 	}
 
 	DrumKit::~DrumKit()
 	{
-		std::cout << "DrumKit dtor called" << std::endl;
+		//std::cout << "DrumKit dtor called" << std::endl;
 	}
+
+	void DrumKit::operator=(const DrumKit& other)
+	{
+		// Copy assignment
+
+		if (this != &other)
+		{
+			cumulativePath = other.cumulativePath;
+			basePath = other.basePath;
+			kitPath = other.kitPath;
+			name = other.name;
+			drums = other.drums;
+			noteMap = other.noteMap;
+		}
+	}
+
+	void DrumKit::operator=(DrumKit&& other) noexcept
+	{
+		// Move assignment
+
+		if (this != &other)
+		{
+			cumulativePath = std::move(other.cumulativePath);
+			basePath = std::move(other.basePath);
+			kitPath = std::move(other.kitPath);
+			name = std::move(other.name);
+			drums = std::move(other.drums);
+			noteMap = std::move(other.noteMap);
+		}
+	}
+
 
 	void DrumKit::ClearNotes()
 	{
@@ -101,9 +138,9 @@ namespace dfx
 
 			d->SortLayers();
 
-			for (auto layer : d->velocityLayers)
+			for (auto &layer : d->velocityLayers)
 			{
-				layer->FinishPaths(d->cumulativePath);
+				layer.FinishPaths(d->cumulativePath);
 			}
 		}
 	}

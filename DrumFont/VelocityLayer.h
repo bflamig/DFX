@@ -78,6 +78,9 @@ namespace dfx
 		VelocityLayer(VelocityLayer&& other) noexcept;
 		virtual ~VelocityLayer() { }
 
+		void operator=(const VelocityLayer& other);
+		void operator=(VelocityLayer&& other) noexcept;
+
 		void FinishPaths(std::filesystem::path& cumulativePath_);
 
 		void LoadWaves();

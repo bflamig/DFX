@@ -91,7 +91,8 @@ namespace dfx
 
 		void Clear();
 		
-		bool Open(const std::string_view &fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_);
+		bool Open(const std::string_view &fileName_);
+		bool OpenStkRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
 		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
 

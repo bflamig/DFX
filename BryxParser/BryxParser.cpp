@@ -503,7 +503,7 @@ namespace bryx
 					if (!silent)
 					{
 						std::ostringstream msg;
-						msg << "wrong token, should be either: " << to_string(tval1) << " or " << to_string(tval2);
+						msg << "should be either: " << to_string(tval1) << " or " << to_string(tval2);
 						LogError(result, msg.str(), curr_token_index);
 					}
 

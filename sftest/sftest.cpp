@@ -21,11 +21,10 @@ namespace dfx
 		SoundFile sf;
 
 		bool raw = true;
-		bool rv = sf.Open(waveFile1, raw, 1, SampleFormat::SINT16, 22050.0);
+		bool rv = sf.OpenStkRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
 
 		raw = false;
-		rv = sf.Open(waveFile2, raw, 2, SampleFormat::SINT16, 44100.0);
-
+		rv = sf.Open(waveFile2);
 	}
 
 } // end of namespace

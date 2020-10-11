@@ -140,8 +140,10 @@ namespace dfx
 		Clear();
 	}
 
-	bool SoundFile::Open(const std::string_view &fileName_, bool typeRaw_, unsigned nChannels_, SampleFormat format_, double fileRate_)
+	bool SoundFile::Open(const std::string_view &fileName_)
 	{
+		// WARNING! Do not use for StkRaw files.
+
 		Close(); // If already open, close what we got
 
 		fileName = fileName_;
@@ -163,65 +165,58 @@ namespace dfx
 		// Attempt to determine file type from header (unless RAW).
 		bool result = false;
 
-		if (typeRaw_)
+		char header[12];
+		if (fread(&header, 4, 3, fd) != 3)
 		{
-			result = getRawInfo(nChannels_, format_, fileRate_);
+			std::stringstream msg;
+			msg << "problem reading header for file (" << fileName << ") on open";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
+		}
+
+		if (!memcmp(header, "RIFF", 4) && !memcmp(&header[8], "WAVE", 4)) // // @@ was strncmp, but to shut up compiler ...
+		{
+			result = getWavInfo();
+		}
+		else if (!memcmp(header, ".snd", 4)) // @@ was strncmp, but to shut up compiler ...
+		{
+			result = getSndInfo();
+		}
+		else if (!memcmp(header, "FORM", 4) &&  // @@ was strncmp, but to shut up compiler ...
+			(!memcmp(&header[8], "AIFF", 4) || !memcmp(&header[8], "AIFC", 4)))
+		{
+			result = getAifInfo();
 		}
 		else
 		{
-			char header[12];
-			if (fread(&header, 4, 3, fd) != 3)
+			// Are we a MAT sound file?
+
+			if (fseek(fd, 126, SEEK_SET) == -1)
 			{
 				std::stringstream msg;
-				msg << "problem reading header for file (" << fileName << ") on open";
+				msg << "problem reading file (" << fileName << ") on open";
 				LogError(AudioResult::FILE_ERROR, msg);
 				return false;
 			}
 
-			if (!memcmp(header, "RIFF", 4) && !memcmp(&header[8], "WAVE", 4)) // // @@ was strncmp, but to shut up compiler ...
+			if (fread(&header, 2, 1, fd) != 1)
 			{
-				result = getWavInfo();
+				std::stringstream msg;
+				msg << "problem reading file (" << fileName << ") on open";
+				LogError(AudioResult::FILE_ERROR, msg);
+				return false;
 			}
-			else if (!memcmp(header, ".snd", 4)) // @@ was strncmp, but to shut up compiler ...
+
+			if (!memcmp(header, "MI", 2) || !memcmp(header, "IM", 2)) // @@ was strncmp, but to shut up compiler ...
 			{
-				result = getSndInfo();
-			}
-			else if (!memcmp(header, "FORM", 4) &&  // @@ was strncmp, but to shut up compiler ...
-				(!memcmp(&header[8], "AIFF", 4) || !memcmp(&header[8], "AIFC", 4)))
-			{
-				result = getAifInfo();
+				result = getMatInfo();
 			}
 			else
 			{
-				// Are we a MAT sound file?
-
-				if (fseek(fd, 126, SEEK_SET) == -1)
-				{
-					std::stringstream msg;
-					msg << "problem reading file (" << fileName << ") on open";
-					LogError(AudioResult::FILE_ERROR, msg);
-					return false;
-				}
-
-				if (fread(&header, 2, 1, fd) != 1)
-				{
-					std::stringstream msg;
-					msg << "problem reading file (" << fileName << ") on open";
-					LogError(AudioResult::FILE_ERROR, msg);
-					return false;
-				}
-
-				if (!memcmp(header, "MI", 2) || !memcmp(header, "IM", 2)) // @@ was strncmp, but to shut up compiler ...
-				{
-					result = getMatInfo();
-				}
-				else
-				{
-					std::stringstream msg;
-					msg << "problem reading file (" << fileName << ") on open";
-					LogError(AudioResult::FILE_ERROR, msg);
-					return false;
-				}
+				std::stringstream msg;
+				msg << "problem reading file (" << fileName << ") on open";
+				LogError(AudioResult::FILE_ERROR, msg);
+				return false;
 			}
 		}
 
@@ -245,6 +240,52 @@ namespace dfx
 
 		return true;
 	}
+
+	bool SoundFile::OpenStkRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_)
+	{
+		Close(); // If already open, close what we got
+
+		fileName = fileName_;
+
+		// Try to open the file.
+#ifdef __OS_WINDOWS__ // @@ BRY
+		errno_t et = fopen_s(&fd, fileName.c_str(), "rb");
+#else
+		fd = fopen(fileName.c_str(), "rb");
+#endif
+		if (!fd)
+		{
+			std::stringstream msg;
+			msg << "could not open or find file (" << fileName << ")";
+			LogError(AudioResult::FILE_NOT_FOUND, msg);
+			return false;
+		}
+
+		bool result = getRawInfo(nChannels_, format_, fileRate_);
+
+		// If here, we had a file type candidate but something else went wrong.
+		if (result == false)
+		{
+			std::stringstream msg;
+			msg << "problem reading raw file (" << fileName << ") on open";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
+		}
+
+		// Check for empty files.
+		if (fileFrames == 0)
+		{
+			std::stringstream msg;
+			msg << "file is empty upon open (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	// //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SoundFile::getRawInfo(unsigned int nChannels_, SampleFormat format_, double fileRate_)
 	{
@@ -871,15 +912,15 @@ namespace dfx
 		long nSamples = (long)(nFrames * nChannels);
 		unsigned long offset = startFrame * nChannels;
 
-		// There are tricks going on here. dest buffer sample type is actually double
-		// but read buffers might be something else, (but must be <= in size)
+		// There are aliasing tricks going on here. dest buffer sample type is actually double
+		// but read buffer type might be something else, (but must be <= in size)
 
 		double* dest_buffer = buffer.samples.get();
 
 		// Read samples into StkFrames data buffer.
 		if (dataType == SampleFormat::SINT16) 
 		{
-			auto read_buf = reinterpret_cast<int16_t *>(dest_buffer);
+			auto read_buf = reinterpret_cast<int16_t *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int16_t)), SEEK_SET) == -1) goto error;
 
 			if (fread(read_buf, sizeof(int16_t), nSamples, fd) != 1) goto error;
@@ -892,7 +933,7 @@ namespace dfx
 			{
 				double gain = 1.0 / 32768.0;
 
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i] * gain;
@@ -900,7 +941,7 @@ namespace dfx
 			}
 			else 
 			{
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i];
@@ -909,7 +950,7 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::SINT32) 
 		{
-			auto read_buf = reinterpret_cast<int32_t*>(dest_buffer);
+			auto read_buf = reinterpret_cast<int32_t*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int32_t)), SEEK_SET) == -1) goto error;
 
 			if (fread(read_buf, sizeof(int32_t), nSamples, fd) != 1) goto error;
@@ -923,7 +964,7 @@ namespace dfx
 			{
 				double gain = 1.0 / 2147483648.0;
 
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i] * gain;
@@ -931,7 +972,7 @@ namespace dfx
 			}
 			else {
 
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i];
@@ -940,7 +981,7 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::FLOAT32) 
 		{
-			auto read_buf = reinterpret_cast<float*>(dest_buffer);
+			auto read_buf = reinterpret_cast<float*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(float)), SEEK_SET) == -1) goto error;
 
 			if (fread(read_buf, sizeof(float), nSamples, fd) != 1) goto error;
@@ -950,7 +991,7 @@ namespace dfx
 				endian_swap_32(read_buf, nSamples);
 			}
 
-			// There are spacing tricks going on here
+			// There are aliasing / spacing tricks going on here
 			for (i = nSamples - 1; i >= 0; i--)
 			{
 				dest_buffer[i] = read_buf[i];
@@ -958,7 +999,7 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::FLOAT64) 
 		{
-			auto read_buf = reinterpret_cast<double *>(dest_buffer);
+			auto read_buf = reinterpret_cast<double *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(double)), SEEK_SET) == -1) goto error;
 
 			if (fread(read_buf, sizeof(double), nSamples, fd) != 1) goto error;
@@ -968,15 +1009,19 @@ namespace dfx
 			    endian_swap_64(read_buf, nSamples);
 			}
 
+#if 0
+			// Umm, no reason to do this. They point to the same
+			// place and have same types.
 			for (i = nSamples - 1; i >= 0; i--)
 			{
 				dest_buffer[i] = read_buf[i];
 			}
+#endif
 		}
 		else if (dataType == SampleFormat::SINT8 && isWaveFile) 
 		{ 
 			// 8-bit WAV data is unsigned!
-			auto read_buf = reinterpret_cast<unsigned char*>(dest_buffer);
+			auto read_buf = reinterpret_cast<unsigned char*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
 			if (fread(read_buf, sizeof(unsigned char), nSamples, fd) != 1) goto error;
 
@@ -984,7 +1029,7 @@ namespace dfx
 			{
 				double gain = 1.0 / 128.0;
 
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = (read_buf[i] - 128) * gain; // convert to signed values
@@ -992,7 +1037,7 @@ namespace dfx
 			}
 			else 
 			{
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i] - 128.0; // convert to signed values
@@ -1002,7 +1047,7 @@ namespace dfx
 		else if (dataType == SampleFormat::SINT8) 
 		{ 
 			// signed 8-bit data
-			auto read_buf = reinterpret_cast<char*>(dest_buffer);
+			auto read_buf = reinterpret_cast<char*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
 			if (fread(read_buf, sizeof(char), nSamples, fd) != 1) goto error;
 
@@ -1010,7 +1055,7 @@ namespace dfx
 			{
 				double gain = 1.0 / 128.0;
 
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i] * gain;
@@ -1018,7 +1063,7 @@ namespace dfx
 			}
 			else 
 			{
-				// There are spacing tricks going on here
+				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i];
@@ -1027,6 +1072,10 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::SINT24) 
 		{
+			// @@ TODO: This needs to be rewritten. Go ahead and use two buffers,
+			// c'est la vie! The below is very inefficient. This is important,
+			// since I might use 24 bit files a lot.
+
 			// 24-bit values are harder to import efficiently since there is
 			// no native 24-bit type.  The following routine works but is much
 			// less efficient than that used for the other data types.

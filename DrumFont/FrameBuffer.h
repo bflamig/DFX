@@ -68,10 +68,64 @@ namespace dfx
 			Resize(nFrames_, nChannels_);
 		}
 
+		FrameBuffer(const FrameBuffer& other)
+		: samples(other.samples)
+		, nFrames(other.nFrames)
+		, nSamples(other.nSamples)
+		, nChannels(other.nChannels)
+		, dataRate(other.dataRate)
+		{
+		}
+
+		FrameBuffer(FrameBuffer&& other) noexcept
+		: samples(std::move(other.samples))
+		, nFrames(other.nFrames)
+		, nSamples(other.nSamples)
+		, nChannels(other.nChannels)
+		, dataRate(other.dataRate)
+		{
+			// Just keeping move pedantics :)
+			other.nFrames = 0;
+			other.nSamples = 0;
+			other.nChannels = 0;
+			other.dataRate =  0;
+		}
+
 		virtual ~FrameBuffer() 
 		{
 			samples = nullptr; // Release our claim on the samples
 		}
+
+		void operator=(const FrameBuffer& other)
+		{
+			if (this != &other)
+			{
+				samples = other.samples;
+				nFrames = other.nFrames;
+				nSamples = other.nSamples;
+				nChannels = other.nChannels;
+				dataRate = other.dataRate;
+			}
+		}
+
+		void operator=(FrameBuffer&& other) noexcept
+		{
+			if (this != &other)
+			{
+				samples = std::move(other.samples);
+				nFrames = other.nFrames;
+				nSamples = other.nSamples;
+				nChannels = other.nChannels;
+				dataRate = other.dataRate;
+
+				// Just keeping move pedantics :)
+				other.nFrames = 0;
+				other.nSamples = 0;
+				other.nChannels = 0;
+				other.dataRate = 0;
+			}
+		}
+
 
 		void Clear()
 		{

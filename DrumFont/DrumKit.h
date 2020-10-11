@@ -39,16 +39,18 @@
 
 namespace dfx
 {
+	using drum_ptr = std::shared_ptr<MultiLayeredDrum>;
 
 	class DrumKit {
 	public:
+
 		std::filesystem::path cumulativePath; // For ease of recursing down
 		std::filesystem::path basePath;       // Usually the path of the sound font file
 		std::filesystem::path kitPath;        // Relative to sound font location
 		std::string name;
 
-		std::vector<std::shared_ptr<MultiLayeredDrum>> drums;
-		std::vector<std::shared_ptr<MultiLayeredDrum>> noteMap;
+		std::vector<drum_ptr> drums;
+		std::vector<drum_ptr> noteMap;
 
 	public:
 
@@ -58,6 +60,9 @@ namespace dfx
 		DrumKit(DrumKit&& other) noexcept;
 
 		virtual ~DrumKit();
+
+		void operator=(const DrumKit& other);
+		void operator=(DrumKit&& other) noexcept;
 
 	public:
 

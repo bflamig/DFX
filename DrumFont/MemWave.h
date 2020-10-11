@@ -56,6 +56,12 @@ namespace dfx
 		MemWave();
 		virtual ~MemWave() {}
 
+		MemWave(const MemWave& other);
+		MemWave(MemWave&& other) noexcept;
+
+		void operator=(const MemWave& other);
+		void operator=(MemWave&& other) noexcept;
+
 		void Load(const std::filesystem::path& path_);
 		void Reset();
 		void AliasSamples(MemWave& other);

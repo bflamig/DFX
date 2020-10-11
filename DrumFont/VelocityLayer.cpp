@@ -96,8 +96,33 @@ namespace dfx
 	, vrange(other.vrange)
 	, robinMgr(std::move(other.robinMgr))
 	{
-		other.vrange.clear();
+		other.vrange.clear(); // just keeping move pedantics :)
 	}
+
+
+	void VelocityLayer::operator=(const VelocityLayer& other)
+	{
+		if (this != &other)
+		{
+			cumulativePath = other.cumulativePath;
+			localPath = other.localPath;
+			vrange = other.vrange;
+			robinMgr = other.robinMgr;
+		}
+	}
+
+	void VelocityLayer::operator=(VelocityLayer&& other) noexcept
+	{
+		if (this != &other)
+		{
+			cumulativePath = std::move(other.cumulativePath);
+			localPath = std::move(other.localPath);
+			vrange = other.vrange;
+			robinMgr = std::move(other.robinMgr);
+			other.vrange.clear(); // just keeping move pedantics :)
+		}
+	}
+
 
 
 	void VelocityLayer::FinishPaths(std::filesystem::path& cumulativePath_)

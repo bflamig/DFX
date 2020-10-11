@@ -28,14 +28,15 @@ namespace bryx
 	};
 
 
-	// In the code below, I'm just playing around learning how to use move semantics
+	// In the code below, I'm just playing around learning how to use move semantics.
+	// So what's here may not be necessary, may not make sense, and may be wrong.
 
 	class ResultBase {
 	public:
 		std::string msg;
 	public:
 		ResultBase() : msg() { }
-		ResultBase(std::string_view msg_) : msg(msg_) { }
+		ResultBase(const std::string_view &msg_) : msg(msg_) { }
 
 		ResultBase(const ResultBase& other)
 		: ResultBase(other.msg)
@@ -105,20 +106,20 @@ namespace bryx
 
 		ResultPkg() : ResultBase(), code(T::NoError) { }
 
-		ResultPkg(std::string_view msg_, T code_)
+		ResultPkg(const std::string_view &msg_, T code_)
 		: ResultBase(msg_)
 		, code(code_)
 		{
 		}
 
 		ResultPkg(const ResultPkg& other)
-		: ResultPkg(other.msg, other.code)
+		: ResultBase(other)
 		{
 			// Copy constructor
 		}
 
 		ResultPkg(ResultPkg&& other) noexcept
-		: ResultBase(std::move(other.msg))
+		: ResultBase(std::move(other))
 		, code(other.code)
 		{
 			// Move constructor bookkeeping
@@ -162,7 +163,7 @@ namespace bryx
 
 		virtual void Print(std::ostream& sout) const
 		{
-			sout << to_string(code) << " --> " << msg << '\n';
+			sout << to_string(code) << "[ " << msg << " ]\n";
 		}
 	};
 
@@ -173,7 +174,11 @@ namespace bryx
 	template<typename T>
 	class AugResultPkg : public ResultPkg<T> {
 	public:
+
+		using base_type = ResultPkg<T>;
+
 		Extent extent;
+
 	public:
 
 		AugResultPkg() 
@@ -245,7 +250,7 @@ namespace bryx
 
 		virtual void Print(std::ostream& sout) const
 		{
-			sout << to_string(ResultPkg<T>::code) << " --> " << ResultPkg<T>::msg << '\n';
+			sout << to_string(base_type::code) << "[ " << base_type::msg << " ]\n";
 		}
 #endif
 	};
