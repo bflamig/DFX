@@ -37,7 +37,8 @@
 namespace dfx
 {
 	MemWave::MemWave()
-	: buff{}
+	: sound_file{}
+	, buff{}
 	, path{}
 	, sampleRate(44100.0)
 	, deltaTime{ 1.0 }
@@ -49,7 +50,8 @@ namespace dfx
 	}
 
 	MemWave::MemWave(const MemWave& other)
-	: buff(other.buff)
+	: sound_file(other.sound_file)
+	, buff(other.buff)
 	, path(other.path)
 	, sampleRate(other.sampleRate)
 	, deltaTime(other.deltaTime)
@@ -60,7 +62,8 @@ namespace dfx
 	}
 
 	MemWave::MemWave(MemWave&& other) noexcept
-	: buff(std::move(other.buff))
+	: sound_file(std::move(other.sound_file))
+	, buff(std::move(other.buff))
 	, path(std::move(other.path))
 	, sampleRate(other.sampleRate)
 	, deltaTime(other.deltaTime)
@@ -69,7 +72,6 @@ namespace dfx
 	, interpolate(other.interpolate)
 	{
 		// Just keeping move pedantics :)
-
 		other.sampleRate = 0;
 		other.deltaTime = 0;
 		other.time = 0;
@@ -81,6 +83,7 @@ namespace dfx
 	{
 		if (this != &other)
 		{
+			sound_file = other.sound_file;
 			buff = other.buff;
 			path = other.path;
 			sampleRate = other.sampleRate;
@@ -93,6 +96,7 @@ namespace dfx
 
 	void MemWave::operator=(MemWave&& other) noexcept
 	{
+		sound_file = std::move(other.sound_file);
 		buff = std::move(other.buff);
 		path = std::move(other.path);
 		sampleRate = other.sampleRate;
@@ -102,7 +106,6 @@ namespace dfx
 		interpolate = other.interpolate;
 
 		// Just keeping move pedantics :)
-
 		other.sampleRate = 0;
 		other.deltaTime = 0;
 		other.time = 0;
@@ -117,10 +120,50 @@ namespace dfx
 		finished = false;
 	}
 
-	void MemWave::Load(const std::filesystem::path& path_)
+	bool MemWave::Load(const std::filesystem::path& path_)
 	{
 		path = path_;
-		// fill buffer, set numFrames; data rate, etc 
+
+		if (sound_file.Open(path_.string()))
+		{
+			auto nFrames = sound_file.fileFrames;
+			auto nChannels = sound_file.nChannels;
+			auto fileRate = sound_file.fileRate;
+			buff.dataRate = fileRate;
+			buff.Resize(nFrames, nChannels);
+
+			bool doNormalize = true;
+			bool b = sound_file.Read(buff, 0, doNormalize);
+
+			sound_file.Close();
+
+			return b;
+		}
+		else return false;
+	}
+
+	bool MemWave::LoadRaw(const std::filesystem::path& path_, unsigned nChannels_, SampleFormat format_, double fileRate_)
+	{
+		path = path_;
+
+		if (sound_file.OpenRaw(path_.string(), nChannels_, format_, fileRate_))
+		{
+			auto nFrames = sound_file.fileFrames;
+			auto nChannels = sound_file.nChannels;
+			auto fileRate = sound_file.fileRate;
+			buff.dataRate = fileRate;
+			buff.Resize(nFrames, nChannels);
+
+			bool doNormalize = true;
+			bool b = sound_file.Read(buff, 0, doNormalize);
+
+			sound_file.Close();
+
+			return b;
+		}
+		else return false;
+
+		return false;
 	}
 
 	void MemWave::AliasSamples(MemWave& other)

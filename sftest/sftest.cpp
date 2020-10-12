@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <filesystem>
-#include "SoundFile.h"
+#include "MemWave.h"
 
 namespace dfx
 {
@@ -20,17 +20,25 @@ namespace dfx
 	{
 		SoundFile sf;
 
-		bool raw = true;
-		bool rv = sf.OpenStkRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
+		bool rv = sf.OpenRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
 
-		raw = false;
 		rv = sf.Open(waveFile2);
+	}
+
+	void test2()
+	{
+		MemWave mw;
+
+		bool b = mw.LoadRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
+
+		b = mw.Load(waveFile2);
 	}
 
 } // end of namespace
 
 int main()
 {
-	dfx::test1();
+	//dfx::test1();
+	dfx::test2();
 }
 

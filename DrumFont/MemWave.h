@@ -34,13 +34,14 @@
  *
 \******************************************************************************/
 #include <filesystem>
-#include "FrameBuffer.h"
+#include "SoundFile.h"
 
 namespace dfx
 {
 	class MemWave {
 	public:
 
+		SoundFile sound_file;
 		FrameBuffer<double> buff;
 		std::filesystem::path path;
 
@@ -62,7 +63,9 @@ namespace dfx
 		void operator=(const MemWave& other);
 		void operator=(MemWave&& other) noexcept;
 
-		void Load(const std::filesystem::path& path_);
+		bool Load(const std::filesystem::path& path_);
+		bool LoadRaw(const std::filesystem::path& path_, unsigned nChannels_, SampleFormat format_, double fileRate_);
+
 		void Reset();
 		void AliasSamples(MemWave& other);
 

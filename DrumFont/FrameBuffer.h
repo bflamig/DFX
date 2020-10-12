@@ -34,6 +34,7 @@
  *
 \******************************************************************************/
 #include <memory>
+#include "SampleUtil.h"
 
 namespace dfx
 {
@@ -44,7 +45,7 @@ namespace dfx
 	class FrameBuffer {
 	public:
 
-		std::shared_ptr<T[]> samples;
+		std::shared_ptr<double[]> samples;
 		unsigned nFrames;
 		unsigned nSamples;
 		unsigned nChannels;
@@ -142,7 +143,7 @@ namespace dfx
 				nFrames = nFrames_;
 				nChannels = nChannels_;
 				nSamples = nFrames * nChannels;
-				samples = new T[nSamples]; // We auto release claim on old samples
+				samples = std::shared_ptr<double[]>(new double[nSamples]); // We auto release claim on old samples
 				Clear();
 			}
 		}

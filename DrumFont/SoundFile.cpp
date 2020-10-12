@@ -89,7 +89,7 @@ namespace dfx
 			case AudioResult::PROCESS_SOCKET_IPADDR: return "PROCESS_SOCKET_IPADDR";
 			case AudioResult::AUDIO_SYSTEM: return "AUDIO_SYSTEM";
 			case AudioResult::MIDI_SYSTEM: return "MIDI_SYSTEM";
-			case AudioResult::UNSPECIFIED: 
+			case AudioResult::UNSPECIFIED:
 			default: return "UNSPECIFIED";
 		}
 	}
@@ -101,10 +101,99 @@ namespace dfx
 		Clear();
 	}
 
+	SoundFile::SoundFile(const SoundFile& other)
+	: errors(other.errors)
+	, fileName(other.fileName)
+	, fd(other.fd) // Both sharing pointer. Yikes!
+	, byteswap(other.byteswap)
+	, isWaveFile(other.isWaveFile)
+	, fileFrames(other.fileFrames)
+	, dataOffset(other.dataOffset)
+	, nChannels(other.nChannels)
+	, dataType(other.dataType)
+	, fileRate(other.fileRate)
+	{
+		fd = {}; // Seems like a good idea?
+	}
+
+	SoundFile::SoundFile(SoundFile&& other) noexcept
+	: errors(other.errors)
+	, fileName(std::move(other.fileName))
+	, fd(other.fd) // Both sharing pointer. Yikes!
+	, byteswap(other.byteswap)
+	, isWaveFile(other.isWaveFile)
+	, fileFrames(other.fileFrames)
+	, dataOffset(other.dataOffset)
+	, nChannels(other.nChannels)
+	, dataType(other.dataType)
+	, fileRate(other.fileRate)
+	{
+		// jkuwmp :)
+
+		other.errors = {};
+		other.fd = {}; // Seems like a good idea ?
+		other.byteswap = {};
+		other.isWaveFile = {};
+		other.fileFrames = {};
+		other.dataOffset = {};
+		other.nChannels = {};
+		other.dataType = {};
+		other.fileRate = {};
+	}
+
 	SoundFile::~SoundFile()
 	{
 		Close();
 	}
+
+	void SoundFile::operator=(const SoundFile& other)
+	{
+		if (this != &other)
+		{
+			errors = other.errors;
+			fileName = other.fileName;
+			fd = other.fd; // YIKES! NOT COOL (?)
+			byteswap = other.byteswap;
+			isWaveFile = other.isWaveFile;
+			fileFrames = other.fileFrames;
+			dataOffset = other.dataOffset;
+			nChannels = other.nChannels;
+			dataType = other.dataType;
+			fileRate = other.fileRate;
+
+			fd = {}; // Seems like a good idea (?)
+		}
+	}
+
+	void SoundFile::operator=(SoundFile&& other) noexcept
+	{
+		if (this != &other)
+		{
+			errors = other.errors;
+			fileName = std::move(other.fileName);
+			fd = other.fd; // YIKES! NOT COOL (?)
+			byteswap = other.byteswap;
+			isWaveFile = other.isWaveFile;
+			fileFrames = other.fileFrames;
+			dataOffset = other.dataOffset;
+			nChannels = other.nChannels;
+			dataType = other.dataType;
+			fileRate = other.fileRate;
+
+			// jkuwmp :)
+
+			other.errors = {};
+			other.fd = {}; // Seems like a good idea ?
+			other.byteswap = {};
+			other.isWaveFile = {};
+			other.fileFrames = {};
+			other.dataOffset = {};
+			other.nChannels = {};
+			other.dataType = {};
+			other.fileRate = {};
+		}
+	}
+
 
 	void SoundFile::Clear()
 	{
@@ -241,7 +330,7 @@ namespace dfx
 		return true;
 	}
 
-	bool SoundFile::OpenStkRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_)
+	bool SoundFile::OpenRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_)
 	{
 		Close(); // If already open, close what we got
 
@@ -923,7 +1012,7 @@ namespace dfx
 			auto read_buf = reinterpret_cast<int16_t *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int16_t)), SEEK_SET) == -1) goto error;
 
-			if (fread(read_buf, sizeof(int16_t), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(int16_t), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
@@ -953,7 +1042,7 @@ namespace dfx
 			auto read_buf = reinterpret_cast<int32_t*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int32_t)), SEEK_SET) == -1) goto error;
 
-			if (fread(read_buf, sizeof(int32_t), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(int32_t), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
@@ -970,7 +1059,8 @@ namespace dfx
 					dest_buffer[i] = read_buf[i] * gain;
 				}
 			}
-			else {
+			else 
+			{
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
@@ -984,7 +1074,7 @@ namespace dfx
 			auto read_buf = reinterpret_cast<float*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(float)), SEEK_SET) == -1) goto error;
 
-			if (fread(read_buf, sizeof(float), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(float), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
@@ -1002,7 +1092,7 @@ namespace dfx
 			auto read_buf = reinterpret_cast<double *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(double)), SEEK_SET) == -1) goto error;
 
-			if (fread(read_buf, sizeof(double), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(double), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
@@ -1023,7 +1113,7 @@ namespace dfx
 			// 8-bit WAV data is unsigned!
 			auto read_buf = reinterpret_cast<unsigned char*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
-			if (fread(read_buf, sizeof(unsigned char), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(unsigned char), nSamples, fd) != nSamples) goto error;
 
 			if (doNormalize) 
 			{
@@ -1049,7 +1139,7 @@ namespace dfx
 			// signed 8-bit data
 			auto read_buf = reinterpret_cast<char*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
-			if (fread(read_buf, sizeof(char), nSamples, fd) != 1) goto error;
+			if (fread(read_buf, sizeof(char), nSamples, fd) != nSamples) goto error;
 
 			if (doNormalize) 
 			{
@@ -1090,25 +1180,26 @@ namespace dfx
 #ifdef __LITTLE_ENDIAN__
 				if (byteswap) 
 				{
-					if (fread(ptr, sizeof(unsigned char), 3, fd) != 1) goto error;
+					if (fread(ptr, sizeof(unsigned char), 3, fd) != 3) goto error;
 					temp &= 0x00ffffff;
 					swap32(ptr);
 				}
 				else 
 				{
-					if (fread(ptr + 1, sizeof(unsigned char), 3, fd) != 1) goto error;
+					auto rv = fread(ptr + 1, sizeof(unsigned char), 3, fd);
+					if (rv != 3) goto error;
 					temp &= 0xffffff00;
 				}
 #else
 				if (byteswap) 
 				{
-					if (fread(ptr + 1, sizeof(unsigned char), 3, fd) != 1) goto error;
+					if (fread(ptr + 1, sizeof(unsigned char), 3, fd) != 3) goto error;
 					temp &= 0xffffff00;
 					swap32(ptr);
 				}
 				else 
 				{
-					if (fread(ptr, sizeof(unsigned char), 3, fd) != 1) goto error;
+					if (fread(ptr, sizeof(unsigned char), 3, fd) != 3) goto error;
 					temp &= 0x00ffffff;
 				}
 #endif

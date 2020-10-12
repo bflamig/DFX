@@ -38,7 +38,6 @@
 #include <vector>
 #include <sstream>
 #include "FrameBuffer.h"
-#include "SampleUtil.h"
 #include "ResultPkg.h"
 
 namespace dfx
@@ -70,7 +69,7 @@ namespace dfx
 	using AudioResultPkg = bryx::ResultPkg<AudioResult>;
 
 	class SoundFile {
-	protected:
+	public:
 
 		std::vector<AudioResultPkg> errors;
 		std::string fileName;
@@ -89,10 +88,16 @@ namespace dfx
 		SoundFile();
 		virtual ~SoundFile();
 
+		SoundFile(const SoundFile& other);
+		SoundFile(SoundFile&& other) noexcept;
+
+		void operator=(const SoundFile& other);
+		void operator=(SoundFile&& other) noexcept;
+
 		void Clear();
 		
 		bool Open(const std::string_view &fileName_);
-		bool OpenStkRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_);
+		bool OpenRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
 		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
 
