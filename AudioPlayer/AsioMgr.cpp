@@ -68,6 +68,7 @@ namespace dfx
 
 	AsioMgr::~AsioMgr()
 	{
+		closeStream();
 		iam = nullptr;
 	}
 
@@ -141,8 +142,10 @@ namespace dfx
 
 	bool AsioMgr::Stopped()
 	{
-		return iam->Stopped();
+		// @@ Hmmm....return iam->Stopped();
+		return stream.state == StreamState::STOPPED;
 	}
+
 	bool AsioMgr::Exit()
 	{
 		return iam->Exit();
@@ -181,12 +184,13 @@ namespace dfx
 		{
 			CloseHandle(handle->condition);
 
-			if (handle->bufferInfos)
-			{
-				//free(handle->bufferInfos);
+			// @@ NO! handle->bufferInfos has already been
+			// deallocated. Do NOT do that here!
 
-				delete handle->bufferInfos;
-			}
+			//if (handle->bufferInfos)
+			//{
+				//delete handle->bufferInfos;
+			//}
 
 			delete handle;
 			stream.apiHandle = 0;
@@ -295,6 +299,22 @@ namespace dfx
 
 		stopStream();
 	}
+
+	// This function will be called by a spawned thread when the user
+	// callback function signals that the stream should be stopped or
+	// aborted.  It is necessary to handle it this way because the
+	// callbackEvent() function must return before the ASIOStop()
+	// function will return.
+	static unsigned __stdcall asioStopStream(void* ptr)
+	{
+		CallbackInfo* info = (CallbackInfo*)ptr;
+		auto object = (AsioMgr*)info->object;
+
+		object->stopStream();
+		_endthreadex(0);
+		return 0;
+	}
+
 
 	//
 	///////////////////////////////////////////////////////////
@@ -499,6 +519,11 @@ namespace dfx
 				ret = 0L;
 				break;
 			}
+
+			case kAsioOverload:
+				InternalAsioMgr::asioXRun = true;
+				return 0L; // Return value actually ignored.
+			break;
 
 			default:
 			{
@@ -712,12 +737,14 @@ namespace dfx
 
 				// spawn a thread to stop the stream
 
-				//unsigned threadId;
+				unsigned threadId;
 				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
-				// Much simpler now.
-				std::thread bare([&] { this->stopStream(); });
+				_beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
+				// Much simpler now. @@ Except causes an exception!
+				//std::thread bare([&] { this->stopStream(); });
+				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
 			}
 			return true;
 		}
@@ -840,13 +867,15 @@ namespace dfx
 				// callbackEvent() function must return before the ASIOStop()
 				// function will return.
 
-				//unsigned threadId;
+				unsigned threadId;
 				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
-				// Much simpler now.
-				std::thread bare([&] { this->stopStream(); });
+				_beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
-				return true;
+				// Much simpler now. @@ Except causes an exception!
+				//std::thread bare([&] { this->stopStream(); });
+				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
+
 			}
 			else if (cbReturnValue == 1) 
 			{

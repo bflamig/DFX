@@ -84,7 +84,7 @@ int loopBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, S
 		*p++ = *q++;
 	}
 
-	return 0;
+	return (streamTime > 2) ? 2 : 0;
 }
 
 void test1()
@@ -129,11 +129,12 @@ void test1()
 						fflush(stdout);
 					}
 
-					am.Stop();
+					//am.Stop();
 				}
 
-				am.DisposeBuffers();
+				//am.DisposeBuffers();
 			}
+
 			am.Exit();
 		}
 
@@ -274,6 +275,7 @@ void testRaw(const std::string_view waveFile)
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
+	//da.Exit();
 }
 
 void testWave(const std::string_view waveFile)
@@ -331,13 +333,15 @@ void testWave(const std::string_view waveFile)
 		}
 	}
 	else std::cout << "Error starting stream" << std::endl;
+
+	//da.Exit();
 }
 
 int main(int argc, char* argv[])
 {
 	ListDevices();
-	//test1();
+	test1();
 	//testRaw(waveFile1);
-	testWave(waveFile2);
+	//testWave(waveFile2);
 	return 0;
 }

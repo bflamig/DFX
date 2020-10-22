@@ -207,6 +207,7 @@ namespace dfx
 
 	InternalAsioMgr::~InternalAsioMgr()
 	{
+		Exit();
 		asioDrivers->removeCurrentDriver();
 		delete asioDrivers;
 		asioDrivers = 0;
@@ -768,6 +769,7 @@ namespace dfx
 
 	bool InternalAsioMgr::Exit()
 	{
+		ASIODisposeBuffers();
 		lastResult = ASIOExit();
 		return lastResult;
 	}
