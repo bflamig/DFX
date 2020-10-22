@@ -68,6 +68,7 @@ namespace dfx
 
 	AsioMgr::~AsioMgr()
 	{
+		iam = nullptr;
 	}
 
 	int AsioMgr::LastError()

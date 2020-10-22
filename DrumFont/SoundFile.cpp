@@ -223,6 +223,20 @@ namespace dfx
 		errors.push_back(AudioResultPkg(msg.str(), err));
 	}
 
+	const AudioResultPkg SoundFile::LastError() const
+	{
+		auto n = errors.size();
+
+		if (n == 0)
+		{
+			return AudioResultPkg();
+		}
+		else
+		{
+			return errors.back();
+		}
+	}
+
 	void SoundFile::Close()
 	{
 		if (fd)

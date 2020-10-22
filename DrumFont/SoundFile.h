@@ -108,6 +108,8 @@ namespace dfx
 		void LogError(AudioResult err, const std::string_view& msg);
 		void LogError(AudioResult err, const std::stringstream& msg);
 
+		const AudioResultPkg LastError() const;
+
 	protected:
 
 		bool getRawInfo(unsigned int nChannels_, SampleFormat format_, double FileRate_);

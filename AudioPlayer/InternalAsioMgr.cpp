@@ -139,6 +139,8 @@ namespace dfx
 	ASIOError InternalAsioMgr::lastResult{};
 	bool InternalAsioMgr::asioXRun{};
 
+	std::shared_ptr<InternalAsioMgr> static_iam = std::make_shared<InternalAsioMgr>();
+
 	//----------------------------------------------------------------------------------
 
 	// //////////////////////////////////////////////////
@@ -188,6 +190,8 @@ namespace dfx
 	// A static class
 	//
 
+	static int fox = 0;
+
 	InternalAsioMgr::InternalAsioMgr()
 	{
 		// This is what asiodrivers.cpp does if it tries
@@ -197,6 +201,8 @@ namespace dfx
 		{
 			asioDrivers = new AsioDrivers();
 		}
+
+		++fox;
 	}
 
 	InternalAsioMgr::~InternalAsioMgr()
@@ -204,6 +210,7 @@ namespace dfx
 		asioDrivers->removeCurrentDriver();
 		delete asioDrivers;
 		asioDrivers = 0;
+		--fox;
 	}
 
 

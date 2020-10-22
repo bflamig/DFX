@@ -124,37 +124,9 @@ void test1()
 						Delay(6, &dummy);
 #endif
 
-#if 0
-						std::cout << am.SysRefTime() << " ms / ";
-						std::cout << am.SysMilliSeconds() << " ms / ";
-						std::cout << am.SamplePos() << " samples";
-#else
-						//fprintf(stdout, "%d ms / %d ms / %d samples", am.SysRefTime(), am.SysMilliSeconds(), am.SamplePos());
-
 						fprintf(stdout, "%lf stream time", am.getStreamTime());
-
-#endif
-						// create a more readable time code format (the quick and dirty way)
-
-						//double remainder;
-						//long hours, minutes, seconds;
-
-						//am.GetTimeCode(hours, minutes, seconds, remainder);
-
-#if 0
-						std::cout << " / TC: " << (long)hours;
-						std::cout << ":" << (long)minutes;
-						std::cout << ":" << (long)seconds;
-						std::cout << ":" << (long)remainder;
-						std::cout << "     \r" << std::endl;
-
-						std::cout.flush();
-#else
-
-						//fprintf(stdout, " / TC: %2.2d:%2.2d:%2.2d:%5.5d", (long)hours, (long)minutes, (long)seconds, (long)remainder);
 						fprintf(stdout, "     \r");
 						fflush(stdout);
-#endif
 					}
 
 					am.Stop();
@@ -199,9 +171,9 @@ struct MyData
 	MyData(FrameBuffer<system_t>& fb_) : fb(fb_), samplesPlayed{} {; }
 };
 
-int playBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
+int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
 {
-	// A callback function that plays back a sound file. A great way to test the 
+	// A callback function that repeatedly plays back a sound file. A great way to test the 
 	// playback audio streaming. We don't use the inBuff.
 
 	// WARNING! Runs in a different thread! (The ASIO thread I presume)
@@ -217,9 +189,7 @@ int playBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, S
 
 	if (data->samplesPlayed >= w.nFrames)
 	{
-		//left_over = data->samplesPlayed - w.nFrames;
-		//nFrames -= left_over;
-		data->samplesPlayed = 0; // @@ TODO: play repeatedly for now for testing purposes
+		data->samplesPlayed = 0; // play repeatedly for now for testing purposes
 	}
 
 	for (unsigned i = 0; i < nFrames; i++)
@@ -253,19 +223,32 @@ void testRaw(const std::string_view waveFile)
 	SoundFile sf;
 
 	bool rv = sf.OpenRaw(waveFile, 1, SampleFormat::SINT16, 22050.0);
+	if (!rv)
+	{
+		auto &last_err = sf.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
 
 	waves.Resize(sf.fileFrames, sf.nChannels);
 
 	waves.SetDataRate(sf.fileRate); // @@ Needs work
 
 	rv = sf.Read(waves, 0, true);
+	if (!rv)
+	{
+		auto& last_err = sf.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
+
 
 	AsioMgr da;
 	bool verbose = true;
 
 	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
 
-	da.ConfigureUserCallback(playBack);
+	da.ConfigureUserCallback(loopPlayBack);
 
 	MyData myData(waves);
 
@@ -299,19 +282,31 @@ void testWave(const std::string_view waveFile)
 	SoundFile sf;
 
 	bool rv = sf.Open(waveFile);
+	if (!rv)
+	{
+		auto& last_err = sf.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
 
 	waves.Resize(sf.fileFrames, sf.nChannels);
 
 	waves.SetDataRate(sf.fileRate); // @@ Needs work
 
 	rv = sf.Read(waves, 0, true);
+	if (!rv)
+	{
+		auto& last_err = sf.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
 
 	AsioMgr da;
 	bool verbose = true;
 
 	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
 
-	da.ConfigureUserCallback(playBack);
+	da.ConfigureUserCallback(loopPlayBack);
 
 	MyData myData(waves);
 

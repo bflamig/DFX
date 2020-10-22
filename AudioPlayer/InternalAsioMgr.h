@@ -208,7 +208,6 @@ namespace dfx
 
 	// Here's how you can link to it:
 
-	static auto static_iam = std::make_shared<InternalAsioMgr>();
-
+	extern std::shared_ptr<InternalAsioMgr> static_iam;
 
 } // end of namespace
