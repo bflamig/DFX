@@ -15,8 +15,12 @@
  * into Json files that can be parsed by any software supporting Json syntax.
  * 
  * ****************************************************************************
- * NOTICE: This file is heavily derived from the FileRead function of the 
- * Synthesis ToolKit (STK):
+ * NOTICE: This file is derived from the FileRead function of the 
+ * Synthesis ToolKit (STK). However it is not a replacement. Instead, it just
+ * implements the functionality I need, and has been heavily modified and
+ * cleaned up using modern C++ (2017) features.
+ * Here are the original comments from the FileRead files in the STK. Not all
+ * of this applies here. We don't implement everything shown.
  * 
 	This class provides input support for various
 	audio file formats.  Multi-channel (>2)
