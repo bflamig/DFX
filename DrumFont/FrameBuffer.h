@@ -39,7 +39,19 @@
 namespace dfx
 {
 	template<typename T> using MonoFrame = T;
-	template<typename T> using StereoFrame = std::pair<T, T>;
+
+	//template<typename T> using StereoFrame = std::pair<T, T>;
+
+	template<typename T>
+	struct StereoFrame
+	{
+		T left{};
+		T right{};
+
+		StereoFrame() = default;
+		StereoFrame(T left_, T right_) : left(left_), right(right_) {}
+		StereoFrame(const StereoFrame& other) : left(other.left), right(other.right) {}
+	};
 
 	template<typename T>
 	class FrameBuffer {
@@ -89,10 +101,10 @@ namespace dfx
 			other.nFrames = 0;
 			other.nSamples = 0;
 			other.nChannels = 0;
-			other.dataRate =  0;
+			other.dataRate = 0;
 		}
 
-		virtual ~FrameBuffer() 
+		virtual ~FrameBuffer()
 		{
 			samples = nullptr; // Release our claim on the samples
 		}
