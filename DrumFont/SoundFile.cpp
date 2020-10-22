@@ -411,11 +411,11 @@ namespace dfx
 
 		int sampleBytes = 0;
 
-		if (format_ == SampleFormat::SINT8)
-		{
-			sampleBytes = 1;
-		}
-		else if (format_ == SampleFormat::SINT16)
+		//if (format_ == SampleFormat::SINT8)
+		//{
+		//	sampleBytes = 1;
+		//}
+		if (format_ == SampleFormat::SINT16)
 		{
 			sampleBytes = 2;
 		}
@@ -541,12 +541,12 @@ namespace dfx
 #endif
 		if (format_tag == 1) 
 		{
-			if (temp == 8)
-			{
-				dataType = SampleFormat::SINT8;
-				good_tag = true;
-			}
-			else if (temp == 16)
+			//if (temp == 8)
+			//{
+			//	dataType = SampleFormat::SINT8;
+			//	good_tag = true;
+			//}
+			if (temp == 16)
 			{
 				dataType = SampleFormat::SINT16;
 				good_tag = true;
@@ -646,8 +646,8 @@ namespace dfx
 		swap32(&format);
 #endif
 
-		if (format == 2) dataType = SampleFormat::SINT8;
-		else if (format == 3) dataType = SampleFormat::SINT16;
+		//if (format == 2) dataType = SampleFormat::SINT8;
+		if (format == 3) dataType = SampleFormat::SINT16;
 		else if (format == 4) dataType = SampleFormat::SINT24;
 		else if (format == 5) dataType = SampleFormat::SINT32;
 		else if (format == 6) dataType = SampleFormat::FLOAT32;
@@ -698,10 +698,10 @@ namespace dfx
 #endif
 		// Convert to sample frames.
 
-		if (dataType == SampleFormat::SINT8)
-		{
-			fileFrames = fileSize / nChannels;
-		}
+		//if (dataType == SampleFormat::SINT8)
+		//{
+		//	fileFrames = fileSize / nChannels;
+		//}
 		if (dataType == SampleFormat::SINT16)
 		{
 			fileFrames = fileSize / (2 * nChannels);
@@ -830,12 +830,12 @@ namespace dfx
 
 		if (aifc == false) 
 		{
-			if (temp <= 8)
-			{
-				dataType = SampleFormat::SINT8;
-				good_tag = true;
-			}
-			else if (temp <= 16)
+			//if (temp <= 8)
+			//{
+			//	dataType = SampleFormat::SINT8;
+			//	good_tag = true;
+			//}
+			if (temp <= 16)
 			{
 				dataType = SampleFormat::SINT16;
 				good_tag = true;
@@ -865,12 +865,12 @@ namespace dfx
 
 			if (!memcmp(id, "NONE", 4) || !memcmp(id, "sowt", 4)) // @@ was strncmp, but to shut up compiler ...
 			{
-				if (temp <= 8)
-				{
-					dataType = SampleFormat::SINT8;
-					good_tag = true;
-				}
-				else if (temp <= 16)
+				//if (temp <= 8)
+				//{
+				//	dataType = SampleFormat::SINT8;
+				//	good_tag = true;
+				//}
+				if (temp <= 16)
 				{
 					dataType = SampleFormat::SINT16;
 					good_tag = true;
@@ -1016,7 +1016,8 @@ namespace dfx
 
 			if (byteswap) 
 			{
-				endian_swap_16(read_buf, nSamples);
+				//endian_swap_16(read_buf, nSamples);
+				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 			if (doNormalize) 
 			{
@@ -1046,7 +1047,8 @@ namespace dfx
 
 			if (byteswap) 
 			{
-				endian_swap_32(read_buf, nSamples);
+				//endian_swap_32(read_buf, nSamples);
+				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
 			if (doNormalize) 
@@ -1078,7 +1080,8 @@ namespace dfx
 
 			if (byteswap) 
 			{
-				endian_swap_32(read_buf, nSamples);
+				//endian_swap_32(read_buf, nSamples);
+				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
 			// There are aliasing / spacing tricks going on here
@@ -1096,7 +1099,8 @@ namespace dfx
 
 			if (byteswap) 
 			{
-			    endian_swap_64(read_buf, nSamples);
+			    //endian_swap_64(read_buf, nSamples);
+				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
 #if 0
@@ -1108,6 +1112,7 @@ namespace dfx
 			}
 #endif
 		}
+#if 0
 		else if (dataType == SampleFormat::SINT8 && isWaveFile) 
 		{ 
 			// 8-bit WAV data is unsigned!
@@ -1160,6 +1165,7 @@ namespace dfx
 				}
 			}
 		}
+#endif
 		else if (dataType == SampleFormat::SINT24) 
 		{
 			// @@ TODO: This needs to be rewritten. Go ahead and use two buffers,
