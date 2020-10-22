@@ -23,11 +23,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wtf", "wtf\wtf.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sftest", "sftest\sftest.vcxproj", "{B1D9EE57-F66A-45EC-A488-4099485C44FB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DrumPlayer", "DrumPlayer\DrumPlayer.vcxitems", "{EF231796-1239-4AA8-9B72-D4BE105C1DF6}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsioLayer", "AsioLayer\AsioLayer.vcxitems", "{A96CDF6F-F020-4BB2-8981-91536D34D1A9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioTest", "AudioTest\AudioTest.vcxproj", "{AED82C64-5CAA-4788-B3A5-A689D1E2326D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioPlayer", "AudioPlayer\AudioPlayer.vcxitems", "{BBF2E5E0-2DC7-4E38-A845-110E77AD8A8F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -40,14 +40,14 @@ Global
 		DrumFont\DrumFont.vcxitems*{859cf6d4-4791-4734-aa21-fc8c1e076e8a}*SharedItemsImports = 4
 		AsioLayer\AsioLayer.vcxitems*{a96cdf6f-f020-4bb2-8981-91536d34d1a9}*SharedItemsImports = 9
 		AsioLayer\AsioLayer.vcxitems*{aed82c64-5caa-4788-b3a5-a689d1e2326d}*SharedItemsImports = 4
+		AudioPlayer\AudioPlayer.vcxitems*{aed82c64-5caa-4788-b3a5-a689d1e2326d}*SharedItemsImports = 4
 		BryxParser\BryxParser.vcxitems*{aed82c64-5caa-4788-b3a5-a689d1e2326d}*SharedItemsImports = 4
 		DrumFont\DrumFont.vcxitems*{aed82c64-5caa-4788-b3a5-a689d1e2326d}*SharedItemsImports = 4
-		DrumPlayer\DrumPlayer.vcxitems*{aed82c64-5caa-4788-b3a5-a689d1e2326d}*SharedItemsImports = 4
 		BryxParser\BryxParser.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
 		DrumFont\DrumFont.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
+		AudioPlayer\AudioPlayer.vcxitems*{bbf2e5e0-2dc7-4e38-a845-110e77ad8a8f}*SharedItemsImports = 9
 		BryxParser\BryxParser.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
 		DrumFont\DrumFont.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
-		DrumPlayer\DrumPlayer.vcxitems*{ef231796-1239-4aa8-9b72-d4be105c1df6}*SharedItemsImports = 9
 		BryxParser\BryxParser.vcxitems*{efefd3ee-df52-413b-af1c-dfa52564e464}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

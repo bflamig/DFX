@@ -57,9 +57,9 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
     <Import Project="..\AsioLayer\AsioLayer.vcxitems" Label="Shared" />
-    <Import Project="..\DrumPlayer\DrumPlayer.vcxitems" Label="Shared" />
     <Import Project="..\DrumFont\DrumFont.vcxitems" Label="Shared" />
     <Import Project="..\BryxParser\BryxParser.vcxitems" Label="Shared" />
+    <Import Project="..\AudioPlayer\AudioPlayer.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
