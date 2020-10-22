@@ -231,8 +231,6 @@ namespace dfx
         DfxStream stream;
         DeviceInfo devInfo;
 
-        bool xRun;
-
     public:
 
         DfxAudio();

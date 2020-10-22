@@ -226,7 +226,7 @@ namespace dfx
 		ResetEvent(handle->condition);
 
 		stream.state = StreamState::RUNNING;
-		xRun = false;
+		InternalAsioMgr::asioXRun = false;
 
 	unlock:
 		stopThreadCalled = false;
@@ -452,6 +452,7 @@ namespace dfx
 				// long by another thread.
 				// However a driver can issue it in other situations, too.
 
+				InternalAsioMgr::asioXRun = true;
 				ret = 1L;
 				break;
 			}
@@ -813,18 +814,16 @@ namespace dfx
 			double streamTime = getStreamTime();
 			auto status = StreamIO_Good;
 
-			//if (stream.mode != INPUT && asioXRun == true) 
-			if (stream.nDevPlayChannels > 0 && xRun == true)
+			if (stream.nDevPlayChannels > 0 && InternalAsioMgr::asioXRun == true)
 			{
 				status |= StreamIO_Output_Underflow;
-				xRun = false;
+				InternalAsioMgr::asioXRun = false;
 			}
 
-			//if (stream.mode != OUTPUT && asioXRun == true) 
-			if (stream.nDevRecChannels > 0 && xRun == true)
+			if (stream.nDevRecChannels > 0 && InternalAsioMgr::asioXRun == true)
 			{
 				status |= StreamIO_Input_Overflow;
-				xRun = false;
+				InternalAsioMgr::asioXRun = false;
 			}
 
 			int cbReturnValue = callback(stream.userPlayBuffer, stream.userRecBuffer, stream.bufferSize, streamTime, status, info->userData);

@@ -137,6 +137,7 @@ namespace dfx
 
 	DriverData InternalAsioMgr::driverData{};
 	ASIOError InternalAsioMgr::lastResult{};
+	bool InternalAsioMgr::asioXRun{};
 
 	//----------------------------------------------------------------------------------
 

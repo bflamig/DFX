@@ -160,6 +160,8 @@ namespace dfx
 		static DriverData driverData;
 		static ASIOError lastResult;
 
+		static bool asioXRun;
+
 	public:
 
 		InternalAsioMgr();

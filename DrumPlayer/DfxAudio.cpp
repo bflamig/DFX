@@ -60,7 +60,6 @@ namespace dfx
     DfxAudio::DfxAudio()
     : stream{}
     , devInfo{}
-    , xRun{}
     {
     }
 
