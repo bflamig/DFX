@@ -184,8 +184,8 @@ namespace dfx
 			{
 				auto& e = polyTable.elems[i];
 				auto rv = e.wave.StereoTick();
-				left += rv.first;   // @@ TODO: l * e.gain?
-				right += rv.second;  // @@ TODO: r * e.gain?
+				left += rv.left;   // @@ TODO: l * e.gain?
+				right += rv.right;  // @@ TODO: r * e.gain?
 			}
 
 			i = nxt;
