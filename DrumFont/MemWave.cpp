@@ -178,6 +178,12 @@ namespace dfx
 		sampleRate = sampleRate_;
 		deltaTime = buff.dataRate / sampleRate;
 		interpolate = fmod(deltaTime, 1.0) != 0.0 ? true : false;
+
+		if (deltaTime != 1.0)
+		//if (interpolate)
+		{
+			deltaTime *= buff.nChannels; // @@ TODO: We seem to need to do this. Why? Makes no sense!
+		}
 	}
 
 
@@ -231,7 +237,6 @@ namespace dfx
 		}
 
 		// Get ready for next go round
-
 		time += deltaTime;
 
 		return sample;
@@ -273,7 +278,6 @@ namespace dfx
 		}
 
 		// Get ready for next go round
-
 		time += deltaTime;
 
 		return frame;

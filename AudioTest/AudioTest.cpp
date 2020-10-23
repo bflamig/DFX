@@ -39,10 +39,10 @@
 #include <string>
 //#include <filesystem>
 
-const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
+//const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
 //const char* const ASIO_DRIVER_NAME = "JRiver Media Center 26";
 //const char* const ASIO_DRIVER_NAME = "ReaRoute ASIO (x64)";
-//const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
+const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
 
 using namespace dfx;
 
@@ -243,10 +243,14 @@ int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 
 
 #ifdef __OS_WINDOWS__
-std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.raw");
+//std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.raw");
+//std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowbell1.raw");
+std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakeslap/tambourn.raw");
+//std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/100/100_dope.raw");
 std::string waveFile2("G:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
 #else
 std::string waveFile1("/home/pi/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.raw");
+std::string waveFile1("/home/pi/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowbell1.raw");
 std::string waveFile2("/home/pi/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
 #endif
 
@@ -375,14 +379,12 @@ void testWave(const std::string_view waveFile)
 }
 
 
-void testWaveII(const std::string_view waveFile)
+void testMemWaveII(const std::string_view waveFile)
 {
 	//FrameBuffer<double> waves;
 	//SoundFile sf;
 
 	MemWave waves;
-
-	//waves.SetRate(44100);
 
 	bool rv = waves.Load(waveFile);
 	if (!rv)
@@ -392,19 +394,10 @@ void testWaveII(const std::string_view waveFile)
 		return;
 	}
 
-	waves.SetRate(44100);
+	waves.SetRate(88200);
+	//waves.deltaTime *= 2; // @@ TODO: See the SetRate() code. We need to do this. Why? Why is it off by 2?
 
-	//waves.Resize(sf.fileFrames, sf.nChannels);
-
-	//waves.SetDataRate(sf.fileRate); // @@ Needs work
-
-	//rv = sf.Read(waves, 0, true);
-	//if (!rv)
-	//{
-	//	auto& last_err = sf.LastError();
-	//	last_err.Print(std::cout);
-	//	return;
-	//}
+	//auto x = fmod(2.0, 1.0);
 
 
 	AsioMgr da;
@@ -417,7 +410,7 @@ void testWaveII(const std::string_view waveFile)
 	// 2 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(2, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+	b = da.Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
 
 	if (b)
 	{
@@ -444,8 +437,8 @@ int main(int argc, char* argv[])
 {
 	ListDevices();
 	//test1();
-	//testRaw(waveFile1);
+	testRaw(waveFile1);
 	//testWave(waveFile2);
-	testWaveII(waveFile2);
+	//testMemWaveII(waveFile2);
 	return 0;
 }
