@@ -69,18 +69,27 @@ namespace dfx
 
     struct CallbackInfo
     {
-        std::thread thread{};
-        void* object{};    // Used as a "this" pointer.
-        void* callback{};
-        void* userData{};
+        std::thread thread{};  // Used for certain shutdown operations
+        void* object{};        // Used as a "this" pointer.
+        void* callback{};      // Generic pointer to user level processing callback
+        void* userData{};      // Generic pointer to data to pass to said callback
         void* errorCallback{};
-        void* apiInfo{};   // void pointer for API specific callback information
-        bool isRunning{};
-        bool doRealtime{};
-        int priority{};
+        void* apiInfo{};       // void pointer for API specific callback information
+        //bool isRunning{};
+        //bool doRealtime{};
+        //int priority{};
 
         // Default constructor.
         CallbackInfo() = default;
+
+        ~CallbackInfo()
+        {
+            // In case this thread is still breathing.
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
     };
 
     // /////////////////////////////////////////////////////////////////////////////

@@ -306,6 +306,8 @@ namespace dfx
 		stopStream();
 	}
 
+#if 1
+
 	// This function will be called by a spawned thread when the user
 	// callback function signals that the stream should be stopped or
 	// aborted.  It is necessary to handle it this way because the
@@ -317,84 +319,38 @@ namespace dfx
 		auto object = (AsioMgr*)info->object;
 
 		object->stopStream();
-		_endthreadex(0);
+		//_endthreadex(0);
+
+		//if (info->thread.joinable())
+		//{
+		//	info->thread.join();
+		//}
+
+		// Let the thread run die on its own. We have to 
+		// do this, because it must live longer than this
+		// function (asioStopStream) since in fact the thread
+		// is the one that called this function. So if we 
+		// don't detach, amusement ensues.
+		// The other way to do this is to let the thread
+		// hang around in limbo until the CallbackInfo
+		// destructor is called, where we can then 
+		// "join" it to the current world, or perhaps
+		// detach it there? But that way seems wrong.
+		// I think just detaching it here is the solution.
+
+		info->thread.detach();
+
 		return 0;
 	}
+
+#endif
 
 
 	//
 	///////////////////////////////////////////////////////////
 
-	static ASIOCallbacks asioCallbacks; // This has to hang around while stream is running
-
+	static ASIOCallbacks asioCallbacks;      // This has to hang around while stream is running
 	static CallbackInfo *asioCallbackInfo;
-
-#if 0
-	static ASIOTime* bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, ASIOBool processNow)
-	{
-		static long processedSamples = 0;
-
-		// store the timeInfo for later use
-		driverData.tInfo = *timeInfo;
-
-		// Get the time stamp of the buffer. This is not necessary if no
-		// synchronization to other media is required
-
-		if (timeInfo->timeInfo.flags & kSystemTimeValid)
-		{
-			driverData.nanoSeconds = ASIO64toDouble(timeInfo->timeInfo.systemTime);
-		}
-		else
-		{
-			driverData.nanoSeconds = 0;
-		}
-
-		if (timeInfo->timeInfo.flags & kSamplePositionValid)
-		{
-			driverData.samplePos = ASIO64toDouble(timeInfo->timeInfo.samplePosition);
-		}
-		else
-		{
-			driverData.samplePos = 0;
-		}
-
-		if (timeInfo->timeCode.flags & kTcValid)
-		{
-			driverData.tcSamples = ASIO64toDouble(timeInfo->timeCode.timeCodeSamples);
-		}
-		else
-		{
-			driverData.tcSamples = 0;
-		}
-
-		// get the system reference time
-		driverData.sysRefTime = get_sys_reference_time();
-
-#if WINDOWS && _DEBUG
-		// a few debug messages for the Windows device driver developer
-		// tells you the time when driver got its interrupt and the delay until the app receives
-		// the event notification.
-		static double last_samples = 0;
-
-		std::stringstream str;
-
-		str << " / " << driverData.sysRefTime;
-		str << " ms / " << (long)(driverData.nanoSeconds / 1000000.0);
-		str << " ms / " << (long)(driverData.samplePos - last_samples);
-		str << " samples                 ";
-
-		std::string fred = str.str();
-		//OutputDebugString(fred);
-		//std::cout << str.str();
-		last_samples = driverData.samplePos;
-#endif
-
-		bufferSwitch(index, processNow);
-
-		processedSamples += buffSize;
-	}
-
-#endif
 
 	void AsioMgr::bufferSwitch(long index, long processNow)
 	{
@@ -409,11 +365,6 @@ namespace dfx
 		object->iam->driverData.sysRefTime = get_sys_reference_time();
 
 		object->callbackEvent(index);
-
-		// @@ HACK
-		// From tickStreamTime(): stream.streamTime += (stream.bufferSize * 1.0 / stream.sampleRate);
-
-		//object->iam->driverData.samplePos = object->getStreamTime() * object->;
 	}
 
 	void AsioMgr::sampleRateChanged(double sRate)
@@ -422,6 +373,8 @@ namespace dfx
 		// Note: double sRate is really ASIOSampleRate srate
 
 		// Callback
+
+		// @@ TODO
 
 		// Do whatever you need to do if the sample rate changed
 		// usually this only happens during external sync.
@@ -435,7 +388,7 @@ namespace dfx
 	{
 		// Static member function
 
-		// Callback
+		// Callback for messages from the asio driver
 
 		// Currently the parameters "message" and "opt" are not used.
 
@@ -527,8 +480,10 @@ namespace dfx
 			}
 
 			case kAsioOverload:
+			{
 				InternalAsioMgr::asioXRun = true;
 				return 0L; // Return value actually ignored.
+			}
 			break;
 
 			default:
@@ -552,8 +507,6 @@ namespace dfx
 
 		stream.state = StreamState::STOPPED;
 
-		//stream.sampleRate = static_cast<int>(iam->driverData.sampleRate); // @@ TODO: Can set? Or, devInfo.preferredSampleRate;
-
 		if (sampleRate_ == 0)
 		{
 			sampleRate_ = devInfo.preferredSampleRate;
@@ -570,7 +523,7 @@ namespace dfx
 
 		ASIOSetSampleRate(sampleRate_); // @@ TODO: check success
 
-		iam->driverData.sampleRate = sampleRate_; // @@ is this what we want to do?
+		iam->driverData.sampleRate = sampleRate_; // @@ Should we? To keep things consistent?
 
 		stream.sampleRate = sampleRate_;
 
@@ -586,9 +539,6 @@ namespace dfx
 		asioCallbacks.sampleRateDidChange = sampleRateChanged;
 		asioCallbacks.bufferSwitchTimeInfo = nullptr; // bufferSwitchTimeInfo; //  nullptr;
 		asioCallbacks.bufferSwitch = bufferSwitch; //  iam->bufferSwitch; //  bufferSwitch; // Local
-
-		// @@ TODO: Move much of this functionality as possible out of InternalAsioMgr. Only do those things
-		// there that need the internal stuff to function
 
 		bool b = iam->CreateAsioBuffers(nInputChannels_, nOutputChannels_, stream.bufferSize, &asioCallbacks, verbose);
 
@@ -743,6 +693,7 @@ namespace dfx
 
 				// spawn a thread to stop the stream
 
+#if 0
 				unsigned threadId;
 				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
@@ -751,6 +702,11 @@ namespace dfx
 				// Much simpler now. @@ Except causes an exception!
 				//std::thread bare([&] { this->stopStream(); });
 				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
+#else
+				// We create thread and move it into the CallbackInfo structure. That way it hangs
+				// around until it terminates and is thus no longer joinable.
+				info->thread = std::thread([&]{ this->stopStream(); }); // @@ Note: move assigned.
+#endif
 			}
 			return true;
 		}
@@ -873,6 +829,7 @@ namespace dfx
 				// callbackEvent() function must return before the ASIOStop()
 				// function will return.
 
+#if 0
 				unsigned threadId;
 				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
 
@@ -881,6 +838,12 @@ namespace dfx
 				// Much simpler now. @@ Except causes an exception!
 				//std::thread bare([&] { this->stopStream(); });
 				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
+#else
+				// We create thread and move it into the CallbackInfo structure. That way it hangs
+				// around until it terminates and is thus no longer joinable.
+				//info->thread = std::thread([&] { this->stopStream(); }); // @@ Note: move assigned.
+				info->thread = std::thread([&] { asioStopStream(&stream.callbackInfo); }); // @@ Note: move assigned.
+#endif
 
 			}
 			else if (cbReturnValue == 1) 

@@ -457,8 +457,8 @@ int main(int argc, char* argv[])
 {
 	ListDevices();
 	//test1();
-	testWave(waveFile2);
-	//testMemWaveII(waveFile2);
+	//testWave(waveFile2);
+	testMemWaveII(waveFile2);
 	//testRaw(waveFile1);
 	return 0;
 }
