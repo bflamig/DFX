@@ -71,7 +71,7 @@ namespace dfx
 	, finished(other.finished)
 	, interpolate(other.interpolate)
 	{
-		// Just keeping move pedantics :)
+		// Just keeping move pedantics (jkmp :)
 		other.sampleRate = 0;
 		other.deltaTime = 0;
 		other.time = 0;
@@ -169,6 +169,8 @@ namespace dfx
 	void MemWave::AliasSamples(MemWave& other)
 	{
 		buff.Alias(other.buff);
+		// @@ I wonder, should I do this?
+		SetRate(sampleRate);
 	}
 
 	void MemWave::SetRate(double sampleRate_)
@@ -279,7 +281,7 @@ namespace dfx
 
 	bool MemWave::IsFinished()
 	{
-		return true;
+		return finished;
 	}
 
 } // end of namspace

@@ -33,8 +33,7 @@
 \******************************************************************************/
 
 #include "AsioMgr.h"
-#include "FrameBuffer.h"
-#include "SoundFile.h"
+#include "MemWave.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -128,17 +127,11 @@ void test1()
 						fprintf(stdout, "     \r");
 						fflush(stdout);
 					}
-
-					//am.Stop();
 				}
-
-				//am.DisposeBuffers();
 			}
 
 			am.Exit();
 		}
-
-		//am.UnloadDriver();
 	}
 }
 
@@ -153,16 +146,8 @@ bool Prep(DfxAudio& da, const std::string& driver_name, bool verbose)
 	}
 	else std::cout << "Trouble loading and initializing driver" << std::endl;
 
-	//if (b)
-	//{
-	//	// ASIOControlPanel(); you might want to check wether the ASIOControlPanel() can open
-	//
-	//}
-	//else std::cout << "Trouble querying device info" << std::endl;
-
 	return b;
 }
-
 
 struct MyData
 {
@@ -209,6 +194,54 @@ int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTim
 	return 0;
 }
 
+int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
+{
+	// A callback function that repeatedly plays back a sound file. A great way to test the 
+	// playback audio streaming. We don't use the inBuff.
+
+	// WARNING! Runs in a different thread! (The ASIO thread I presume)
+
+	auto waves = reinterpret_cast<MemWave*>(userData);
+	auto p = reinterpret_cast<system_t*>(outBuff);
+
+	auto nOutChannels = waves->buff.nChannels; // @@ TODO: THIS BETTER MATCH what we opened!
+
+	if (waves->IsFinished())
+	{
+		for (unsigned i = 0; i < nFrames; i++)
+		{
+			*p++ = 0;
+			*p++ = 0;
+		}
+
+		return 2;
+	}
+
+	if (nOutChannels == 1)
+	{
+		while (nFrames > 0)
+		{
+			auto sf = waves->MonoTick();
+			*p++ = sf;
+			*p++ = sf;
+			--nFrames;
+		}
+	}
+	else
+	{
+		while (nFrames > 0)
+		{
+			auto sf = waves->StereoTick();
+			*p++ = sf.left;
+			*p++ = sf.right;
+			--nFrames;
+		}
+	}
+
+	return 0;
+}
+
+
 #ifdef __OS_WINDOWS__
 std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.raw");
 std::string waveFile2("G:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
@@ -220,28 +253,34 @@ std::string waveFile2("/home/pi/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods
 
 void testRaw(const std::string_view waveFile)
 {
-	FrameBuffer<double> waves;
-	SoundFile sf;
+	//FrameBuffer<double> waves;
+	//SoundFile sf;
 
-	bool rv = sf.OpenRaw(waveFile, 1, SampleFormat::SINT16, 22050.0);
+	MemWave waves;
+
+	//waves.SetRate(44100);
+
+	bool rv = waves.LoadRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
 	if (!rv)
 	{
-		auto &last_err = sf.LastError();
+		auto &last_err = waves.sound_file.LastError();
 		last_err.Print(std::cout);
 		return;
 	}
 
-	waves.Resize(sf.fileFrames, sf.nChannels);
+	waves.SetRate(44100);
 
-	waves.SetDataRate(sf.fileRate); // @@ Needs work
+	//waves.Resize(sf.fileFrames, sf.nChannels);
 
-	rv = sf.Read(waves, 0, true);
-	if (!rv)
-	{
-		auto& last_err = sf.LastError();
-		last_err.Print(std::cout);
-		return;
-	}
+	//waves.SetDataRate(sf.fileRate); // @@ Needs work
+
+	//rv = sf.Read(waves, 0, true);
+	//if (!rv)
+	//{
+	//	auto& last_err = sf.LastError();
+	//	last_err.Print(std::cout);
+	//	return;
+	//}
 
 
 	AsioMgr da;
@@ -249,14 +288,12 @@ void testRaw(const std::string_view waveFile)
 
 	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
 
-	da.ConfigureUserCallback(loopPlayBack);
-
-	MyData myData(waves);
+	da.ConfigureUserCallback(wavesPlayBack);
 
 	// 2 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(2, 2, 64, sf.fileRate, &myData, verbose);
+	b = da.Open(2, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
 
 	if (b)
 	{
@@ -315,7 +352,7 @@ void testWave(const std::string_view waveFile)
 	// 2 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(2, 2, 64, sf.fileRate, &myData, verbose);
+	b = da.Open(2, 2, 64, static_cast<unsigned>(sf.fileRate), &myData, verbose);
 
 	if (b)
 	{
@@ -337,11 +374,78 @@ void testWave(const std::string_view waveFile)
 	//da.Exit();
 }
 
+
+void testWaveII(const std::string_view waveFile)
+{
+	//FrameBuffer<double> waves;
+	//SoundFile sf;
+
+	MemWave waves;
+
+	//waves.SetRate(44100);
+
+	bool rv = waves.Load(waveFile);
+	if (!rv)
+	{
+		auto& last_err = waves.sound_file.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
+
+	waves.SetRate(44100);
+
+	//waves.Resize(sf.fileFrames, sf.nChannels);
+
+	//waves.SetDataRate(sf.fileRate); // @@ Needs work
+
+	//rv = sf.Read(waves, 0, true);
+	//if (!rv)
+	//{
+	//	auto& last_err = sf.LastError();
+	//	last_err.Print(std::cout);
+	//	return;
+	//}
+
+
+	AsioMgr da;
+	bool verbose = true;
+
+	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
+
+	da.ConfigureUserCallback(wavesPlayBack);
+
+	// 2 ins, 2 outs (aka stereo)
+	// 64 sample buffers (nominal)
+
+	b = da.Open(2, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+
+	if (b)
+	{
+		b = da.Start();
+	}
+	else std::cout << "Error opening stream" << std::endl;
+
+	if (b)
+	{
+		std::cout << "\nAudio session started successfully.\n" << std::endl;
+
+		while (!da.Stopped())
+		{
+			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
+		}
+	}
+	else std::cout << "Error starting stream" << std::endl;
+
+	//da.Exit();
+}
+
+
 int main(int argc, char* argv[])
 {
 	ListDevices();
-	test1();
+	//test1();
 	//testRaw(waveFile1);
 	//testWave(waveFile2);
+	testWaveII(waveFile2);
 	return 0;
 }
