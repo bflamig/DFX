@@ -93,6 +93,8 @@ namespace dfx
 		bool QueryDriverInfo(bool verbose = true);
 		bool QueryDeviceInfo(bool verbose = true);
 
+		bool PopupControlPanel();
+
 		bool DisposeBuffers();
 
 		// ///

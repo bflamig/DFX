@@ -242,6 +242,8 @@ namespace dfx
         virtual bool InitDriver(bool verbose = true) = 0;
         virtual void UnloadDriver() = 0;
 
+        virtual bool PopupControlPanel() = 0;
+
         virtual long NumDevices() = 0;
         virtual std::vector<std::string> DeviceNames() = 0;
         virtual std::string DeviceName(long devId) = 0;

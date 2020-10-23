@@ -68,7 +68,7 @@ namespace dfx
 
 	AsioMgr::~AsioMgr()
 	{
-		closeStream();
+		Exit();
 		iam = nullptr;
 	}
 
@@ -126,6 +126,11 @@ namespace dfx
 	}
 
 
+	bool AsioMgr::PopupControlPanel()
+	{
+		return iam->PopupControlPanel();
+	}
+
 	bool AsioMgr::Start()
 	{
 		bool b = iam->Start();
@@ -135,9 +140,8 @@ namespace dfx
 
 	bool AsioMgr::Stop()
 	{
-		bool b = iam->Stop();
-		stream.state = StreamState::STOPPED;
-		return b;
+		stopStream();
+		return true;
 	}
 
 	bool AsioMgr::Stopped()
@@ -148,6 +152,7 @@ namespace dfx
 
 	bool AsioMgr::Exit()
 	{
+		closeStream();
 		return iam->Exit();
 	}
 
@@ -176,7 +181,7 @@ namespace dfx
 
 		DisposeBuffers();
 
-		UnloadDriver();
+		//UnloadDriver();
 
 		AsioHandle* handle = (AsioHandle*)stream.apiHandle;
 
@@ -193,10 +198,11 @@ namespace dfx
 			//}
 
 			delete handle;
-			stream.apiHandle = 0;
 		}
 
-		DfxAudio::closeStream(); // Gets rid of stream buffers
+		stream.apiHandle = 0;
+
+		DfxAudio::closeStream(); // Gets rid of user-controlled stream buffers
 	}
 
 	bool stopThreadCalled = false;

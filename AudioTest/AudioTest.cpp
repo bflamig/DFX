@@ -40,10 +40,10 @@
 #include <string>
 //#include <filesystem>
 
-//const char* const ASIO_DRIVER_NAME = "FocusRite USB ASIO";
+const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
 //const char* const ASIO_DRIVER_NAME = "JRiver Media Center 26";
 //const char* const ASIO_DRIVER_NAME = "ReaRoute ASIO (x64)";
-const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
+//const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
 
 using namespace dfx;
 
@@ -99,7 +99,7 @@ void test1()
 		// initialize the driver
 		if (am.InitDriver(verbose))
 		{
-			// ASIOControlPanel(); you might want to check wether the ASIOControlPanel() can open
+			//am.PopupControlPanel(); // @@ NOT BLOCKING. SO not much good!
 
 			// set up the asioCallback structure and create the ASIO data buffer
 
@@ -138,7 +138,7 @@ void test1()
 			am.Exit();
 		}
 
-		am.UnloadDriver();
+		//am.UnloadDriver();
 	}
 }
 

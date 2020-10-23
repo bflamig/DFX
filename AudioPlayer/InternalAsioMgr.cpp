@@ -51,11 +51,6 @@
 #include <iostream>
 #include <sstream>
 
-
-// @@ TODO: HACK TO GET RID OF
-
-constexpr double TEST_RUN_TIME = 2.0;		// run for 2 seconds
-
 //////////////////////////////////////////////////////////////////
 
 namespace dfx
@@ -207,8 +202,8 @@ namespace dfx
 
 	InternalAsioMgr::~InternalAsioMgr()
 	{
-		Exit();
-		asioDrivers->removeCurrentDriver();
+		Exit(); // Removes current driver too
+		//asioDrivers->removeCurrentDriver();
 		delete asioDrivers;
 		asioDrivers = 0;
 		--fox;
@@ -275,7 +270,15 @@ namespace dfx
 
 	bool InternalAsioMgr::InitDriver(bool verbose)
 	{
-		lastResult = ASIOInit(&InternalAsioMgr::driverData.driverInfo);
+		// Per SDK document, do this so asioMessage callback works
+		driverData.driverInfo.asioVersion = 2;
+
+		// So driver popup works
+		// GetDesktopWindow() might work better here. See
+		// DirectSound comment in RtAudio.cpp
+		driverData.driverInfo.sysRef = GetForegroundWindow();
+
+		lastResult = ASIOInit(&driverData.driverInfo);
 
 		if (lastResult == ASE_OK)
 		{
@@ -302,6 +305,12 @@ namespace dfx
 		return asioDrivers->getCurrentDriverIndex();
 	}
 
+	bool InternalAsioMgr::PopupControlPanel()
+	{
+		auto rv = ASIOControlPanel();
+		return rv == ASE_OK;
+	}
+
 	//----------------------------------------------------------------------------------
 
 	bool InternalAsioMgr::QueryDriverInfo(bool verbose)
@@ -318,7 +327,7 @@ namespace dfx
 
 		if (verbose)
 		{
-			std::cout << "ASIOGetChannels (num inputs: " << driverData.nInputChannels << ", num outputs: " << driverData.nOutputChannels << std::endl;
+			std::cout << "ASIOGetChannels (num inputs: " << driverData.nInputChannels << ", num outputs: " << driverData.nOutputChannels << ")" << std::endl;
 		}
 
 		// get the usable buffer sizes
@@ -742,8 +751,11 @@ namespace dfx
 	bool InternalAsioMgr::DisposeBuffers()
 	{
 		ASIODisposeBuffers();
-		lastResult = ASIOExit();
-		return lastResult == ASE_OK;
+		delete[] driverData.bufferInfos;
+		driverData.bufferInfos = 0;
+		delete[] driverData.channelInfos;
+		driverData.channelInfos = 0;
+		return true;
 	}
 
 
@@ -769,8 +781,8 @@ namespace dfx
 
 	bool InternalAsioMgr::Exit()
 	{
-		ASIODisposeBuffers();
-		lastResult = ASIOExit();
+		DisposeBuffers();
+		lastResult = ASIOExit(); // Removes current driver
 		return lastResult;
 	}
 
@@ -915,14 +927,7 @@ namespace dfx
 			ASIOOutputReady();
 		}
 
-		if (processedSamples >= driverData.sampleRate * TEST_RUN_TIME)	// roughly measured
-		{
-			driverData.stopped = true;
-		}
-		else
-		{
-			processedSamples += buffSize;
-		}
+		processedSamples += buffSize;
 
 		return 0L;
 	}

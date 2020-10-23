@@ -65,9 +65,9 @@ namespace dfx
 
 	struct AsioHandle 
 	{
-		int drainCounter;       // Tracks callback counts when draining
-		bool internalDrain;     // Indicates if stop is initiated from callback or not.
-		ASIOBufferInfo* bufferInfos;
+		int drainCounter;            // Tracks callback counts when draining
+		bool internalDrain;          // Indicates if stop is initiated from callback or not.
+		ASIOBufferInfo* bufferInfos; // This struct does *not* own these
 		HANDLE condition;
 
 		AsioHandle() : drainCounter{}, internalDrain{}, bufferInfos{}, condition{}
@@ -176,6 +176,8 @@ namespace dfx
 		static  void UnloadDriver();
 
 		static long QueryDeviceID();
+
+		bool PopupControlPanel();
 
 		static bool Start();
 		static bool Stop();
