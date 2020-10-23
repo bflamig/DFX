@@ -267,7 +267,7 @@ namespace dfx
 
 		}
 
-		StereoFrame<T> StereoInterpolate(double pos) const
+		StereoFrame<T> StereoInterpolate(double framePos) const
 		{
 #ifdef DFX_DEBUG
 			if (nChannels != 2)
@@ -280,32 +280,46 @@ namespace dfx
 				throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 2");
 			}
 #endif
-			unsigned indx = (unsigned)pos;
-			double frac = pos - indx;
+			// This ASSUMES interleaved sampling data. Don't forget that!
+			// So the frame, say, at framePos p, is { samples[p], samples[p+1] }
+
+			auto frameIndx = (unsigned)framePos;
+			const double frac = framePos - frameIndx;
+			const auto firstFrameSample = frameIndx * 2;
 
 			if (frac > 0.0)
 			{
-				if (indx >= nFrames)
+				if (frameIndx >= nFrames)
 				{
 					throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 3");
 				}
-				else if (indx == nFrames - 1)
+				else if (frameIndx == nFrames - 1)
 				{
 					// On last frame, so don't interpolate
-					return { samples[indx], samples[indx + 1] };
+					return { samples[firstFrameSample], samples[firstFrameSample + 1] };
 				}
 				else
 				{
-					// Here to interpolate
+					// Okay, then, we must interpolate between frames.
+					// Now, two frames are two samples apart.
 
-					T a = samples[indx];
-					T b = samples[++indx];
+					auto sampleIndx = firstFrameSample;
+
+					// Let's work on one channel of the frame at a time.
+					// First, the left channel
+
+					T a = samples[sampleIndx];
+					T b = samples[sampleIndx + 2];
 
 					T output1 = a;
 					output1 += frac * (b - a);
 
-					a = samples[++indx];
-					b = samples[++indx];
+					// Now, the right channel
+
+					sampleIndx = firstFrameSample + 1;
+
+					a = samples[sampleIndx];
+					b = samples[sampleIndx + 2];
 
 					T output2 = a;
 					output2 += frac * (b - a);
@@ -315,15 +329,17 @@ namespace dfx
 			}
 			else
 			{
+				// We are right on the money! No interpolation needed.
+
 #ifdef DFX_DEBUG
-				if (indx >= nFrames)
+				if (frameIndx >= nFrames)
 				{
 					throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 4");
 				}
 #endif
-				return { samples[indx], samples[indx + 1] };
+				auto sampleIndx = firstFrameSample;
+				return { samples[sampleIndx], samples[sampleIndx + 1] };
 			}
-
 		}
 	};
 

@@ -584,7 +584,7 @@ namespace dfx
 	void DeInterleaveChannel(T* interleavedBuff, T* nonInterleavedChannel, unsigned whichChannel, unsigned nChannels, unsigned nSamples)
 	{
 		auto dest = nonInterleavedChannel;
-		auto src = interleavedBuff + whichChannel; // bug! *nChannels;
+		auto src = interleavedBuff + whichChannel;
 
 		for (unsigned s = 0; s < nSamples; s++)
 		{
@@ -597,7 +597,7 @@ namespace dfx
 	void DeInterleaveChannel(T* interleavedBuff, T* nonInterleavedChannel, unsigned whichChannel, unsigned nChannels, unsigned nSamples, bool byte_swap)
 	{
 		auto dest = nonInterleavedChannel;
-		auto src = interleavedBuff + whichChannel; // bug! *nChannels;
+		auto src = interleavedBuff + whichChannel;
 
 		if (byte_swap)
 		{

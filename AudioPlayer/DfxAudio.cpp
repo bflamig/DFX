@@ -168,11 +168,15 @@ namespace dfx
 
     void DfxAudio::tickStreamTime()
     {
+        // This is called once per callback event. So we've processed
+        // stream.bufferSize (eg 64) samples. So advance the stream time
+        // to the start of the next buffer.
+
         // Subclasses that do not provide their own implementation of
         // getStreamTime should call this function once per buffer I/O to
         // provide basic stream time support.
 
-        stream.streamTime += (stream.bufferSize * 1.0 / stream.sampleRate);
+        stream.streamTime += (double(stream.bufferSize) / double(stream.sampleRate));
 
 #if defined( HAVE_GETTIMEOFDAY )
         gettimeofday(&stream_.lastTickTimestamp, NULL);

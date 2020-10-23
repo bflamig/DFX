@@ -194,12 +194,20 @@ int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTim
 	return 0;
 }
 
+static int64_t cowboy = 0;
+static int64_t indian = 0;
+static double buffalo = 0.0;
+
 int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
 {
 	// A callback function that repeatedly plays back a sound file. A great way to test the 
 	// playback audio streaming. We don't use the inBuff.
 
 	// WARNING! Runs in a different thread! (The ASIO thread I presume)
+
+	// We don't use streamTime here. Instead, the MemWave object keeps track of
+	// where we are, and knows when we are finished. It may be doing interpolation
+	// of samples on the fly.
 
 	auto waves = reinterpret_cast<MemWave*>(userData);
 	auto p = reinterpret_cast<system_t*>(outBuff);
@@ -217,24 +225,35 @@ int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 		return 2;
 	}
 
+	++indian;
+	buffalo = streamTime;
+
 	if (nOutChannels == 1)
 	{
 		while (nFrames > 0)
 		{
+			// NOTE: We are ticking at the playback sampling rate, which may not
+			// be the sampling rate of the recorded file. So the tick function
+			// below might have to calculate an interpolated frame.
 			auto sf = waves->MonoTick();
 			*p++ = sf;
 			*p++ = sf;
 			--nFrames;
+			++cowboy;
 		}
 	}
 	else
 	{
 		while (nFrames > 0)
 		{
+			// NOTE: We are ticking at the playback sampling rate, which may not
+			// be the sampling rate of the recorded file. So the tick function
+			// below might have to calculate an interpolated frame.
 			auto sf = waves->StereoTick();
 			*p++ = sf.left;
 			*p++ = sf.right;
 			--nFrames;
+			++cowboy;
 		}
 	}
 
@@ -244,8 +263,8 @@ int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 
 #ifdef __OS_WINDOWS__
 //std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.raw");
-//std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowbell1.raw");
-std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakeslap/tambourn.raw");
+std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowbell1.raw");
+//std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakeslap/tambourn.raw");
 //std::string waveFile1("G:/DrumSW/WaveLibrary/FakeWaves_raw/fakesnare/100/100_dope.raw");
 std::string waveFile2("G:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
 #else
@@ -254,70 +273,6 @@ std::string waveFile1("/home/pi/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowb
 std::string waveFile2("/home/pi/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
 #endif
 
-
-void testRaw(const std::string_view waveFile)
-{
-	//FrameBuffer<double> waves;
-	//SoundFile sf;
-
-	MemWave waves;
-
-	//waves.SetRate(44100);
-
-	bool rv = waves.LoadRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
-	if (!rv)
-	{
-		auto &last_err = waves.sound_file.LastError();
-		last_err.Print(std::cout);
-		return;
-	}
-
-	waves.SetRate(44100);
-
-	//waves.Resize(sf.fileFrames, sf.nChannels);
-
-	//waves.SetDataRate(sf.fileRate); // @@ Needs work
-
-	//rv = sf.Read(waves, 0, true);
-	//if (!rv)
-	//{
-	//	auto& last_err = sf.LastError();
-	//	last_err.Print(std::cout);
-	//	return;
-	//}
-
-
-	AsioMgr da;
-	bool verbose = true;
-
-	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
-
-	da.ConfigureUserCallback(wavesPlayBack);
-
-	// 2 ins, 2 outs (aka stereo)
-	// 64 sample buffers (nominal)
-
-	b = da.Open(2, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
-
-	if (b)
-	{
-		b = da.Start();
-	}
-	else std::cout << "Error opening stream" << std::endl;
-
-	if (b)
-	{
-		std::cout << "\nAudio session started successfully.\n" << std::endl;
-
-		while (!da.Stopped())
-		{
-			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
-		}
-	}
-	else std::cout << "Error starting stream" << std::endl;
-
-	//da.Exit();
-}
 
 void testWave(const std::string_view waveFile)
 {
@@ -334,7 +289,7 @@ void testWave(const std::string_view waveFile)
 
 	waves.Resize(sf.fileFrames, sf.nChannels);
 
-	waves.SetDataRate(sf.fileRate); // @@ Needs work
+	waves.SetDataRate(48000);
 
 	rv = sf.Read(waves, 0, true);
 	if (!rv)
@@ -353,16 +308,18 @@ void testWave(const std::string_view waveFile)
 
 	MyData myData(waves);
 
-	// 2 ins, 2 outs (aka stereo)
+	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(2, 2, 64, static_cast<unsigned>(sf.fileRate), &myData, verbose);
+	b = da.Open(0, 2, 64, static_cast<unsigned>(sf.fileRate), &myData, verbose);
 
 	if (b)
 	{
 		b = da.Start();
 	}
 	else std::cout << "Error opening stream" << std::endl;
+
+	auto start = std::chrono::high_resolution_clock::now();
 
 	if (b)
 	{
@@ -372,6 +329,13 @@ void testWave(const std::string_view waveFile)
 		{
 			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
 		}
+
+		auto finish = std::chrono::high_resolution_clock::now();
+
+		auto elapsed = finish - start;
+		auto zebra = elapsed.count();
+
+		std::cout << "Session ended. Playing time = " << zebra / 1.0e9 << " secs" << std::endl;
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
@@ -381,9 +345,6 @@ void testWave(const std::string_view waveFile)
 
 void testMemWaveII(const std::string_view waveFile)
 {
-	//FrameBuffer<double> waves;
-	//SoundFile sf;
-
 	MemWave waves;
 
 	bool rv = waves.Load(waveFile);
@@ -394,11 +355,7 @@ void testMemWaveII(const std::string_view waveFile)
 		return;
 	}
 
-	waves.SetRate(88200);
-	//waves.deltaTime *= 2; // @@ TODO: See the SetRate() code. We need to do this. Why? Why is it off by 2?
-
-	//auto x = fmod(2.0, 1.0);
-
+	waves.SetRate(48000);
 
 	AsioMgr da;
 	bool verbose = true;
@@ -407,10 +364,12 @@ void testMemWaveII(const std::string_view waveFile)
 
 	da.ConfigureUserCallback(wavesPlayBack);
 
-	// 2 ins, 2 outs (aka stereo)
+	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
 	b = da.Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+
+	auto start = std::chrono::high_resolution_clock::now();
 
 	if (b)
 	{
@@ -426,6 +385,68 @@ void testMemWaveII(const std::string_view waveFile)
 		{
 			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
 		}
+
+		auto finish = std::chrono::high_resolution_clock::now();
+
+		auto elapsed = finish - start;
+		auto zebra = elapsed.count();
+
+		std::cout << "Session ended. Playing time = " << zebra / 1.0e9 << " secs" << std::endl;
+	}
+	else std::cout << "Error starting stream" << std::endl;
+
+	//da.Exit();
+}
+
+void testRaw(const std::string_view waveFile)
+{
+	MemWave waves;
+
+	bool rv = waves.LoadRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
+	if (!rv)
+	{
+		auto& last_err = waves.sound_file.LastError();
+		last_err.Print(std::cout);
+		return;
+	}
+
+	waves.SetRate(48000);
+
+	AsioMgr da;
+	bool verbose = true;
+
+	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
+
+	da.ConfigureUserCallback(wavesPlayBack);
+
+	// 0 ins, 2 outs (aka stereo)
+	// 64 sample buffers (nominal)
+
+	b = da.Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	if (b)
+	{
+		b = da.Start();
+	}
+	else std::cout << "Error opening stream" << std::endl;
+
+	if (b)
+	{
+		std::cout << "\nAudio session started successfully.\n" << std::endl;
+
+		while (!da.Stopped())
+		{
+			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
+		}
+
+		auto finish = std::chrono::high_resolution_clock::now();
+
+		auto elapsed = finish - start;
+		auto zebra = elapsed.count();
+
+		std::cout << "Session ended. Playing time = " << zebra / 1.0e9 << " secs" << std::endl;
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
@@ -437,8 +458,8 @@ int main(int argc, char* argv[])
 {
 	ListDevices();
 	//test1();
-	testRaw(waveFile1);
-	//testWave(waveFile2);
+	testWave(waveFile2);
 	//testMemWaveII(waveFile2);
+	//testRaw(waveFile1);
 	return 0;
 }
