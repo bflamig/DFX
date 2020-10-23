@@ -1,17 +1,10 @@
 /******************************************************************************\
- * DFX - "Drum font exchange format" - source code
+ * Bryx - "Bryan exchange format" - source code
  *
  * Copyright (c) 2020 by Bryan Flamig
  *
- * This software helps facilitate the real-time playing of multi-layered drum
- * samples, by implementing a language that specifies a master directory of the
- * the sample wave files for a drum kit: where the samples are, what they are
- * for, and a summary of their properties. The DFX format allows modifications
- * of sample levels to achieve a unified, pleasing mix of sounds. Mechanisms
- * such as velocity layers and round robins are supported for this purpose.
- *
  * This exchange format has a one to one mapping to the widely used Json syntax,
- * simplified to be easier to read and write. It is easy to translate DFX files
+ * simplified to be easier to read and write. It is easy to translate Bryx files
  * into Json files that can be parsed by any software supporting Json syntax.
  *
  ******************************************************************************
