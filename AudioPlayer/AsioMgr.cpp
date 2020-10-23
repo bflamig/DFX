@@ -68,7 +68,7 @@ namespace dfx
 
 	AsioMgr::~AsioMgr()
 	{
-		Exit();
+		Close();
 		iam = nullptr;
 	}
 
@@ -150,7 +150,7 @@ namespace dfx
 		return stream.state == StreamState::STOPPED;
 	}
 
-	bool AsioMgr::Exit()
+	bool AsioMgr::Close()
 	{
 		closeStream();
 		return iam->Exit();

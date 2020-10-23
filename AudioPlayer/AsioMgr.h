@@ -82,11 +82,11 @@ namespace dfx
 		virtual bool Start();
 		virtual bool Stop();
 		virtual bool Stopped();
-		virtual bool Exit();
 
 		virtual void ConfigureUserCallback(CallbackPtr userCallback);
 
 		virtual bool Open(long nInputChannels_, long nOutputChannels_, long bufferSize_, unsigned sampleRate_, void *userData_, bool verbose);
+		virtual bool Close();
 
 	public:
 

@@ -269,11 +269,11 @@ namespace dfx
         virtual bool Start(); // should be overidden
         virtual bool Stop();  // should be overidden
         virtual bool Stopped() = 0;
-        virtual bool Exit() = 0;
 
         virtual void ConfigureUserCallback(CallbackPtr userCallback) = 0;
 
         virtual bool Open(long nInputChannels_, long nOutputChannels_, long bufferSize_, unsigned sampleRate_, void* userData_, bool verbose) = 0;
+        virtual bool Close() = 0;
 
     };
 

@@ -39,10 +39,10 @@
 #include <string>
 //#include <filesystem>
 
-//const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
+const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
 //const char* const ASIO_DRIVER_NAME = "JRiver Media Center 26";
 //const char* const ASIO_DRIVER_NAME = "ReaRoute ASIO (x64)";
-const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
+//const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
 
 using namespace dfx;
 
@@ -130,7 +130,7 @@ void test1()
 				}
 			}
 
-			am.Exit();
+			am.Close();
 		}
 	}
 }
@@ -338,7 +338,7 @@ void testWave(const std::string_view waveFile)
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
-	//da.Exit();
+	//da.Close();
 }
 
 
@@ -394,7 +394,7 @@ void testMemWaveII(const std::string_view waveFile)
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
-	//da.Exit();
+	//da.Close();
 }
 
 void testRaw(const std::string_view waveFile)
@@ -449,7 +449,7 @@ void testRaw(const std::string_view waveFile)
 	}
 	else std::cout << "Error starting stream" << std::endl;
 
-	//da.Exit();
+	//da.Close();
 }
 
 

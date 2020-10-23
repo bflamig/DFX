@@ -169,7 +169,6 @@ namespace dfx
 	void MemWave::AliasSamples(MemWave& other)
 	{
 		buff.Alias(other.buff);
-		// @@ I wonder, should I do this?
 		SetRate(sampleRate);
 	}
 
