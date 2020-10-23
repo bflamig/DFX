@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{abacf82e-b11e-49ae-9ad8-1b62203d5cb6}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)FrameBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MemWave.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SampleUtil.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SoundFile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)FrameBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)MemWave.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SampleUtil.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SoundFile.h" />
+  </ItemGroup>
+</Project>

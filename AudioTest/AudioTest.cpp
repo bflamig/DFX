@@ -275,7 +275,7 @@ std::string waveFile2("/home/pi/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods
 
 void testWave(const std::string_view waveFile)
 {
-	FrameBuffer<double> waves;
+	FrameBuffer<double> frames;
 	SoundFile sf;
 
 	bool rv = sf.Open(waveFile);
@@ -286,11 +286,11 @@ void testWave(const std::string_view waveFile)
 		return;
 	}
 
-	waves.Resize(sf.fileFrames, sf.nChannels);
+	frames.Resize(sf.fileFrames, sf.nChannels);
 
-	waves.SetDataRate(48000);
+	frames.SetDataRate(48000);
 
-	rv = sf.Read(waves, 0, true);
+	rv = sf.Read(frames, 0, true);
 	if (!rv)
 	{
 		auto& last_err = sf.LastError();
@@ -305,12 +305,12 @@ void testWave(const std::string_view waveFile)
 
 	da.ConfigureUserCallback(loopPlayBack);
 
-	MyData myData(waves);
+	MyData myData(frames);
 
 	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(0, 2, 64, static_cast<unsigned>(sf.fileRate), &myData, verbose);
+	b = da.Open(0, 2, 64, static_cast<unsigned>(frames.dataRate), &myData, verbose);
 
 	if (b)
 	{

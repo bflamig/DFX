@@ -17,28 +17,20 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)DfxParser.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DrumFont.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DrumKit.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)FrameBuffer.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)MemWave.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)PolyDrummer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)PolyTable.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RobinMgr.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)SoundFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VelocityLayer.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)SampleUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)DfxParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DrumFont.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DrumKit.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)FrameBuffer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)MemWave.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MultiLayeredDrum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)PolyDrummer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)PolyTable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RobinMgr.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)SoundFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)VelocityLayer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)SampleUtil.h" />
   </ItemGroup>
 </Project>
