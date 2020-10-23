@@ -73,7 +73,7 @@ int loopBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, S
 	// audio streaming. WARNING: Have this go to your headphones, not your monitors
 	// if the inputs are microphones. Otherwise, feedback city!
 
-	// WARNING! Runs in a different thread! (The ASIO thread I presume)
+	// WARNING! Runs in a different thread! (The ASIO thread)
 
 	auto p = reinterpret_cast<system_t*>(outBuff);
 	auto q = reinterpret_cast<system_t*>(inBuff);
@@ -162,7 +162,7 @@ int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTim
 	// A callback function that repeatedly plays back a sound file. A great way to test the 
 	// playback audio streaming. We don't use the inBuff.
 
-	// WARNING! Runs in a different thread! (The ASIO thread I presume)
+	// WARNING! Runs in a different thread! (The ASIO thread)
 
 	auto data = reinterpret_cast<MyData*>(userData);
 	auto& w = data->fb;
@@ -203,7 +203,7 @@ int wavesPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 	// A callback function that repeatedly plays back a sound file. A great way to test the 
 	// playback audio streaming. We don't use the inBuff.
 
-	// WARNING! Runs in a different thread! (The ASIO thread I presume)
+	// WARNING! Runs in a different thread! (The ASIO thread)
 
 	// We don't use streamTime here. Instead, the MemWave object keeps track of
 	// where we are, and knows when we are finished. It may be doing interpolation
@@ -272,7 +272,6 @@ std::string waveFile1("/home/pi/WaveLibrary/FakeWaves_raw/fakesnare/42/42_dee1.r
 std::string waveFile1("/home/pi/WaveLibrary/FakeWaves_raw/fakesnare/108/108_cowbell1.raw");
 std::string waveFile2("/home/pi/WaveLibrary/DownloadedWaves/FocusRite/Snare_Rods_Flam/Snare_Rods_Flam.wav");
 #endif
-
 
 void testWave(const std::string_view waveFile)
 {

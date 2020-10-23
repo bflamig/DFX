@@ -40,8 +40,6 @@ namespace dfx
 {
 	template<typename T> using MonoFrame = T;
 
-	//template<typename T> using StereoFrame = std::pair<T, T>;
-
 	template<typename T>
 	struct StereoFrame
 	{
@@ -53,14 +51,17 @@ namespace dfx
 		StereoFrame(const StereoFrame& other) : left(other.left), right(other.right) {}
 	};
 
+	// NOTE: If you are going to interpolate, T is best as either float or double.
+	// I don't do rounding at the moment.
+
 	template<typename T>
 	class FrameBuffer {
 	public:
 
-		std::shared_ptr<double[]> samples;
+		std::shared_ptr<T[]> samples;
 		unsigned nFrames;
-		unsigned nSamples;
 		unsigned nChannels;
+		unsigned nSamples;
 		double dataRate; // In Hz
 
 	public:
@@ -68,8 +69,8 @@ namespace dfx
 		FrameBuffer()
 		: samples{}
 		, nFrames{}
-		, nSamples{}
 		, nChannels{}
+		, nSamples{}
 		, dataRate{ 44100.0 }
 		{
 		}
@@ -82,25 +83,22 @@ namespace dfx
 		}
 
 		FrameBuffer(const FrameBuffer& other)
-		: samples(other.samples)
-		, nFrames(other.nFrames)
-		, nSamples(other.nSamples)
-		, nChannels(other.nChannels)
-		, dataRate(other.dataRate)
+		: FrameBuffer{}
 		{
+			Copy(other);
 		}
 
 		FrameBuffer(FrameBuffer&& other) noexcept
 		: samples(std::move(other.samples))
 		, nFrames(other.nFrames)
-		, nSamples(other.nSamples)
 		, nChannels(other.nChannels)
+		, nSamples(other.nSamples)
 		, dataRate(other.dataRate)
 		{
 			// Just keeping move pedantics :)
 			other.nFrames = 0;
-			other.nSamples = 0;
 			other.nChannels = 0;
+			other.nSamples = 0;
 			other.dataRate = 0;
 		}
 
@@ -113,11 +111,7 @@ namespace dfx
 		{
 			if (this != &other)
 			{
-				samples = other.samples;
-				nFrames = other.nFrames;
-				nSamples = other.nSamples;
-				nChannels = other.nChannels;
-				dataRate = other.dataRate;
+				Copy(other);
 			}
 		}
 
@@ -127,36 +121,15 @@ namespace dfx
 			{
 				samples = std::move(other.samples);
 				nFrames = other.nFrames;
-				nSamples = other.nSamples;
 				nChannels = other.nChannels;
+				nSamples = other.nSamples;
 				dataRate = other.dataRate;
 
 				// Just keeping move pedantics :)
 				other.nFrames = 0;
-				other.nSamples = 0;
 				other.nChannels = 0;
+				other.nSamples = 0;
 				other.dataRate = 0;
-			}
-		}
-
-
-		void Clear()
-		{
-			for (unsigned i = 0; i < nSamples; i++)
-			{
-				samples[i] = 0.0;
-			}
-		}
-
-		void Resize(unsigned nFrames_, unsigned nChannels_)
-		{
-			if (nFrames_ != nFrames || nChannels_ != nChannels)
-			{
-				nFrames = nFrames_;
-				nChannels = nChannels_;
-				nSamples = nFrames * nChannels;
-				samples = std::shared_ptr<double[]>(new double[nSamples]); // We auto release claim on old samples
-				Clear();
 			}
 		}
 
@@ -166,6 +139,39 @@ namespace dfx
 			nFrames = other.nFrames;
 			nChannels = other.nChannels;
 			nSamples = other.nSamples;
+			dataRate = other.dataRate;
+		}
+
+		void Clear()
+		{
+			for (unsigned i = 0; i < nSamples; i++)
+			{
+				samples[i] = 0.0;
+			}
+		}
+
+		void Copy(const FrameBuffer& other)
+		{
+			if (this != &other)
+			{
+				bool clear = false;
+				Resize(other.nFrames, other.nChannels, clear);
+				memcpy(samples.get(), other.samples.get(), sizeof(T));
+			}
+
+			dataRate = other.dataRate;
+		}
+
+		void Resize(unsigned nFrames_, unsigned nChannels_, bool clear = true)
+		{
+			if (nFrames_ != nFrames || nChannels_ != nChannels)
+			{
+				nFrames = nFrames_;
+				nChannels = nChannels_;
+				nSamples = nFrames * nChannels;
+				samples = std::shared_ptr<T[]>(new T[nSamples]); // We auto release claim on old samples
+				Clear();
+			}
 		}
 
 		void SetDataRate(double dataRate_)
@@ -248,7 +254,7 @@ namespace dfx
 					T b = samples[indx + 1];
 
 					T output = a;
-					output += frac * (b - a);
+					output += static_cast<T>(frac * (b - a));
 
 					return output;
 				}
@@ -312,7 +318,7 @@ namespace dfx
 					T b = samples[sampleIndx + 2];
 
 					T output1 = a;
-					output1 += frac * (b - a);
+					output1 += static_cast<T>(frac * (b - a));
 
 					// Now, the right channel
 
@@ -322,7 +328,7 @@ namespace dfx
 					b = samples[sampleIndx + 2];
 
 					T output2 = a;
-					output2 += frac * (b - a);
+					output2 += static_cast<T>(frac * (b - a));
 
 					return { output1, output2 };
 				}
