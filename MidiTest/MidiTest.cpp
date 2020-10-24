@@ -5,67 +5,169 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <optional>
 
-std::vector<std::string> enumeratePorts()
+struct MidiMessage
 {
-	auto inMidi = std::make_unique<RtMidiIn>();
+	std::vector<unsigned char> bytes;
+	double stamp;
 
-	unsigned nPorts = inMidi->getPortCount();
+	MidiMessage(std::vector<unsigned char> bytes_, double stamp_) : bytes(bytes_), stamp(stamp_) {}
 
-	std::vector<std::string> midiNames(nPorts);
+	MidiMessage(const MidiMessage& other) : bytes(other.bytes), stamp(other.stamp) {}
 
-	for (unsigned i = 0; i < nPorts; i++)
+	MidiMessage(MidiMessage&& other)
+	: bytes(std::move(other.bytes))
+	, stamp(other.stamp)
 	{
-		auto portName = inMidi->getPortName(i);
-		midiNames[i] = portName;
+		other.stamp = {};
 	}
 
-	return midiNames;
-}
+	void operator=(const MidiMessage& other)
+	{
+		if (this != &other)
+		{
+			bytes = other.bytes;
+			stamp = other.stamp;
+		}
+	}
+
+	void operator=(MidiMessage&& other)
+	{
+		if (this != &other)
+		{
+			bytes = std::move(other.bytes);
+			stamp = other.stamp;
+			other.stamp = {};
+		}
+	}
+};
+
+
+// Higher level wrapper around RtMidi
+
+class DfxMidi {
+public:
+
+	std::unique_ptr<RtMidiIn> input_handle;
+
+	std::vector<std::string> inPortNames;
+
+	DfxMidi()
+	{
+		input_handle = std::make_unique<RtMidiIn>();
+	}
+
+	virtual ~DfxMidi()
+	{
+	}
+
+	void Refresh()
+	{
+		GatherPortInfo();
+	}
+
+	void GatherPortInfo()
+	{
+		inPortNames = GetPortNames();
+	}
+
+	unsigned GetNumPorts()
+	{
+		return input_handle->getPortCount();
+	}
+
+	std::string GetPortName(unsigned port)
+	{
+		return input_handle->getPortName(port);
+	}
+
+	std::vector<std::string> GetPortNames()
+	{
+		std::vector<std::string> midiNames;
+		unsigned nPorts = GetNumPorts();
+
+		for (unsigned i = 0; i < nPorts; i++)
+		{
+			midiNames.emplace_back(GetPortName(i));
+		}
+
+		return midiNames;
+	}
+
+	void ListPorts(std::ostream& sout)
+	{
+		Refresh();
+
+		auto midiNames = inPortNames;
+
+		size_t nPorts = midiNames.size();
+
+		for (size_t i = 0; i < nPorts; i++)
+		{
+			sout << "  Port: " << i << ":  \"" << midiNames[i] << "\"" << std::endl;
+		}
+
+		sout << std::endl;
+	}
+
+	void OpenPort(unsigned port)
+	{
+		input_handle->openPort(port);
+	}
+
+	bool OpenPort(const std::string_view& name)
+	{
+		unsigned p = 0;
+		for (auto& n : inPortNames)
+		{
+			if (n == name)
+			{
+				OpenPort(p);
+				return true;
+			}
+
+			++p;
+		}
+
+		return false;
+	}
+
+	void ListenToAllMessages()
+	{
+		// Don't ignore sysex, timing, or active sensing messages.
+		input_handle->ignoreTypes(false, false, false);
+	}
+
+	std::optional<MidiMessage> GetMessage()
+	{
+		// NOTE: Non-blocking! So don't worry about using this
+		// in an interactive loop
+
+		std::vector<unsigned char> messageBytes;
+
+		double stamp = input_handle->getMessage(&messageBytes); // non-blocking
+
+		if (messageBytes.size() > 0)
+		{
+			return MidiMessage(messageBytes, stamp);
+		}
+		else return {};
+	}
+};
 
 void test1()
 {
-	auto midiNames = enumeratePorts();
-
-	auto nPorts = midiNames.size();
-
-	for (unsigned i = 0; i < nPorts; i++)
-	{
-		std::cout << "  Port: " << i << ":  \"" << midiNames[i] << "\"\n";
-	}
-
-	std::cout << std::endl;
+	DfxMidi dm;
+	dm.ListPorts(std::cout);
 }
 
-
-#if 0
-void midiErrorCallback(RtMidiError::Type type, const std::string& errorText, void* userData)
-{
-}
-
-void midiCallback(double timeStamp, std::vector<unsigned char> *message, void* userData)
-{
-
-}
 
 void test2()
 {
-	auto inMidi = std::make_unique<RtMidiIn>();
+	DfxMidi dm;
 
-	inMidi->setErrorCallback(midiErrorCallback);
-	inMidi->setCallback(midiCallback);
-
-	inMidi->openPort(0);
-}
-
-#endif
-
-void test2()
-{
-	auto midiin = std::make_unique<RtMidiIn>();
-
-	// Check available ports.
-	unsigned int nPorts = midiin->getPortCount();
+	unsigned nPorts = dm.GetNumPorts();
 
 	if (nPorts == 0) 
 	{
@@ -73,10 +175,9 @@ void test2()
 		return;
 	}
 
-	midiin->openPort(0);
+	dm.Refresh();
 
-	// Don't ignore sysex, timing, or active sensing messages.
-	// midiin->ignoreTypes(false, false, false);
+	dm.OpenPort("AKM320 2");
 
 	// Install an interrupt handler function.
 	//done = false;
@@ -90,23 +191,27 @@ void test2()
 
 	while (!done) 
 	{
-		double stamp = midiin->getMessage(&message); // non-blocking
-		int nBytes = message.size();
+		auto m = dm.GetMessage();
 
-		for (int i = 0; i < nBytes; i++)
+		if (m)
 		{
-			std::cout << "Byte " << i << " = " << (int)message[i] << ", ";
-		}
+			std::cout << "deltaT = " << m->stamp << "  ";
 
-		if (nBytes > 0)
-		{
-			std::cout << "stamp = " << stamp << std::endl;
+			auto bytes = m->bytes;
+			int nBytes = bytes.size();
+
+			for (int i = 0; i < nBytes; i++)
+			{
+				std::cout << "Byte " << i << " = " << (int)(bytes[i]) << ", ";
+			}
+
+			std::cout << std::endl;
+
 		}
 
 		// Sleep for 10 milliseconds ... platform-dependent.
 
 		using namespace std::chrono_literals;
-
 		std::this_thread::sleep_for(10ms);
 	}
 }
@@ -114,6 +219,14 @@ void test2()
 int main()
 {
 	test1();
-	test2();
+
+	//try
+	//{
+		test2();
+	//}
+	//catch (...)
+	//{
+		//std::cout << "caught exception" << std::endl;
+	//}
 }
 

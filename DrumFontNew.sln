@@ -35,6 +35,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BryxUtil", "BryxUtil\BryxUt
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiTest", "MidiTest\MidiTest.vcxproj", "{D68E8040-7741-45D5-8551-911C7093B306}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiPlayer", "MidiPlayer\MidiPlayer.vcxitems", "{D4956BD6-51D8-496A-9ECE-324B7EE234F6}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BryxParser\BryxParser.vcxitems*{01581f57-4117-47f9-a36f-f7c809ea7315}*SharedItemsImports = 4
@@ -64,10 +66,8 @@ Global
 		DrumFont\DrumFont.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
 		AudioPlayer\AudioPlayer.vcxitems*{bbf2e5e0-2dc7-4e38-a845-110e77ad8a8f}*SharedItemsImports = 9
 		BryxUtil\BryxUtil.vcxitems*{bfb3dfd1-953a-4713-b32d-2a7dc7ddd606}*SharedItemsImports = 9
-		AsioLayer\AsioLayer.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
-		AudioPlayer\AudioPlayer.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
-		BryxUtil\BryxUtil.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
-		DfxUtil\DfxUtil.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
+		MidiPlayer\MidiPlayer.vcxitems*{d4956bd6-51d8-496a-9ece-324b7ee234f6}*SharedItemsImports = 9
+		MidiPlayer\MidiPlayer.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
 		BryxParser\BryxParser.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
 		BryxUtil\BryxUtil.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
 		DfxUtil\DfxUtil.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
