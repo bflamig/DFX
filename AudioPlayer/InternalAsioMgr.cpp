@@ -415,16 +415,18 @@ namespace dfx
 	bool InternalAsioMgr::QueryDeviceInfo(DeviceInfo& devInfo, bool verbose)
 	{
 		// ASSUMES QueryDeviceInfo has already been called
+		// But don't call after creating buffers, cause driverData num channels
+		// will have possibly changed.
 
 		devInfo.name = driverData.driverInfo.name;
 		devInfo.devID = QueryDeviceID();
 
-		devInfo.nInChannels = driverData.nInputChannels;
-		devInfo.nOutChannels = driverData.nOutputChannels;
+		devInfo.nInChannelsAvail = driverData.nInputChannels;
+		devInfo.nOutChannelsAvail = driverData.nOutputChannels;
 
-		if (devInfo.nOutChannels > 0 && devInfo.nInChannels > 0)
+		if (devInfo.nOutChannelsAvail > 0 && devInfo.nInChannelsAvail > 0)
 		{
-			devInfo.nDuplexChannels = (devInfo.nInChannels < devInfo.nOutChannels) ? devInfo.nInChannels : devInfo.nOutChannels;
+			devInfo.nDuplexChannelsAvail = (devInfo.nInChannelsAvail < devInfo.nOutChannelsAvail) ? devInfo.nInChannelsAvail : devInfo.nOutChannelsAvail;
 		}
 
 		// Get channel names for input channels
@@ -433,7 +435,7 @@ namespace dfx
 		ASIOChannelInfo channelInfo;
 		ASIOSampleType stype{ ASIOSTLastEntry };
 
-		for (long i = 0; i < devInfo.nInChannels; i++)
+		for (long i = 0; i < devInfo.nInChannelsAvail; i++)
 		{
 			channelInfo.channel = i;
 			channelInfo.isInput = true;
@@ -461,7 +463,7 @@ namespace dfx
 
 		// Get channel names for output channels
 
-		for (long i = 0; i < devInfo.nOutChannels; i++)
+		for (long i = 0; i < devInfo.nOutChannelsAvail; i++)
 		{
 			channelInfo.channel = i;
 			channelInfo.isInput = false;

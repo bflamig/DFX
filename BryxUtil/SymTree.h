@@ -76,7 +76,7 @@ namespace bryx
 	protected:
 
 		int add_internal(char c);
-		size_t add_leaf(char c, int id);
+		int add_leaf(char c, int id);
 
 		int find_index(char c_) const;
 

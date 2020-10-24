@@ -13,18 +13,6 @@ namespace dfx
         Duplex
     };
 
-#if 0
-
-    enum class StreamMode
-    {
-        OUTPUT,
-        INPUT,
-        DUPLEX,
-        UNINITIALIZED = -75
-    };
-
-#endif
-
     enum class StreamState
     {
         STOPPED,
@@ -84,11 +72,11 @@ namespace dfx
 
         ~CallbackInfo()
         {
-            // In case this thread is still breathing.
-            if (thread.joinable())
-            {
-                thread.join();
-            }
+            //// In case this thread is still breathing.
+            //if (thread.joinable())
+            //{
+            //   thread.join();
+            //}
         }
     };
 
@@ -97,10 +85,7 @@ namespace dfx
     static constexpr unsigned int MAX_SAMPLE_RATES = 7;
 
     static constexpr unsigned int SAMPLE_RATES[MAX_SAMPLE_RATES] = {
-        // Why bother? 4000, 5512, 8000, 9600, 11025, 16000, 
-        22050,
-        // Why bother? 32000, 
-        44100, 48000, 88200, 96000, 176400, 192000
+        22050, 44100, 48000, 88200, 96000, 176400, 192000
     };
 
     // This information is shielded from the internals of any particular
@@ -115,9 +100,9 @@ namespace dfx
         std::vector<std::string> outputNames;
         std::string name;
         long devID;
-        long nOutChannels;
-        long nInChannels;
-        long nDuplexChannels;
+        long nOutChannelsAvail;
+        long nInChannelsAvail;
+        long nDuplexChannelsAvail;
         bool isDefaultOutput;
         bool isDefaultInput;
         unsigned preferredSampleRate;

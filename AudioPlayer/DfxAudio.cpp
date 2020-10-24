@@ -194,9 +194,9 @@ namespace dfx
     , outputNames{}
     , name{}
     , devID{}
-    , nOutChannels{}
-    , nInChannels{}
-    , nDuplexChannels{}
+    , nOutChannelsAvail{}
+    , nInChannelsAvail{}
+    , nDuplexChannelsAvail{}
     , isDefaultOutput{}
     , isDefaultInput{}
     , preferredSampleRate{}
@@ -215,9 +215,9 @@ namespace dfx
     , outputNames{ std::move(other.outputNames) }
     , name{ std::move(other.name) }
     , devID(other.devID)
-    , nOutChannels{ other.nOutChannels }
-    , nInChannels{ other.nInChannels }
-    , nDuplexChannels{ other.nDuplexChannels }
+    , nOutChannelsAvail{ other.nOutChannelsAvail }
+    , nInChannelsAvail{ other.nInChannelsAvail }
+    , nDuplexChannelsAvail{ other.nDuplexChannelsAvail }
     , isDefaultOutput{ other.isDefaultOutput }
     , isDefaultInput{ other.isDefaultInput }
     , preferredSampleRate{ other.preferredSampleRate }
@@ -232,15 +232,15 @@ namespace dfx
     {
         if (mode == IoMode::In)
         {
-            return (nChannels + startChannel <= nInChannels);
+            return (nChannels + startChannel <= nInChannelsAvail);
         }
         else if (mode == IoMode::Out)
         {
-            return (nChannels + startChannel <= nOutChannels);
+            return (nChannels + startChannel <= nOutChannelsAvail);
         }
         else // mode == IoMode::Duplex
         {
-            return (nChannels + startChannel <= nDuplexChannels);
+            return (nChannels + startChannel <= nDuplexChannelsAvail);
         }
     }
 

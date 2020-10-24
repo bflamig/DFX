@@ -35,7 +35,7 @@ namespace bryx
 		return static_cast<int>(children.size()) - 1;
 	}
 
-	size_t SymTree::add_leaf(char c, int id)
+	int SymTree::add_leaf(char c, int id)
 	{
 		children.push_back(SymElem(c, id));
 		return static_cast<int>(children.size()) - 1;

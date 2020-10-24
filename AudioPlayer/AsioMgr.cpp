@@ -306,44 +306,31 @@ namespace dfx
 		stopStream();
 	}
 
-#if 1
-
 	// This function will be called by a spawned thread when the user
 	// callback function signals that the stream should be stopped or
 	// aborted.  It is necessary to handle it this way because the
 	// callbackEvent() function must return before the ASIOStop()
-	// function will return.
+	// function will return. And that of course causes other issues
+	// as outline below where we must detach the thread after stopping
+	// the stream.
+
 	static unsigned __stdcall asioStopStream(void* ptr)
 	{
 		CallbackInfo* info = (CallbackInfo*)ptr;
 		auto object = (AsioMgr*)info->object;
 
 		object->stopStream();
-		//_endthreadex(0);
-
-		//if (info->thread.joinable())
-		//{
-		//	info->thread.join();
-		//}
 
 		// Let the thread run die on its own. We have to 
 		// do this, because it must live longer than this
 		// function (asioStopStream) since in fact the thread
 		// is the one that called this function. So if we 
 		// don't detach, amusement ensues.
-		// The other way to do this is to let the thread
-		// hang around in limbo until the CallbackInfo
-		// destructor is called, where we can then 
-		// "join" it to the current world, or perhaps
-		// detach it there? But that way seems wrong.
-		// I think just detaching it here is the solution.
 
 		info->thread.detach();
 
 		return 0;
 	}
-
-#endif
 
 
 	//
@@ -691,22 +678,10 @@ namespace dfx
 				// callbackEvent() function must return before the ASIOStop()
 				// function will return.
 
-				// spawn a thread to stop the stream
+				// We spawn a thread and move it into the CallbackInfo structure.
+				// That way it hangs around long enough to do its thing.
 
-#if 0
-				unsigned threadId;
-				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
-
-				_beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
-
-				// Much simpler now. @@ Except causes an exception!
-				//std::thread bare([&] { this->stopStream(); });
-				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
-#else
-				// We create thread and move it into the CallbackInfo structure. That way it hangs
-				// around until it terminates and is thus no longer joinable.
 				info->thread = std::thread([&]{ this->stopStream(); }); // @@ Note: move assigned.
-#endif
 			}
 			return true;
 		}
@@ -829,21 +804,10 @@ namespace dfx
 				// callbackEvent() function must return before the ASIOStop()
 				// function will return.
 
-#if 0
-				unsigned threadId;
-				//stream.callbackInfo.thread = _beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
+				// We spawn a thread and move it into the CallbackInfo structure.
+				// That way it hangs around long enough to do its thing.
 
-				_beginthreadex(NULL, 0, &asioStopStream, &stream.callbackInfo, 0, &threadId);
-
-				// Much simpler now. @@ Except causes an exception!
-				//std::thread bare([&] { this->stopStream(); });
-				//std::thread bare([&] { asioStopStream(&stream.callbackInfo); });
-#else
-				// We create thread and move it into the CallbackInfo structure. That way it hangs
-				// around until it terminates and is thus no longer joinable.
-				//info->thread = std::thread([&] { this->stopStream(); }); // @@ Note: move assigned.
 				info->thread = std::thread([&] { asioStopStream(&stream.callbackInfo); }); // @@ Note: move assigned.
-#endif
 
 			}
 			else if (cbReturnValue == 1) 
@@ -857,7 +821,6 @@ namespace dfx
 		// Let's take output data from internal form and put in device buffer
 		// /////////////////////////////////////////////////////////////////////////////
 
-		//if (stream.mode == OUTPUT || stream.mode == DUPLEX) 
 		if (stream.nDevPlayChannels > 0)
 		{
 			unsigned nBytesPerSample = nBytes(stream.devPlayFormat);
