@@ -33,6 +33,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DfxUtil", "DfxUtil\DfxUtil.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BryxUtil", "BryxUtil\BryxUtil.vcxitems", "{BFB3DFD1-953A-4713-B32D-2A7DC7DDD606}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiTest", "MidiTest\MidiTest.vcxproj", "{D68E8040-7741-45D5-8551-911C7093B306}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BryxParser\BryxParser.vcxitems*{01581f57-4117-47f9-a36f-f7c809ea7315}*SharedItemsImports = 4
@@ -62,6 +64,10 @@ Global
 		DrumFont\DrumFont.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
 		AudioPlayer\AudioPlayer.vcxitems*{bbf2e5e0-2dc7-4e38-a845-110e77ad8a8f}*SharedItemsImports = 9
 		BryxUtil\BryxUtil.vcxitems*{bfb3dfd1-953a-4713-b32d-2a7dc7ddd606}*SharedItemsImports = 9
+		AsioLayer\AsioLayer.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
+		AudioPlayer\AudioPlayer.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
+		BryxUtil\BryxUtil.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
+		DfxUtil\DfxUtil.vcxitems*{d68e8040-7741-45d5-8551-911c7093b306}*SharedItemsImports = 4
 		BryxParser\BryxParser.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
 		BryxUtil\BryxUtil.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
 		DfxUtil\DfxUtil.vcxitems*{d8009f40-0cce-49d1-b81f-b8b65b636fc6}*SharedItemsImports = 4
@@ -147,6 +153,14 @@ Global
 		{AED82C64-5CAA-4788-B3A5-A689D1E2326D}.Release|x64.Build.0 = Release|x64
 		{AED82C64-5CAA-4788-B3A5-A689D1E2326D}.Release|x86.ActiveCfg = Release|Win32
 		{AED82C64-5CAA-4788-B3A5-A689D1E2326D}.Release|x86.Build.0 = Release|Win32
+		{D68E8040-7741-45D5-8551-911C7093B306}.Debug|x64.ActiveCfg = Debug|x64
+		{D68E8040-7741-45D5-8551-911C7093B306}.Debug|x64.Build.0 = Debug|x64
+		{D68E8040-7741-45D5-8551-911C7093B306}.Debug|x86.ActiveCfg = Debug|Win32
+		{D68E8040-7741-45D5-8551-911C7093B306}.Debug|x86.Build.0 = Debug|Win32
+		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x64.ActiveCfg = Release|x64
+		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x64.Build.0 = Release|x64
+		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x86.ActiveCfg = Release|Win32
+		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
