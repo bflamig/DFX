@@ -44,6 +44,81 @@ struct MidiMessage
 };
 
 
+struct NoteOnMessage
+{
+	unsigned channel{};
+	unsigned note{};
+	unsigned velocity{};
+
+	NoteOnMessage() = default;
+
+	NoteOnMessage(unsigned channel_, unsigned note_, unsigned velocity_)
+	: channel(channel_), note(note_), velocity(velocity_)
+	{
+
+	}
+};
+
+struct NoteOffMessage
+{
+	unsigned channel{};
+	unsigned note{};
+	unsigned velocity{};
+
+	NoteOffMessage() = default;
+
+	NoteOffMessage(unsigned channel_, unsigned note_, unsigned velocity_)
+	: channel(channel_), note(note_), velocity(velocity_)
+	{
+
+	}
+};
+
+struct AftertouchMessage
+{
+	unsigned channel{};
+	unsigned note{};
+	unsigned pressure{};
+
+	AftertouchMessage() = default;
+
+	AftertouchMessage(unsigned channel_, unsigned note_, unsigned pressure_)
+	: channel(channel_), note(note_), pressure(pressure_)
+	{
+
+	}
+};
+
+struct PitchBendMessage
+{
+	unsigned channel{};
+	double amount{};  // 14 bits
+
+	PitchBendMessage() = default;
+
+	PitchBendMessage(unsigned channel_, double amount_)
+	: channel(channel_), amount(amount_)
+	{
+
+	}
+};
+
+struct ControlChangeMessage
+{
+	unsigned channel{};
+	unsigned controller{};
+	unsigned value{};
+
+	ControlChangeMessage() = default;
+
+	ControlChangeMessage(unsigned channel_, unsigned controller_, unsigned value_)
+	: channel(channel_), controller(controller_), value(value_)
+	{
+
+	}
+};
+
+
 // Higher level wrapper around RtMidi
 
 class DfxMidi {
@@ -154,6 +229,83 @@ public:
 		}
 		else return {};
 	}
+
+	std::optional<NoteOnMessage> ParseNoteOn(const MidiMessage& m)
+	{
+		auto& bytes = m.bytes;
+
+		if ((bytes[0] & 0xf0) == 0x90)
+		{
+			unsigned channel = bytes[0] & 0x0f;
+			unsigned note = bytes[1];
+			unsigned velocity = bytes[2];
+			return NoteOnMessage(channel, note, velocity);
+		}
+		else return {};
+	}
+
+	std::optional<NoteOffMessage> ParseNoteOff(const MidiMessage& m)
+	{
+		auto& bytes = m.bytes;
+
+		if ((bytes[0] & 0xf0) == 0x80)
+		{
+			unsigned channel = bytes[0] & 0x0f;
+			unsigned note = bytes[1];
+			unsigned velocity = bytes[2];
+			return NoteOffMessage(channel, note, velocity);
+		}
+		else return {};
+	}
+
+	std::optional<AftertouchMessage> ParseAftertouch(const MidiMessage& m)
+	{
+		auto& bytes = m.bytes;
+
+		if ((bytes[0] & 0xf0) == 0x80)
+		{
+			unsigned channel = bytes[0] & 0x0f;
+			unsigned note = bytes[1];
+			unsigned pressure = bytes[2];
+			return AftertouchMessage(channel, note, pressure);
+		}
+		else return {};
+	}
+
+	std::optional<PitchBendMessage> ParsePitchBend(const MidiMessage& m)
+	{
+		auto& bytes = m.bytes;
+
+		if ((bytes[0] & 0xf0) == 0xe0)
+		{
+			unsigned channel = bytes[0] & 0x0f;
+
+			// @@ TODO: endian issues?
+			int amt = bytes[1] & 0x7f;
+			amt |= (bytes[2] & 0x7f) << 7;
+			amt -= 0x2000;
+			auto amount = (double)amt;
+
+			return PitchBendMessage(channel, amount);
+		}
+		else return {};
+	}
+
+	std::optional <ControlChangeMessage > ParseControlChange(const MidiMessage& m)
+	{
+		auto& bytes = m.bytes;
+
+		if ((bytes[0] & 0xf0) == 0xb0)
+		{
+			unsigned channel = bytes[0] & 0x0f;
+			unsigned controller = bytes[1];
+			unsigned value = bytes[2];
+			return ControlChangeMessage(channel, controller, value);
+		}
+		else return {};
+	}
+
+
 };
 
 void test1()
@@ -183,6 +335,10 @@ void test2()
 	//done = false;
 	//(void)signal(SIGINT, finish);
 
+	// There is an option in VS 2019 to turn off Ctrl-C generating
+	// an exception: Debug/Windows/Exception Settings/Win32 Exceptions/ControlC
+	// UPDATE: ?? That's not the one. Where is it?
+
 	// Periodically check input queue.
 	std::cout << "Reading MIDI from port ... quit with Ctrl-C.\n";
 
@@ -197,16 +353,60 @@ void test2()
 		{
 			std::cout << "deltaT = " << m->stamp << "  ";
 
-			auto bytes = m->bytes;
-			int nBytes = bytes.size();
+			auto n_on = dm.ParseNoteOn(*m);
 
-			for (int i = 0; i < nBytes; i++)
+			if (n_on)
 			{
-				std::cout << "Byte " << i << " = " << (int)(bytes[i]) << ", ";
+				std::cout << "Note ON: Channel " << n_on->channel << " note " << n_on->note << " vel " << n_on->velocity << std::endl;
+				continue;
 			}
 
-			std::cout << std::endl;
+			auto n_off = dm.ParseNoteOff(*m);
 
+			if (n_off)
+			{
+				std::cout << "Note OFF: Channel " << n_off->channel << " note " << n_off->note << " vel " << n_off->velocity << std::endl;
+				continue;
+			}
+
+			auto after = dm.ParseAftertouch(*m);
+
+			if (after)
+			{
+				std::cout << "Aftertouch: Channel " << after->channel << " note " << after->note << " vel " << after->pressure << std::endl;
+				continue;
+			}
+
+			auto pitchbend = dm.ParsePitchBend(*m);
+
+			if (pitchbend)
+			{
+				std::cout << "Pitchbend: Channel " << pitchbend->channel <<  " amount " << pitchbend->amount << std::endl;
+				continue;
+
+			}
+
+			auto cc = dm.ParseControlChange(*m);
+
+			if (cc)
+			{
+				std::cout << "ControlChange: Channel " << cc->channel << " controller " << cc->controller << " val " << cc->value << std::endl;
+				continue;
+			}
+
+
+			{
+				// Fall back for unknown messages
+				auto bytes = m->bytes;
+				int nBytes = bytes.size();
+
+				for (int i = 0; i < nBytes; i++)
+				{
+					std::cout << "Byte " << i << " = " << (int)(bytes[i]) << ", ";
+				}
+
+				std::cout << std::endl;
+			}
 		}
 
 		// Sleep for 10 milliseconds ... platform-dependent.
