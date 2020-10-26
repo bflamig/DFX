@@ -156,7 +156,7 @@ namespace dfx
 			{
 				bool clear = false;
 				Resize(other.nFrames, other.nChannels, clear);
-				memcpy(samples.get(), other.samples.get(), sizeof(T));
+				memcpy(samples.get(), other.samples.get(), nSamples * sizeof(T));
 			}
 
 			dataRate = other.dataRate;
