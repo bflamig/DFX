@@ -14,9 +14,11 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)DfxMidi.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RtMidi.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DfxMidi.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RtMidi.h" />
   </ItemGroup>
 </Project>
