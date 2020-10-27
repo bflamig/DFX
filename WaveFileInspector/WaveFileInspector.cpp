@@ -10,13 +10,60 @@ constexpr auto raw_format = SampleFormat::SINT16;
 constexpr double raw_file_rate = 22050.0;
 
 
-std::pair<double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer, double duration)
+std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer, double duration)
 {
+#if 0
 	auto nframes = size_t(duration * f.fileRate + 0.5);
 
 	if (nframes > buffer.nFrames)
 	{
 		nframes = buffer.nFrames;
+	}
+#else
+    // Doing auto
+	auto nframes = buffer.nFrames;
+#endif
+
+	if (nframes == 0)
+	{
+		throw std::exception("Buffer empty");
+	}
+
+	// Scan from the start till we see a signal above a threshold;
+
+	constexpr double start_threshold = 0.0001;
+
+	size_t start;
+
+	for (start = 0; start < nframes; ++start)
+	{
+		auto x = std::abs(buffer.GetMaxOfFrame(start));
+
+		if (x >= start_threshold) break;
+	}
+
+	if (start == nframes)
+	{
+		// Nothing above threshold, so we'll have to punt
+		start = 0; 
+	}
+
+	// Scan from the end till we see a signal above a threshold
+
+	constexpr double end_threshold = 0.0001;
+
+	size_t end = nframes;
+
+	while (1)
+	{
+		auto x = std::abs(buffer.GetMaxOfFrame(--end));
+		if (x >= end_threshold) break;
+		if (end == 0)
+		{
+			// Nothing above threshold, so we'll have to punt
+			end = nframes;
+			break;
+		}
 	}
 
 	const auto nframes_chunk = nframes / 100;
@@ -25,35 +72,11 @@ std::pair<double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer
 
 	double peak = 0.0;
 
-	for (size_t i = 0; i < nframes; i++)
+	for (size_t i = start; i < end; i++)
 	{
-		// We're just incorporating all channels in the rms
-		// we'll fix that afterwards
+		auto x = buffer.GetMaxOfFrame(i);
 
-		if (f.nChannels == 1)
-		{
-			auto d = std::abs(buffer.GetMonoFrame(i));
-			if (d > peak)
-			{
-				peak = d;
-			}
-		}
-		else if (f.nChannels == 2)
-		{
-			auto d = buffer.GetStereoFrame(i);
-			d.left = std::abs(d.left);
-			d.right = std::abs(d.right);
-
-			if (d.left > peak)
-			{
-				peak = d.left;
-			}
-			if (d.right > peak)
-			{
-				peak = d.right;
-			}
-		}
-		else throw std::exception("Too many channels");
+		if (x > peak) peak = x;
 	}
 
 	const double threshold = peak / 100.0;
@@ -63,9 +86,10 @@ std::pair<double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer
 	int accum_n = 0;
 
 	double sum_squared = 0.0;
+	double fallback_sum_squared = 0.0;
 
-	size_t i = 0;
-	while (i < nframes)
+	size_t i = start;
+	while (i < end)
 	{
 		double chunk_sum_squared = 0.0;
 
@@ -76,41 +100,46 @@ std::pair<double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer
 			// We're just incorporating all channels in the rms
 			// we'll fix that afterwards
 
-			if (f.nChannels == 1)
-			{
-				auto d = buffer.GetMonoFrame(k);
-				chunk_sum_squared += d * d;
-			}
-			else if (f.nChannels == 2)
-			{
-				auto d = buffer.GetStereoFrame(k);
-				chunk_sum_squared += d.left * d.left;
-				chunk_sum_squared += d.right * d.right;
-			}
-			else throw std::exception("Too many channels");
+			auto si = k * buffer.nChannels;
 
-			if (i++ >= nframes) break;
+			for (size_t j = 0; j < buffer.nChannels; j++)
+			{
+				auto d = std::abs(buffer.samples[si + j]);
+				chunk_sum_squared += d;
+			}
+
+			if (i++ >= end) break;
 		}
 
-		auto s = chunk_sum_squared /= f.nChannels;
+		auto s = chunk_sum_squared / buffer.nChannels;
 		s /= k;
 		s = sqrt(s);
 
 		if (s >= threshold)
 		{
 			sum_squared += chunk_sum_squared;
-
 			accum_n += k;
 		}
+
+		fallback_sum_squared += chunk_sum_squared;
 	}
 
-	double rms = sum_squared;
+	double rms;
+	 
+	if (accum_n > 0)
+	{
+		rms = sum_squared / buffer.nChannels;
+		rms /= accum_n;
+	}
+	else
+	{
+		rms = fallback_sum_squared / buffer.nChannels;
+		rms /= nframes;
+	}
 
-	rms /= f.nChannels;
-	if (accum_n > 0) rms /= accum_n; else rms = 0.0;
 	rms = sqrt(rms);
 
-	return { peak, rms };
+	return { start, end, peak, rms };
 }
 
 int EffectiveBits(int x)
@@ -155,17 +184,21 @@ void ScanFile(const std::string_view& fname, bool raw)
 
 	FrameBuffer<double> buffer(f.fileFrames, f.nChannels);
 
-	bool doNormalize = false;
+	bool doNormalize = true;
 	f.Read(buffer, 0, doNormalize);
 
 	double window = 0.100; // in seconds
 
 	auto zebra = ComputeStats(f, buffer, window);
 
-	auto peak = std::get<0>(zebra);
-	auto rms = std::get<1>(zebra);
+	auto start = std::get<0>(zebra);
+	auto end = std::get<1>(zebra);
+	auto peak = std::get<2>(zebra);
+	auto rms = std::get<3>(zebra);
 
-	std::cout << "   Raw peak         " << peak << "\n";
+	std::cout << "   Start            " << start << " (" << (start / f.fileRate) << ") secs" << std::endl;
+	std::cout << "   End              " << end << " (" << (end / f.fileRate) << ") secs" << std::endl;
+	std::cout << "   Raw peak         " << peak << std::endl;
 	//std::cout << "   Raw RMS          " << rms << " over " << window * 1000.0 << " msecs\n";
 
 	auto x = int(peak + 0.5);
@@ -174,8 +207,8 @@ void ScanFile(const std::string_view& fname, bool raw)
 
 	auto mv = maxVal(f.dataType);
 
-	auto linear_scaled_peak = peak / std::abs(mv.first);  // |first| yields biggest val possible
-	auto linear_scaled_rms = rms / std::abs(mv.first);    // ""
+	auto linear_scaled_peak = peak; // What is this NONSENSE? / std::abs(mv.first);  // |first| yields biggest val possible
+	auto linear_scaled_rms = rms; // What is this NONSENSE? / std::abs(mv.first);    // ""
 
 	std::cout << "   Normalized peak  " << linear_scaled_peak << "\n";
 	std::cout << "   Normalized RMS   " << linear_scaled_rms << " over " << window * 1000.0 << " msecs\n";

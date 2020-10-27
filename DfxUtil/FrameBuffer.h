@@ -347,6 +347,21 @@ namespace dfx
 				return { samples[sampleIndx], samples[sampleIndx + 1] };
 			}
 		}
+
+		T GetMaxOfFrame(unsigned f)
+		{
+			unsigned sampleIndx = f * nChannels;
+
+			T m = 0;
+
+			for (unsigned i = 0; i < nChannels; i++)
+			{
+				auto v = std::abs(samples[sampleIndx + i]);
+				if (v > m) m = v;
+			}
+
+			return m;
+		}
 	};
 
 } // End of namespace
