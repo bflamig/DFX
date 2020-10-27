@@ -116,8 +116,9 @@ namespace dfx
         FLOAT64  // Normalized between plus/minus 1.0.
     };
 
-    extern std::string to_string(SampleFormat& x);
-    extern unsigned nBytes(SampleFormat);
+    extern std::string to_string(SampleFormat f);
+    extern unsigned nBytes(SampleFormat f);
+    extern std::pair<double, double> maxVal(SampleFormat f);
 
     // ////////////////////////////////////////////
 

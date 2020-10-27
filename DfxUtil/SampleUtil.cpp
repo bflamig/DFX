@@ -37,9 +37,9 @@
 
 namespace dfx
 {
-	std::string to_string(SampleFormat& x)
+	std::string to_string(SampleFormat f)
 	{
-		switch (x)
+		switch (f)
 		{
 			case SampleFormat::SINT16: return "SINT16";
 			case SampleFormat::SINT24: return "SINT24";
@@ -64,6 +64,22 @@ namespace dfx
             default: return 0;
         }
     }
+
+
+	std::pair<double, double> maxVal(SampleFormat f)
+	{
+		switch (f)
+		{
+			case SampleFormat::SINT16: return { -32768.0, 32767.0 };
+			case SampleFormat::SINT24: return { -8388608.0, 8388607.0 };
+			case SampleFormat::SINT32: return { -2147483648.0, 2147483647.0 };
+			case SampleFormat::FLOAT32: return { std::numeric_limits<float>::min(), std::numeric_limits<float>::max() };
+			case SampleFormat::FLOAT64: return { std::numeric_limits<double>::min(), std::numeric_limits<double>::max() };
+			default: return { 0, 0 };
+		}
+
+	}
+
 
 
     //static inline uint16_t bswap_16(uint16_t x) { return (x>>8) | (x<<8); }

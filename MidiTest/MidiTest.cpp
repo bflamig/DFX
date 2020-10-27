@@ -31,6 +31,8 @@
 #include <chrono>
 #include <thread>
 
+using namespace dfx;
+
 void test1()
 {
 	auto dm = MakeInputMidiObject();

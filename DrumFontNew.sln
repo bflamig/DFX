@@ -37,10 +37,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiTest", "MidiTest\MidiTe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiPlayer", "MidiPlayer\MidiPlayer.vcxitems", "{D4956BD6-51D8-496A-9ECE-324B7EE234F6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WaveFileInspector", "WaveFileInspector\WaveFileInspector.vcxproj", "{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BryxParser\BryxParser.vcxitems*{01581f57-4117-47f9-a36f-f7c809ea7315}*SharedItemsImports = 4
 		BryxUtil\BryxUtil.vcxitems*{01581f57-4117-47f9-a36f-f7c809ea7315}*SharedItemsImports = 4
+		BryxUtil\BryxUtil.vcxitems*{1df9280d-6229-4a16-a93d-a82ea7ebbbc3}*SharedItemsImports = 4
+		DfxUtil\DfxUtil.vcxitems*{1df9280d-6229-4a16-a93d-a82ea7ebbbc3}*SharedItemsImports = 4
 		BryxParser\BryxParser.vcxitems*{276b321b-51fa-41a0-9e90-d910f2bb8ef3}*SharedItemsImports = 4
 		BryxUtil\BryxUtil.vcxitems*{276b321b-51fa-41a0-9e90-d910f2bb8ef3}*SharedItemsImports = 4
 		DfxUtil\DfxUtil.vcxitems*{276b321b-51fa-41a0-9e90-d910f2bb8ef3}*SharedItemsImports = 4
@@ -161,6 +165,14 @@ Global
 		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x64.Build.0 = Release|x64
 		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x86.ActiveCfg = Release|Win32
 		{D68E8040-7741-45D5-8551-911C7093B306}.Release|x86.Build.0 = Release|Win32
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Debug|x64.ActiveCfg = Debug|x64
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Debug|x64.Build.0 = Debug|x64
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Debug|x86.ActiveCfg = Debug|Win32
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Debug|x86.Build.0 = Debug|Win32
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x64.ActiveCfg = Release|x64
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x64.Build.0 = Release|x64
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x86.ActiveCfg = Release|Win32
+		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
