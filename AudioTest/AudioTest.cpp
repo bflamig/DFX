@@ -32,7 +32,7 @@
  *
 \******************************************************************************/
 
-#include "AsioMgr.h"
+#include "DfxAudio.h"
 #include "MemWave.h"
 #include <iostream>
 #include <sstream>
@@ -48,11 +48,11 @@ using namespace dfx;
 
 void ListDevices()
 {
-	AsioMgr am;
+	auto am = MakeAudioApi();
 
-	auto nd = am.NumDevices();
+	auto nd = am->NumDevices();
 
-	auto names = am.DeviceNames();
+	auto names = am->DeviceNames();
 
 	std::cout << "-------------------------------------------" << std::endl;
 	std::cout << "Devices: " << std::endl;
@@ -88,33 +88,32 @@ int loopBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, S
 
 void test1()
 {
-	AsioMgr am;
-
+	auto am = MakeAudioApi();
 	bool verbose = true;
 
 	// load the driver, this will setup all the necessary internal data structures
-	if (am.LoadDriver(ASIO_DRIVER_NAME))
+	if (am->LoadDriver(ASIO_DRIVER_NAME))
 	{
 		// initialize the driver
-		if (am.InitDriver(verbose))
+		if (am->InitDriver(verbose))
 		{
 			//am.PopupControlPanel(); // @@ NOT BLOCKING. SO not much good!
 
 			// set up the asioCallback structure and create the ASIO data buffer
 
-			am.ConfigureUserCallback(loopBack);
+			am->ConfigureUserCallback(loopBack);
 
 			// 2 ins, 2 outs (aka stereo)
 			// 64 sample buffers (nominal)
 
-			if (am.Open(2, 2, 64, 48000, nullptr, verbose))
+			if (am->Open(2, 2, 64, 48000, nullptr, verbose))
 			{
-				if (am.Start())
+				if (am->Start())
 				{
 					// Now all is up and running
 					std::cout << "\nASIO session started successfully.\n\n";
 
-					while (!am.Stopped())
+					while (!am->Stopped())
 					{
 #if WINDOWS
 						Sleep(100);	// goto sleep for 100 milliseconds
@@ -123,14 +122,14 @@ void test1()
 						Delay(6, &dummy);
 #endif
 
-						fprintf(stdout, "%lf stream time", am.getStreamTime());
+						fprintf(stdout, "%lf stream time", am->getStreamTime());
 						fprintf(stdout, "     \r");
 						fflush(stdout);
 					}
 				}
 			}
 
-			am.Close();
+			am->Close();
 		}
 	}
 }

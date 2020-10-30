@@ -16,11 +16,9 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)AsioMgr.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DfxAudio.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)InternalAsioMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)AsioMgr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DfxAudio.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)InternalAsioMgr.h" />
   </ItemGroup>
 </Project>
