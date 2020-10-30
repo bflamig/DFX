@@ -9,8 +9,7 @@ constexpr unsigned raw_nChannels = 1;
 constexpr auto raw_format = SampleFormat::SINT16;
 constexpr double raw_file_rate = 22050.0;
 
-
-std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer, double duration)
+std::tuple<size_t, size_t, double, double, double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer, double duration)
 {
 #if 0
 	auto nframes = size_t(duration * f.fileRate + 0.5);
@@ -37,7 +36,7 @@ std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffe
 
 	for (start = 0; start < nframes; ++start)
 	{
-		auto x = std::abs(buffer.GetMaxOfFrame(start));
+		auto x = std::abs(buffer.GetAbsMaxOfFrame(start));
 
 		if (x >= start_threshold) break;
 	}
@@ -56,7 +55,7 @@ std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffe
 
 	while (1)
 	{
-		auto x = std::abs(buffer.GetMaxOfFrame(--end));
+		auto x = std::abs(buffer.GetAbsMaxOfFrame(--end));
 		if (x >= end_threshold) break;
 		if (end == 0)
 		{
@@ -70,14 +69,20 @@ std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffe
 
 	// Compute the peak signal seen, either channel
 
-	double peak = 0.0;
+	double neg_peak = 0.0;
+	double pos_peak = 0.0;
 
 	for (size_t i = start; i < end; i++)
 	{
-		auto x = buffer.GetMaxOfFrame(i);
+		auto x = buffer.GetMinOfFrame(i);
+		if (x < neg_peak) neg_peak = x;
 
-		if (x > peak) peak = x;
+
+		auto y = buffer.GetMaxOfFrame(i);
+		if (y > pos_peak) pos_peak = y;
 	}
+
+	double peak = std::abs(neg_peak) > pos_peak ? std::abs(neg_peak) : pos_peak;
 
 	const double threshold = peak / 100.0;
 
@@ -139,10 +144,11 @@ std::tuple<size_t, size_t, double, double> ComputeStats(SoundFile &f, FrameBuffe
 
 	rms = sqrt(rms);
 
-	return { start, end, peak, rms };
+	return { start, end, neg_peak, pos_peak, peak, rms };
 }
 
-int EffectiveBits(int x)
+template<typename T>
+int EffectiveIntegerBits(T x)
 {
 	int nd = 0;
 
@@ -152,6 +158,45 @@ int EffectiveBits(int x)
 		x /= 2;
 		nd++;
 	}
+
+	return nd;
+}
+
+int EffectiveBits(double x, SampleFormat file_type)
+{
+	switch (file_type)
+	{
+		case SampleFormat::SINT16:
+		{
+			auto d = int16_t(x * 32767.5 - 0.5);
+			return EffectiveIntegerBits(d);
+
+		}
+		break;
+		case SampleFormat::SINT24:
+		{
+			auto d = int32_t(x * 8388607.5 - 0.5);
+			return EffectiveIntegerBits(d);
+
+		}
+		break;
+		case SampleFormat::SINT32:
+		{
+			auto d = int32_t(x * 2147483647.5 - 0.5);
+			return EffectiveIntegerBits(d);
+		}
+		break;
+		case SampleFormat::FLOAT32:
+		case SampleFormat::FLOAT64:
+		{
+			x += 0.5;
+			x /= 2147483647.5;
+			x = int32_t(x);
+			return EffectiveIntegerBits(x);
+		}
+	}
+
+	throw std::exception("Invalid sample format");
 }
 
 
@@ -193,31 +238,34 @@ void ScanFile(const std::string_view& fname, bool raw)
 
 	auto start = std::get<0>(zebra);
 	auto end = std::get<1>(zebra);
-	auto peak = std::get<2>(zebra);
-	auto rms = std::get<3>(zebra);
+	auto neg_peak = std::get<2>(zebra);
+	auto pos_peak = std::get<3>(zebra);
+	auto peak = std::get<4>(zebra);
+	auto rms = std::get<5>(zebra);
 
 	std::cout << "   Start            " << start << " (" << (start / f.fileRate) << ") secs" << std::endl;
 	std::cout << "   End              " << end << " (" << (end / f.fileRate) << ") secs" << std::endl;
-	std::cout << "   Raw peak         " << peak << std::endl;
-	//std::cout << "   Raw RMS          " << rms << " over " << window * 1000.0 << " msecs\n";
+	std::cout << "   Neg peak         " << neg_peak << std::endl;
+	std::cout << "   Pos peak         " << pos_peak << std::endl;
 
 	auto x = int(peak + 0.5);
-	//std::cout << "   Hex peak         " << std::hex << x << std::dec << "\n";
-	std::cout << "   Effective bits   " << EffectiveBits(x) << "\n";
+	std::cout << "   Effective bits   " << EffectiveBits(peak, f.dataType) << std::endl;
 
 	auto mv = maxVal(f.dataType);
 
-	auto linear_scaled_peak = peak; // What is this NONSENSE? / std::abs(mv.first);  // |first| yields biggest val possible
-	auto linear_scaled_rms = rms; // What is this NONSENSE? / std::abs(mv.first);    // ""
+	auto linear_scaled_peak = peak;
+	auto linear_scaled_rms = rms;
 
-	std::cout << "   Normalized peak  " << linear_scaled_peak << "\n";
-	std::cout << "   Normalized RMS   " << linear_scaled_rms << " over " << window * 1000.0 << " msecs\n";
+	std::cout << "   Normalized peak  " << linear_scaled_peak << std::endl;
+	std::cout << "   Normalized RMS   " << linear_scaled_rms << std::endl;
 
 	auto db_peak = 20.0 * log10(linear_scaled_peak); // 1.0 basis
 	auto db_rms = 20.0 * log10(linear_scaled_rms); // 1.0 basis
 
-	std::cout << "   Relative peak    " << db_peak << " dB\n";
-	std::cout << "   Relative rms     " << db_rms << " dB, over " << window * 1000.0 << " msecs\n";
+	std::cout << "   Relative peak    " << db_peak << " dB" << std::endl;
+	std::cout << "   Relative rms     " << db_rms << " dB" << std::endl;
+
+	std::cout << "   Est Midi vel     " << int(rms * 127.0) << std::endl;
 
 	f.Close();
 }

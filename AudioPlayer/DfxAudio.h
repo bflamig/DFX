@@ -168,7 +168,6 @@ namespace dfx
         ConvertInfo convertRecInfo{};
 
         void* apiHandle{};           // void pointer for API specific stream handle information
-        //StreamMode mode{};           // OUTPUT, INPUT, or DUPLEX.
         StreamState state{};         // STOPPED, RUNNING, or CLOSED
 
         unsigned int devPlayID{};

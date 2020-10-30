@@ -185,7 +185,7 @@ namespace dfx
 	// A static class
 	//
 
-	static int fox = 0;
+	static int fox = 0;  // Just for debugging
 
 	InternalAsioMgr::InternalAsioMgr()
 	{
@@ -341,7 +341,7 @@ namespace dfx
 
 		if (verbose)
 		{
-			std::cout << "ASIOGetBUfferSize: (min: " << driverData.minSize << ", max: " << driverData.maxSize;
+			std::cout << "ASIOGetBufferSize: (min: " << driverData.minSize << ", max: " << driverData.maxSize;
 			std::cout << ", preferred: " << driverData.preferredSize << ", granularity: " << driverData.granularity << ")";
 			std::cout << std::endl;
 		}

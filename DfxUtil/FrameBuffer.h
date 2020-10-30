@@ -348,7 +348,7 @@ namespace dfx
 			}
 		}
 
-		T GetMaxOfFrame(unsigned f)
+		T GetAbsMaxOfFrame(unsigned f)
 		{
 			unsigned sampleIndx = f * nChannels;
 
@@ -362,6 +362,38 @@ namespace dfx
 
 			return m;
 		}
+
+		T GetMaxOfFrame(unsigned f)
+		{
+			unsigned sampleIndx = f * nChannels;
+
+			T m = 0;
+
+			for (unsigned i = 0; i < nChannels; i++)
+			{
+				auto v = samples[sampleIndx + i];
+				if (v > m) m = v;
+			}
+
+			return m;
+		}
+
+		T GetMinOfFrame(unsigned f)
+		{
+			unsigned sampleIndx = f * nChannels;
+
+			T m = 0;
+
+			for (unsigned i = 0; i < nChannels; i++)
+			{
+				auto v = samples[sampleIndx + i];
+				if (v < m) m = v;
+			}
+
+			return m;
+		}
+
+
 	};
 
 } // End of namespace

@@ -78,9 +78,6 @@ namespace dfx
 
 	// custom internal data storage
 
-	//static constexpr long kMaxInputChannels = 32;
-	//static constexpr long kMaxOutputChannels = 32;
-
 	class DriverData {
 	public:
 
