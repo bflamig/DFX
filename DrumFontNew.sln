@@ -19,8 +19,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DrumFontTest", "DrumFontTes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PolyTableTest", "PolyTableTest\PolyTableTest.vcxproj", "{D8009F40-0CCE-49D1-B81F-B8B65B636FC6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wtf", "wtf\wtf.vcxproj", "{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sftest", "sftest\sftest.vcxproj", "{B1D9EE57-F66A-45EC-A488-4099485C44FB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsioLayer", "AsioLayer\AsioLayer.vcxitems", "{A96CDF6F-F020-4BB2-8981-91536D34D1A9}"
@@ -38,6 +36,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MidiPlayer", "MidiPlayer\MidiPlayer.vcxitems", "{D4956BD6-51D8-496A-9ECE-324B7EE234F6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WaveFileInspector", "WaveFileInspector\WaveFileInspector.vcxproj", "{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DrumPlayTest", "DrumPlayTest\DrumPlayTest.vcxproj", "{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -68,6 +68,13 @@ Global
 		BryxUtil\BryxUtil.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
 		DfxUtil\DfxUtil.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
 		DrumFont\DrumFont.vcxitems*{b1d9ee57-f66a-45ec-a488-4099485c44fb}*SharedItemsImports = 4
+		AsioLayer\AsioLayer.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		AudioPlayer\AudioPlayer.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		BryxParser\BryxParser.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		BryxUtil\BryxUtil.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		DfxUtil\DfxUtil.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		DrumFont\DrumFont.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
+		MidiPlayer\MidiPlayer.vcxitems*{b8c577ed-821e-4f7b-9ec5-95b9cbc49adf}*SharedItemsImports = 4
 		AudioPlayer\AudioPlayer.vcxitems*{bbf2e5e0-2dc7-4e38-a845-110e77ad8a8f}*SharedItemsImports = 9
 		BryxUtil\BryxUtil.vcxitems*{bfb3dfd1-953a-4713-b32d-2a7dc7ddd606}*SharedItemsImports = 9
 		MidiPlayer\MidiPlayer.vcxitems*{d4956bd6-51d8-496a-9ece-324b7ee234f6}*SharedItemsImports = 9
@@ -133,14 +140,6 @@ Global
 		{D8009F40-0CCE-49D1-B81F-B8B65B636FC6}.Release|x64.Build.0 = Release|x64
 		{D8009F40-0CCE-49D1-B81F-B8B65B636FC6}.Release|x86.ActiveCfg = Release|Win32
 		{D8009F40-0CCE-49D1-B81F-B8B65B636FC6}.Release|x86.Build.0 = Release|Win32
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Debug|x64.ActiveCfg = Debug|x64
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Debug|x64.Build.0 = Debug|x64
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Debug|x86.ActiveCfg = Debug|Win32
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Debug|x86.Build.0 = Debug|Win32
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Release|x64.ActiveCfg = Release|x64
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Release|x64.Build.0 = Release|x64
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Release|x86.ActiveCfg = Release|Win32
-		{B39B4C83-91C4-4110-99E0-CD9F92D4BA43}.Release|x86.Build.0 = Release|Win32
 		{B1D9EE57-F66A-45EC-A488-4099485C44FB}.Debug|x64.ActiveCfg = Debug|x64
 		{B1D9EE57-F66A-45EC-A488-4099485C44FB}.Debug|x64.Build.0 = Debug|x64
 		{B1D9EE57-F66A-45EC-A488-4099485C44FB}.Debug|x86.ActiveCfg = Debug|Win32
@@ -173,6 +172,14 @@ Global
 		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x64.Build.0 = Release|x64
 		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x86.ActiveCfg = Release|Win32
 		{1DF9280D-6229-4A16-A93D-A82EA7EBBBC3}.Release|x86.Build.0 = Release|Win32
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Debug|x64.ActiveCfg = Debug|x64
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Debug|x64.Build.0 = Debug|x64
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Debug|x86.ActiveCfg = Debug|Win32
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Debug|x86.Build.0 = Debug|Win32
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Release|x64.ActiveCfg = Release|x64
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Release|x64.Build.0 = Release|x64
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Release|x86.ActiveCfg = Release|Win32
+		{B8C577ED-821E-4F7B-9EC5-95B9CBC49ADF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

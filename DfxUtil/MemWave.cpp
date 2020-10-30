@@ -203,7 +203,7 @@ namespace dfx
 	MonoFrame<double> MemWave::MonoTick()
 	{
 #ifdef DFX_DEBUG
-		if (buff.nFrames != 1)
+		if (buff.nChannels != 1)
 		{
 			throw std::exception("Buffer isn't in mono. MemWave::MonoTick()");
 		}
@@ -244,7 +244,7 @@ namespace dfx
 	StereoFrame<double> MemWave::StereoTick()
 	{
 #ifdef DFX_DEBUG
-		if (buff.nFrames != 2)
+		if (buff.nChannels != 2)
 		{
 			throw std::exception("Buffer isn't in stereo. MemWave::StereoTick()");
 		}

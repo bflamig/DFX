@@ -49,8 +49,53 @@
 
 #include "DfxAudio.h"
 
+#ifdef __OS_WINDOWS__
+#include "AsioMgr.h"
+#endif
+
+#ifdef __UNIX_JACK__
+#include "JackMgr.h"
+#endif
+
+#ifdef __MACOSX_CORE__
+#incldue "CoreMgr.h"
+#endif
+
 namespace dfx
 {
+
+    std::unique_ptr<DfxAudio> MakeAudioObj(AudioApi api_)
+    {
+        std::unique_ptr<DfxAudio> dfa;
+
+        switch (api_)
+        {
+            case AudioApi::ASIO:
+            {
+#ifdef __OS_WINDOWS__
+                dfa = std::make_unique<AsioMgr>();
+#endif
+            }
+            break;
+
+            case AudioApi::Jack:
+            {
+#ifdef __UNIX_JACK__
+                dfa = std::make_unique<JackMgr>();
+#endif
+            }
+            break;
+            case AudioApi::Core:
+            {
+#ifdef __MACOSX_CORE__
+                dfa = std::make_unique<CoreMgr>();
+#endif
+            }
+            default:;
+        }
+
+        return dfa;
+    }
 
     // ////////////////////////////////////////////////////////////////////////
     // 
@@ -65,6 +110,18 @@ namespace dfx
 
     DfxAudio::~DfxAudio()
     {
+    }
+
+    bool DfxAudio::Prep(const std::string& driver_name, bool verbose)
+    {
+        bool b = LoadDriver(driver_name);
+
+        if (b)
+        {
+            b = InitDriver(verbose);
+        }
+
+        return b;
     }
 
     bool DfxAudio::Start()

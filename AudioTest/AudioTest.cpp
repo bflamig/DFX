@@ -135,20 +135,6 @@ void test1()
 	}
 }
 
-
-bool Prep(DfxAudio& da, const std::string& driver_name, bool verbose)
-{
-	bool b = da.LoadDriver(driver_name);
-
-	if (b)
-	{
-		b = da.InitDriver(verbose);
-	}
-	else std::cout << "Trouble loading and initializing driver" << std::endl;
-
-	return b;
-}
-
 struct MyData
 {
 	FrameBuffer<system_t>& fb;
@@ -165,22 +151,36 @@ int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTim
 	// WARNING! Runs in a different thread! (The ASIO thread)
 
 	auto data = reinterpret_cast<MyData*>(userData);
-	auto& w = data->fb;
+	auto& fb = data->fb;
 
 	auto p = reinterpret_cast<system_t*>(outBuff);
 
-	auto nOutChannels = data->fb.nChannels; // @@ TODO: THIS BETTER MATCH what we opened!
+	auto nOutChannels = fb.nChannels; // @@ TODO: THIS BETTER MATCH what we opened!
 
-	unsigned left_over = 0;
-
-	if (data->samplesPlayed >= w.nFrames)
+	if (data->samplesPlayed > fb.nFrames)
 	{
-		data->samplesPlayed = 0; // play repeatedly for now for testing purposes
+		throw std::exception("out of range in playback");
 	}
 
-	for (unsigned i = 0; i < nFrames; i++)
+	unsigned left_to_do = fb.nFrames - data->samplesPlayed;
+
+	unsigned nf;
+	unsigned left_over;
+
+	if (nFrames > left_to_do)
 	{
-		auto sf = w.GetStereoFrame(data->samplesPlayed++);
+		nf = left_to_do;
+		left_over = nFrames - left_to_do;
+	}
+	else
+	{
+		nf = nFrames;
+		left_over = 0;
+	}
+
+	for (unsigned i = 0; i < nf; i++)
+	{
+		auto sf = fb.GetStereoFrame(data->samplesPlayed++);
 		*p++ = sf.left;
 		*p++ = sf.right;
 	}
@@ -189,6 +189,11 @@ int loopPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTim
 	{
 		*p++ = 0;
 		*p++ = 0;
+	}
+
+	if (left_over)
+	{
+		data->samplesPlayed = 0; // Start over
 	}
 
 	return 0;
@@ -298,23 +303,29 @@ void testWave(const std::string_view waveFile)
 		return;
 	}
 
-	AsioMgr da;
+	auto da = MakeAudioObj(AudioApi::ASIO);
+
 	bool verbose = true;
 
-	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
+	bool b = da->Prep(ASIO_DRIVER_NAME, verbose);
+	if (!b)
+	{
+		std::cout << "Error loading and initializing driver" << std::endl;
+		return;
+	}
 
-	da.ConfigureUserCallback(loopPlayBack);
+	da->ConfigureUserCallback(loopPlayBack);
 
 	MyData myData(frames);
 
 	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(0, 2, 64, static_cast<unsigned>(frames.dataRate), &myData, verbose);
+	b = da->Open(0, 2, 64, static_cast<unsigned>(frames.dataRate), &myData, verbose);
 
 	if (b)
 	{
-		b = da.Start();
+		b = da->Start();
 	}
 	else std::cout << "Error opening stream" << std::endl;
 
@@ -324,7 +335,7 @@ void testWave(const std::string_view waveFile)
 	{
 		std::cout << "\nASIO session started successfully.\n" << std::endl;
 
-		while (!da.Stopped())
+		while (!da->Stopped())
 		{
 			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
 		}
@@ -356,23 +367,28 @@ void testMemWaveII(const std::string_view waveFile)
 
 	waves.SetRate(48000);
 
-	AsioMgr da;
+	auto da = MakeAudioObj(AudioApi::ASIO);
 	bool verbose = true;
 
-	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
+	bool b = da->Prep(ASIO_DRIVER_NAME, verbose);
+	if (!b)
+	{
+		std::cout << "Error loading and initializing driver" << std::endl;
+		return;
+	}
 
-	da.ConfigureUserCallback(wavesPlayBack);
+	da->ConfigureUserCallback(wavesPlayBack);
 
 	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+	b = da->Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
 
 	auto start = std::chrono::high_resolution_clock::now();
 
 	if (b)
 	{
-		b = da.Start();
+		b = da->Start();
 	}
 	else std::cout << "Error opening stream" << std::endl;
 
@@ -380,7 +396,7 @@ void testMemWaveII(const std::string_view waveFile)
 	{
 		std::cout << "\nAudio session started successfully.\n" << std::endl;
 
-		while (!da.Stopped())
+		while (!da->Stopped())
 		{
 			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
 		}
@@ -411,23 +427,28 @@ void testRaw(const std::string_view waveFile)
 
 	waves.SetRate(48000);
 
-	AsioMgr da;
+	auto da = MakeAudioObj(AudioApi::ASIO);
 	bool verbose = true;
 
-	bool b = Prep(da, ASIO_DRIVER_NAME, verbose);
+	bool b = da->Prep(ASIO_DRIVER_NAME, verbose);
+	if (!b)
+	{
+		std::cout << "Error loading and initializing driver" << std::endl;
+		return;
+	}
 
-	da.ConfigureUserCallback(wavesPlayBack);
+	da->ConfigureUserCallback(wavesPlayBack);
 
 	// 0 ins, 2 outs (aka stereo)
 	// 64 sample buffers (nominal)
 
-	b = da.Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
+	b = da->Open(0, 2, 64, static_cast<unsigned>(waves.sampleRate), &waves, verbose);
 
 	auto start = std::chrono::high_resolution_clock::now();
 
 	if (b)
 	{
-		b = da.Start();
+		b = da->Start();
 	}
 	else std::cout << "Error opening stream" << std::endl;
 
@@ -435,7 +456,7 @@ void testRaw(const std::string_view waveFile)
 	{
 		std::cout << "\nAudio session started successfully.\n" << std::endl;
 
-		while (!da.Stopped())
+		while (!da->Stopped())
 		{
 			//fprintf(stdout, "%lf stream time\n", am.getStreamTime());
 		}
@@ -457,8 +478,8 @@ int main(int argc, char* argv[])
 {
 	ListDevices();
 	//test1();
-	//testWave(waveFile2);
-	testMemWaveII(waveFile2);
+	testWave(waveFile2);
+	//testMemWaveII(waveFile2);
 	//testRaw(waveFile1);
 	return 0;
 }

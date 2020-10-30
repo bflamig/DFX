@@ -147,7 +147,7 @@ namespace bryx
 		}
 
 		ResultPkg(ResultPkg&& other) noexcept
-		: ResultBase(std::move(other))
+		: ResultBase(std::forward<ResultPkg<T>>(other))
 		, code(other.code)
 		{
 			// Move constructor bookkeeping
@@ -175,7 +175,7 @@ namespace bryx
 
 			if (this != &other)
 			{
-				ResultBase::operator=(std::move(other));
+				ResultBase::operator=(std::forward<ResultPkg<T>>(other));
 				code = other.code;
 				other.code = T::NoError;
 			}
@@ -229,7 +229,7 @@ namespace bryx
 		}
 
 		AugResultPkg(AugResultPkg&& other) noexcept
-		: ResultPkg<T>(std::move(other))
+		: ResultPkg<T>(std::forward<AugResultPkg<T>>(other))
 		, extent(other.extent)
 		{
 			// Move constructor bookkeeping
@@ -257,7 +257,7 @@ namespace bryx
 
 			if (this != &other)
 			{
-				ResultPkg<T>::operator=(std::move(other));
+				ResultPkg<T>::operator=(std::forward<AugResultPkg<T>>(other));
 				extent = other.extent;
 				other.extent.Clear();
 			}
@@ -271,16 +271,14 @@ namespace bryx
 			extent.Clear();
 		}
 
-#if 1
-		// @@ ?? WHY WON'T THIS COMPILE?
-		// WHY DOES IT NOT SEE code or msg unless I qualify
-		// the names?
+		// @@ Mention of code and msg must be qualified with the
+		// base type for whatever reason. Doesn't make sense to
+		// me, but perhaps there is some general case where it does.
 
 		virtual void Print(std::ostream& sout) const
 		{
 			sout << to_string(base_type::code) << "[ " << base_type::msg << " ]\n";
 		}
-#endif
 	};
 
 

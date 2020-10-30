@@ -36,6 +36,10 @@
 #include <memory>
 #include "SampleUtil.h"
 
+#ifdef _DEBUG
+#define DFX_DEBUG
+#endif
+
 namespace dfx
 {
 	template<typename T> using MonoFrame = T;
@@ -184,7 +188,6 @@ namespace dfx
 		MonoFrame<T> GetMonoFrame(unsigned i) const
 		{
 #ifdef DFX_DEBUG
-
 			if (nChannels != 1)
 			{
 				throw std::exception("Invalid buffer configuration at FrameBuffer::GetMonoFrame()");
@@ -219,7 +222,6 @@ namespace dfx
 		MonoFrame<T> MonoInterpolate(double pos) const
 		{
 #ifdef DFX_DEBUG
-
 			if (nChannels != 1)
 			{
 				throw std::exception("Invalid buffer configuration at FrameBuffer::MonoInterpolate()");
@@ -281,7 +283,7 @@ namespace dfx
 				throw std::exception("Invalid buffer configuration at FrameBuffer::StereoInterpolate() - 1");
 			}
 
-			if (pos < 0.0)
+			if (framePos < 0.0)
 			{
 				throw std::exception("Out of bounds at FrameBuffer::StereoInterpolate() - 2");
 			}

@@ -34,6 +34,13 @@
 
 namespace dfx
 {
+    enum class AudioApi
+    {
+        ASIO,
+        Jack,
+        Core
+    };
+
     enum class IoMode
     {
         Out,
@@ -259,7 +266,9 @@ namespace dfx
 
     public:
 
-        virtual bool LoadDriver(const std::string& name) = 0;
+        bool Prep(const std::string& driver_name_, bool verbose);
+
+        virtual bool LoadDriver(const std::string& driver_name_) = 0;
         virtual bool InitDriver(bool verbose = true) = 0;
         virtual void UnloadDriver() = 0;
 
@@ -298,5 +307,6 @@ namespace dfx
 
     };
 
+    extern std::unique_ptr<DfxAudio> MakeAudioObj(AudioApi api_);
 
 } // end of namespace

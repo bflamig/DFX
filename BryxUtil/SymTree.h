@@ -35,8 +35,8 @@
 // /////////////////////////////////////////////////////
 // Symbol tree support:
 // Supports mapping from a string key to an int.
-// This is for unique keys only. We have Low
-// overhead, multi-way trees. Probably faster than
+// This is for unique keys only. Implements a low
+// overhead, multi-way tree. Probably faster than
 // the usual map algs for the purposes I need them,
 // (mapping unit names into unit codes.) In such a 
 // database, each level of the tree will probably not
