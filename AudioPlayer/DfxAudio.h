@@ -307,6 +307,6 @@ namespace dfx
 
     };
 
-    extern std::unique_ptr<DfxAudio> MakeAudioObj(AudioApi api_);
+    extern std::unique_ptr<DfxAudio> MakeAudioApi();              // User level
 
 } // end of namespace

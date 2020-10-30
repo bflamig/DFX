@@ -303,7 +303,7 @@ void testWave(const std::string_view waveFile)
 		return;
 	}
 
-	auto da = MakeAudioObj(AudioApi::ASIO);
+	auto da = MakeAudioApi();
 
 	bool verbose = true;
 
@@ -367,7 +367,7 @@ void testMemWaveII(const std::string_view waveFile)
 
 	waves.SetRate(48000);
 
-	auto da = MakeAudioObj(AudioApi::ASIO);
+	auto da = MakeAudioApi();
 	bool verbose = true;
 
 	bool b = da->Prep(ASIO_DRIVER_NAME, verbose);
@@ -427,7 +427,7 @@ void testRaw(const std::string_view waveFile)
 
 	waves.SetRate(48000);
 
-	auto da = MakeAudioObj(AudioApi::ASIO);
+	auto da = MakeAudioApi();
 	bool verbose = true;
 
 	bool b = da->Prep(ASIO_DRIVER_NAME, verbose);

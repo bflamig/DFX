@@ -64,7 +64,24 @@
 namespace dfx
 {
 
-    std::unique_ptr<DfxAudio> MakeAudioObj(AudioApi api_)
+    std::unique_ptr<DfxAudio> MakeAudioApi()
+    {
+        std::unique_ptr<DfxAudio> dfa;
+
+#ifdef __OS_WINDOWS__
+        dfa = std::make_unique<AsioMgr>();
+#elif __UNIX_JACK__
+        dfa = std::make_unique<JackMgr>();
+#elif __MACOSX_CORE__
+        dfa = std::make_unique<CoreMgr>();
+#endif
+
+        return dfa;
+    }
+
+
+#if 0
+    std::unique_ptr<DfxAudio> MakeAudioApi(AudioApi api_)
     {
         std::unique_ptr<DfxAudio> dfa;
 
@@ -96,6 +113,8 @@ namespace dfx
 
         return dfa;
     }
+
+#endif
 
     // ////////////////////////////////////////////////////////////////////////
     // 
