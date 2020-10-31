@@ -168,8 +168,13 @@ namespace dfx
 
 	void MemWave::AliasSamples(MemWave& other)
 	{
-		buff.Alias(other.buff);
-		SetRate(sampleRate);
+		if (this != &other)
+		{
+			buff.Alias(other.buff);
+			SetRate(sampleRate);
+		}
+
+		Reset();
 	}
 
 	void MemWave::SetRate(double sampleRate_)

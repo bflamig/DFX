@@ -164,4 +164,12 @@ namespace dfx
 		}
 	}
 
+	void DrumKit::LoadWaves()
+	{
+		for (auto& d : drums)
+		{
+			d->LoadWaves();
+		}
+	}
+
 } // end of namespace

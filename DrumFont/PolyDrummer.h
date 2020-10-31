@@ -51,7 +51,7 @@ namespace dfx
 	public:
 
 		PolyTable polyTable;
-		DrumKit drumKit;
+		std::shared_ptr<DrumKit> drumKit;
 
 		bool interrupt_same_note; // If true, only one playback of each note active at a time.
 
@@ -61,12 +61,19 @@ namespace dfx
 
 		virtual ~PolyDrummer();
 
-		void LoadKit();
+		void LoadKit(std::shared_ptr<DrumKit> &drumKit);
+
+		void SetSampleRate(double sampleRate_)
+		{
+			polyTable.SetSampleRate(sampleRate_);
+		}
 
 		void SetInterruptSameNoteScheme(bool reuse_flag)
 		{
 			interrupt_same_note = reuse_flag;
 		}
+
+		bool HasSoundsToPlay();
 
 		//! Start a note with the given drum type and amplitude.
 

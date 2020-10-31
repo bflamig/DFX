@@ -75,6 +75,7 @@ namespace dfx
 	protected:
 		void MakeYoungest(int slot); // moves to first of the actives
 	public:
+		void SetSampleRate(double sampleRate_);
 		void DumpActive(std::ostream& s);
 		void DumpInactive(std::ostream& s);
 	};

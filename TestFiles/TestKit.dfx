@@ -1,0 +1,76 @@
+dfx = 
+{
+	mydrumkit =
+	{
+		path = "g:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite",
+	
+		instruments = 
+		{
+			bass_drum =	
+			{ 
+				note = 1,
+				path = "Kick",
+				velocities =
+				[
+					v64 = 
+					{
+						path = "",
+						robins = 
+						[
+							r1 =
+							{
+								fname = "Kick.wav",
+							}
+						]
+					},
+				]
+			},
+			
+			snare =
+			{
+				path = "snare/0",
+				
+				note = 2,
+				
+				velocities =
+				[
+					v48 = 
+					{
+						path = "",
+						
+						robins =
+						[
+							r1 =
+							{
+								fname = "Snare_1.wav",
+							},
+							
+							r2 =
+							{
+								fname = "Snare_2.wav",
+							}
+						]
+					},
+					
+					v72 = 
+					{
+						path = "",
+						
+						robins =
+						[
+							r1 =
+							{
+								fname = "Snare_Medium1.wav",
+							},
+							
+							r2 =
+							{
+								fname = "Snare_Medium2.wav",
+							}
+						]
+					}
+				]
+			}
+		}
+	}
+} 

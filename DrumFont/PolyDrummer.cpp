@@ -68,9 +68,15 @@ namespace dfx
 	{
 	}
 
-	void LoadKit()
+	void PolyDrummer::LoadKit(std::shared_ptr<DrumKit> &kit_)
 	{
+		drumKit = kit_;
+	}
 
+	bool PolyDrummer::HasSoundsToPlay()
+	{
+		int i = polyTable.aHead;
+		return i != -1;
 	}
 
 	void PolyDrummer::noteOnDirect(int noteNumber, double amplitude)
@@ -125,9 +131,13 @@ namespace dfx
 			auto& e = polyTable.elems[slot];
 
 			int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
-			auto& drum = drumKit.noteMap[mapped_note];
-			auto& mw = drum->ChooseWave(amplitude);
-			e.wave.AliasSamples(mw);
+			auto& drum = drumKit->noteMap[mapped_note];
+			if (drum)
+			{
+				auto& mw = drum->ChooseWave(amplitude);
+				e.wave.AliasSamples(mw);
+			}
+			else return; // No drum mapped, so do nothing
 		}
 
 		auto& e = polyTable.elems[slot];

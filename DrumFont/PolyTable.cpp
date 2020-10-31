@@ -193,6 +193,14 @@ namespace dfx
 		elems[slot].younger = -1; // only used when on active list anyway
 	}
 
+	void PolyTable::SetSampleRate(double sampleRate_)
+	{
+		for (auto& e : elems)
+		{
+			e.wave.SetRate(sampleRate_);
+		}
+	}
+
 	void PolyTable::DumpActive(std::ostream& s)
 	{
 		s << "Active List from youngest to oldest:\n";
