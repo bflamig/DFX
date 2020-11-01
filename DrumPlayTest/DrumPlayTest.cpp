@@ -68,8 +68,8 @@ int drumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 		// be the sampling rate of the recorded file. So the tick function
 		// below might have to calculate an interpolated frame.
 		auto sf = poly_drummer->StereoTick();
-		*p++ = sf.left;
-		*p++ = sf.right;
+		*p++ = sf.left * 0.5;   // @@ TEMP KLUDGE: Apply -6dB of gain to alleviate clipping
+		*p++ = sf.right * 0.5;  // @@ TEMP KLUDGE: Apply -6DB of gain to alleviate clipping
 		--nFrames;
 	}
 
