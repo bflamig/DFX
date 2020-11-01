@@ -68,9 +68,11 @@ namespace dfx
 	{
 	}
 
-	void PolyDrummer::LoadKit(std::shared_ptr<DrumKit> &kit_)
+	void PolyDrummer::UseKit(std::shared_ptr<DrumKit> &kit_, double systemSampleRate_)
 	{
 		drumKit = kit_;
+		polyTable.SetupEmptyTable();
+		SetSampleRate(systemSampleRate_);
 	}
 
 	bool PolyDrummer::HasSoundsToPlay()
@@ -87,6 +89,16 @@ namespace dfx
 			throw std::exception("PolyDrum::noteOn: amplitude parameter is out of bounds");
 		}
 #endif
+
+		// Select a drum. If empty, then we're outta here!
+
+		int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
+		auto& drum = drumKit->noteMap[mapped_note];
+
+		if (!drum)
+		{
+			return;
+		}
 
 		int slot = -1;
 
@@ -129,15 +141,8 @@ namespace dfx
 			// Point to the proper sound wave to use
 
 			auto& e = polyTable.elems[slot];
-
-			int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
-			auto& drum = drumKit->noteMap[mapped_note];
-			if (drum)
-			{
-				auto& mw = drum->ChooseWave(amplitude);
-				e.wave.AliasSamples(mw);
-			}
-			else return; // No drum mapped, so do nothing
+			auto& mw = drum->ChooseWave(amplitude);
+			e.wave.AliasSamples(mw);
 		}
 
 		auto& e = polyTable.elems[slot];

@@ -69,6 +69,7 @@ namespace dfx
 		PolyTable(int nsoundings);
 		virtual ~PolyTable();
 	public:
+		void SetupEmptyTable();
 		bool IsFull() const { return iHead == -1; }
 		int ActivateSlot(int noteNumber);
 		void Deactivate(int slot);

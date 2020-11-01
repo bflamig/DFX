@@ -113,9 +113,22 @@ namespace dfx
 		other.interpolate = false;
 	}
 
+	void MemWave::Clear()
+	{
+		sound_file.Clear();
+		buff.Clear();
+		path.clear();
+		sampleRate = 44100.0;
+		time = 0.0;
+		deltaTime = 1.0;
+		finished = false;
+		interpolate = false;
+	}
+
 
 	void MemWave::Reset()
 	{
+		// Starts the sound from the beginning.
 		time = 0.0;
 		finished = false;
 	}

@@ -22,6 +22,25 @@ struct MyData
 	};
 };
 
+
+int ProcessMidi(DfxMidi* in_midi, PolyDrummer* poly_drummer)
+{
+	auto m = in_midi->GetMessage(); // Non blocking
+	if (m)
+	{
+		auto tag = m->bytes[0] & 0xf0;
+
+		if (tag == NoteOnMessage::tag)
+		{
+			auto n_on = in_midi->ParseNoteOn(*m);
+			poly_drummer->noteOnDirect(n_on->note, n_on->velocity / 127.0);
+			std::cout << '+' << std::flush;
+		}
+	}
+
+	return 0;
+}
+
 int drumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
 {
 	// A callback function that plays back whatever sounds are in a polyphonic drumkit
@@ -37,40 +56,29 @@ int drumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 
 	auto p = reinterpret_cast<system_t*>(outBuff);
 
-	auto m = in_midi->GetMessage(); // Non blocking
-	if (m)
-	{
-		auto tag = m->bytes[0] & 0xf0;
+	ProcessMidi(in_midi.get(), poly_drummer.get());
 
-		if (tag == NoteOnMessage::tag)
+	if (poly_drummer->HasSoundsToPlay())
+	{
+		while (nFrames > 0)
 		{
-			auto n_on = in_midi->ParseNoteOn(*m);
-			poly_drummer->noteOnDirect(n_on->note, n_on->velocity / 127.0);
-			std::cout << '+' << std::flush;
+			// NOTE: We are ticking at the playback sampling rate, which may not
+			// be the sampling rate of the recorded file. So the tick function
+			// below might have to calculate an interpolated frame.
+			auto sf = poly_drummer->StereoTick();
+			*p++ = sf.left * 0.5;   // @@ TEMP KLUDGE: Apply -6dB of gain to alleviate clipping
+			*p++ = sf.right * 0.5;  // @@ TEMP KLUDGE: Apply -6DB of gain to alleviate clipping
+			--nFrames;
 		}
 	}
-
-	if (!poly_drummer->HasSoundsToPlay())
+	else
 	{
-		while(nFrames > 0)
+		while (nFrames > 0)
 		{
 			*p++ = 0;
 			*p++ = 0;
 			--nFrames;
 		}
-
-		return 0;
-	}
-
-	while (nFrames > 0)
-	{
-		// NOTE: We are ticking at the playback sampling rate, which may not
-		// be the sampling rate of the recorded file. So the tick function
-		// below might have to calculate an interpolated frame.
-		auto sf = poly_drummer->StereoTick();
-		*p++ = sf.left * 0.5;   // @@ TEMP KLUDGE: Apply -6dB of gain to alleviate clipping
-		*p++ = sf.right * 0.5;  // @@ TEMP KLUDGE: Apply -6DB of gain to alleviate clipping
-		--nFrames;
 	}
 
 	return 0;
@@ -101,8 +109,7 @@ int main()
 
 	auto polyDrummer = std::make_shared<PolyDrummer>();
 
-	polyDrummer->LoadKit(df->drumKits[0]);
-	polyDrummer->SetSampleRate(systemSampleRate);
+	polyDrummer->UseKit(df->drumKits[0], systemSampleRate);
 
 	auto myData = std::make_unique<MyData>(inMidi, polyDrummer);
 

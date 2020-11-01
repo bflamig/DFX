@@ -63,6 +63,8 @@ namespace dfx
 		void operator=(const MemWave& other);
 		void operator=(MemWave&& other) noexcept;
 
+		void Clear();
+
 		bool Load(const std::filesystem::path& path_);
 		bool LoadRaw(const std::filesystem::path& path_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 

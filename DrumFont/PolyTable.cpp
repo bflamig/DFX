@@ -56,13 +56,26 @@ namespace dfx
 	PolyTable::PolyTable(int nsoundings)
 	: elems(nsoundings)
 	{
-		// Set up inactive linked list to take up entire table.
+		SetupEmptyTable();
+	}
 
-		for (int i = 0; i < nsoundings; i++)
+	PolyTable::~PolyTable()
+	{
+	}
+
+	void PolyTable::SetupEmptyTable()
+	{
+		auto nsoundings = elems.size();
+
+		// Set up inactive linked list to take up entire table.
+		// Also clear out any resident wave data.
+
+		for (size_t i = 0; i < nsoundings; i++)
 		{
 			elems[i].younger = -1;  // Only for active list, which starts out empty
 			elems[i].older = i + 1;
 			elems[i].soundNumber = -1;
+			elems[i].wave.Clear();
 		}
 
 		// Fixup last inactive older pointer
@@ -75,10 +88,6 @@ namespace dfx
 
 		aHead = -1;     // Head of active list (empty)
 		aOldest = -1;   // No oldest slot yet
-	}
-
-	PolyTable::~PolyTable()
-	{
 	}
 
 	int PolyTable::ActivateSlot(int noteNumber)

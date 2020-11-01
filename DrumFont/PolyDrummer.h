@@ -61,11 +61,11 @@ namespace dfx
 
 		virtual ~PolyDrummer();
 
-		void LoadKit(std::shared_ptr<DrumKit> &drumKit);
+		void UseKit(std::shared_ptr<DrumKit>& drumKit, double systemSampleRate_);;
 
-		void SetSampleRate(double sampleRate_)
+		void SetSampleRate(double systemSampleRate_)
 		{
-			polyTable.SetSampleRate(sampleRate_);
+			polyTable.SetSampleRate(systemSampleRate_);
 		}
 
 		void SetInterruptSameNoteScheme(bool reuse_flag)
@@ -92,8 +92,6 @@ namespace dfx
 
 		//! Fill a channel of the Frame object with computed outputs.
 		//Frame& tick(Frame& frame, unsigned int channel = 0);
-
-
 	};
 
 
