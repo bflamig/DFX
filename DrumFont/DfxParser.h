@@ -47,6 +47,7 @@ namespace dfx
 		NoError,
 		FileNotFound,
 		InvalidFileType,
+		ParsingError,
 		MustBeSpecified,
 		MustBeString,
 		NoteMissing,

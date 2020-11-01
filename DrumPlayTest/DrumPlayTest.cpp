@@ -85,6 +85,11 @@ int main()
 	auto df = std::make_unique<DrumFont>();
 	auto result = df->LoadFile(std::cout, kitFile);
 
+	if (result != DfxResult::NoError)
+	{
+		return -1;
+	}
+
 	df->drumKits[0]->LoadWaves();
 
 	auto da = MakeAudioApi();

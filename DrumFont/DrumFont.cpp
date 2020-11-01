@@ -63,7 +63,24 @@ namespace dfx
 			}
 			EndLog();
 		}
-		else rv = DfxResult::UnspecifiedError; // @@ TODO: Last error?
+		else
+		{
+			slog << "Parsing drum font file failed:" << std::endl;
+			if (rvp == ParserResult::FileOpenError)
+			{
+				slog << "failed to open file: " << fname << std::endl;
+			}
+			else if (rvp == ParserResult::CannotDetermineSyntaxMode)
+			{
+				slog << "cannot determine syntax mode: " << fname << std::endl;
+			}
+			else
+			{
+				PrintError(slog);
+			}
+
+			rv = DfxResult::UnspecifiedError; // @@ TODO: Last error?
+		}
 
 		return rv;
 	}

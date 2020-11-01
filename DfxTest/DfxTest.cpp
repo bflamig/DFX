@@ -39,7 +39,8 @@ using namespace dfx;
 
 std::shared_ptr<DfxParser> OpeningCredits()
 {
-	std::string filename = "../TestFiles/Test1.dfx";
+	//std::string filename = "../TestFiles/Test1.dfx";
+	std::string filename = "../TestFiles/TestKit.dfx";
 
 	auto df = std::make_shared<DfxParser>();
 

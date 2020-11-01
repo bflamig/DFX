@@ -45,6 +45,7 @@ namespace dfx
 			case DfxResult::NoError: s = "NoError"; break;
 			case DfxResult::FileNotFound: s = "File not found"; break;
 			case DfxResult::InvalidFileType: s = "Invalid file type"; break;
+			case DfxResult::ParsingError: s = "Parsing error"; break;
 			case DfxResult::MustBeSpecified: s = "Must be specified"; break;
 			case DfxResult::MustBeString: s = "Must be a double quoted string"; break;
 			case DfxResult::NoteMissing: s = "Drum note missing"; break;
