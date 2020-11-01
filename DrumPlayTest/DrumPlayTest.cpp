@@ -50,34 +50,61 @@ int drumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 	// We don't use streamTime here. Instead, the Drumkit object keeps track of each drum that
 	// is being played.
 
+	auto p = reinterpret_cast<system_t*>(outBuff);
+
 	auto myData = reinterpret_cast<MyData*>(userData);
 	auto in_midi = myData->inMidi;
 	auto poly_drummer = myData->poly_drummer;
 
-	auto p = reinterpret_cast<system_t*>(outBuff);
+	// We do midi processing right in this callback. This makes things simpler from a 
+	// thread synchronization standpoint. We don't have to do any locking here.
 
-	ProcessMidi(in_midi.get(), poly_drummer.get());
+	// We look for midi messages every nn times through processing samples here.
+	// So if our buffer is 64 samples, this means we look for midi messages 64/nn 
+	// times, for each call to this playback. This helps keep the midi latency low.
+
+	static constexpr unsigned slow_loop_chunk = 16;
 
 	if (poly_drummer->HasSoundsToPlay())
 	{
 		while (nFrames > 0)
 		{
-			// NOTE: We are ticking at the playback sampling rate, which may not
-			// be the sampling rate of the recorded file. So the tick function
-			// below might have to calculate an interpolated frame.
-			auto sf = poly_drummer->StereoTick();
-			*p++ = sf.left * 0.5;   // @@ TEMP KLUDGE: Apply -6dB of gain to alleviate clipping
-			*p++ = sf.right * 0.5;  // @@ TEMP KLUDGE: Apply -6DB of gain to alleviate clipping
-			--nFrames;
+			// A "slow loop" call:
+			ProcessMidi(in_midi.get(), poly_drummer.get()); // Non-blocking.
+
+			auto num_to_do = slow_loop_chunk <= nFrames ? slow_loop_chunk : nFrames;
+			nFrames -= num_to_do;
+
+			while (num_to_do > 0)
+			{
+				// NOTE: We are ticking at the playback sampling rate, which may not
+				// be the sampling rate of the recorded file. So the tick function
+				// below might have to calculate an interpolated frame.
+				auto sf = poly_drummer->StereoTick();
+				*p++ = sf.left * 0.5;   // @@ TEMP KLUDGE: Apply -6dB of gain to alleviate clipping
+				*p++ = sf.right * 0.5;  // @@ TEMP KLUDGE: Apply -6DB of gain to alleviate clipping
+				--num_to_do;
+			}
 		}
 	}
 	else
 	{
 		while (nFrames > 0)
 		{
-			*p++ = 0;
-			*p++ = 0;
-			--nFrames;
+			// A "slow loop" call:
+			ProcessMidi(in_midi.get(), poly_drummer.get()); // Non-blocking.
+
+			auto num_to_do = slow_loop_chunk <= nFrames ? slow_loop_chunk : nFrames;
+			nFrames -= num_to_do;
+
+			// Play silence
+
+			while (num_to_do > 0)
+			{
+				*p++ = 0;
+				*p++ = 0;
+				--num_to_do;
+			}
 		}
 	}
 
