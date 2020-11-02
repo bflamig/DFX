@@ -43,11 +43,11 @@ int ProcessMidi(DfxMidi* in_midi, PolyDrummer* poly_drummer)
 
 int drumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTime, StreamIOStatus ioStatus, void* userData)
 {
-	// A callback function that plays back whatever sounds are in a polyphonic drumkit
+	// A callback function that plays back whatever sounds are active in a polyphonic drumkit
 
 	// WARNING! Runs in a different thread! (The ASIO thread)
 
-	// We don't use streamTime here. Instead, the Drumkit object keeps track of each drum that
+	// We don't use streamTime here. Instead, the PolyDrummer object keeps track of each drum that
 	// is being played.
 
 	auto p = reinterpret_cast<system_t*>(outBuff);

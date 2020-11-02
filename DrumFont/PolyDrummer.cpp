@@ -60,7 +60,7 @@ namespace dfx
 
 	PolyDrummer::PolyDrummer(int polyPhony)
 	: polyTable(polyPhony)
-	, interrupt_same_note(false)  // @@ don't use true till fixed, if ever
+	, interrupt_same_note(false)  // @@ We don't really like the interrupt scheme. And it might be buggy anyway.
 	{
 	}
 
@@ -90,14 +90,14 @@ namespace dfx
 		}
 #endif
 
-		// Select a drum. If empty, then we're outta here!
+		// Select a drum. If no mapping for the note to a drum, then we're outta here!
 
 		int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
 		auto& drum = drumKit->noteMap[mapped_note];
 
 		if (!drum)
 		{
-			return;
+			return; // Don't have a mapping for given note.
 		}
 
 		int slot = -1;
@@ -105,7 +105,9 @@ namespace dfx
 		if (interrupt_same_note)
 		{
 			// In this scheme we search for the note already being active.
-			// If so, we merely start the active wave over by resetting it
+			// If so, we merely start the active wave over by resetting it.
+			// @@ UPDATE: I don't really like this scheme, so this code will
+			// probably go unused. We keep the logic here for posterity.
 
 			auto& e = polyTable.elems;
 			slot = polyTable.aHead;
@@ -130,7 +132,7 @@ namespace dfx
 			if (polyTable.IsFull())
 			{
 				// Turn off oldest since we're going to be using its slot. 
-				// @@ Actually, don't need to do anything here.
+				// @@ UPDATE: Actually, don't need to do anything here.
 			}
 
 			// grab a slot to use and place on active list
@@ -142,6 +144,13 @@ namespace dfx
 
 			auto& e = polyTable.elems[slot];
 			auto& mw = drum->ChooseWave(amplitude);
+
+			// Let the appropriate slot in the poly table
+			// alias the wave sample we're going to play.
+			// Also, starts the wave at time 0, and determines
+			// whether to interpolate (for when sampling rate
+			// and data rate don't match.)
+
 			e.wave.AliasSamples(mw);
 		}
 
@@ -174,7 +183,7 @@ namespace dfx
 		while (i != -1)
 		{
 			auto& e = polyTable.elems[i];
-			// @@ TODO: DO THIS! e.filter.setGain(amplitude * 0.01);
+			// @@ TODO: e.filter.setGain(amplitude * 0.01);
 			i = e.older;
 		}
 	}
@@ -182,6 +191,10 @@ namespace dfx
 
 	StereoFrame<double> PolyDrummer::StereoTick()
 	{
+		// We advance to the next frame of each active drum.
+		// If a drum is finished playing, deactivate that drum
+		// in the table.
+
 		double left = 0.0;
 		double right = 0.0;
 
