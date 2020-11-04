@@ -1,0 +1,81 @@
+dfx = 
+{
+	mydrumkit =
+	{
+		stuff = [{}, {}]
+		
+		path = "Rogers"
+	
+		instruments = 
+		{
+			bass_drum =	
+			{ 
+				note = 60
+				path = "kick/gretch"
+				velcurve = {type = logexp, knee = 0.6, gain = 6dB}
+				velocities =
+				[
+					v32 = 
+					{
+						path = ""
+						robins = 
+						[
+							r1 = { fname = "kick_lo.wav", offset = 1492, peak = "-40dB", rms =  -54db }
+						]
+					}
+					
+					v64 = 
+					{
+						path = ""
+						robins = 
+						[
+							r1 = { fname = "kick_med.wav", offset = 1742, peak = -30dB, rms =  -44db }
+						]
+					}
+					
+					v96 = 
+					{
+						path = ""
+						robins = 
+						[
+							r1 = { fname = "kick_hi.wav", offset = 1742, peak = -6db, rms =  -10db	}
+						]
+					}
+					
+				]
+			}
+			
+			snare =
+			{
+				path = "snares/sonor"
+				
+				note = 61
+				
+				velocities =
+				[
+					v16 = 
+					{
+						path = ""
+						
+						robins =
+						[
+							r1 = { fname = "snare_pp_1.wav" offset = 2200 peak = -70db rms =  -74db	}
+							r2 = { fname = "snare_pp_2.wav"	offset = 470 peak = -65db rms =  -73db }
+						]
+					}
+					
+					v64 = 
+					{
+						path = ""
+						
+						robins =
+						[
+							r1 = { fname = "snare_med_1.wav", offset = 200, peak = -20db, rms =  -24db	}
+							r2 = { fname = "snare_med_2.wav", offset = 470, peak = -25db, rms =  -33db	}
+						]
+					}
+				]
+			}
+		}
+	}
+} 

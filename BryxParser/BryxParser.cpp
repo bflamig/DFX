@@ -980,12 +980,12 @@ namespace bryx
 				lp->Insert(nvp);
 			}
 
-			// We expect either a comma or and ending right brace
+			// We expect either a comma, another start of a member token, or an ending right brace
 
 			bool expect_tokn = true;
 			bool silent_fail = false;
 
-			result = CheckForEitherToken(TokenEnum::Comma, TokenEnum::RightBrace, expect_tokn, silent_fail);
+			//result = CheckForEitherToken(TokenEnum::Comma, TokenEnum::RightBrace, expect_tokn, silent_fail);
 
 			if (result == ParserResult::NoError)
 			{
@@ -995,7 +995,7 @@ namespace bryx
 					AdvanceToken();
 					break;
 				}
-				else
+				else if (t->type == TokenEnum::Comma)
 				{
 					// We got a comma, so advance beyond it.
 					AdvanceToken();
@@ -1152,12 +1152,12 @@ namespace bryx
 				lp->Add(ep);
 			}
 
-			// We expect either a comma or right square bracket
+			// We expect either a comma, the start of another member element or a right square bracket
 
 			bool expect_tokn = true;
 			bool silent_fail = false;
 
-			result = CheckForEitherToken(TokenEnum::Comma, TokenEnum::RightSquareBracket, expect_tokn, silent_fail);
+			//result = CheckForEitherToken(TokenEnum::Comma, TokenEnum::RightSquareBracket, expect_tokn, silent_fail);
 
 			if (result == ParserResult::NoError)
 			{
@@ -1167,7 +1167,7 @@ namespace bryx
 					AdvanceToken();
 					break;
 				}
-				else
+				else if (tkn->type == TokenEnum::Comma)
 				{
 					// We got a comma, so advance beyond it.
 					AdvanceToken();
@@ -1373,7 +1373,11 @@ namespace bryx
 
 						if (i != last)
 						{
-							sout << ',';
+							if (lexi.syntax_mode == SyntaxModeEnum::Bryx)
+							{
+								sout << "  ";
+							}
+							else sout << ',';
 							NextLine(sout, indent + indent_amt);
 						}
 						++i;
@@ -1409,7 +1413,11 @@ namespace bryx
 						PrintWalk(sout, *v, indent);
 						if (i != last)
 						{
-							sout << ',';
+							if (lexi.syntax_mode == SyntaxModeEnum::Bryx)
+							{
+								sout << "  ";
+							}
+							else sout << ',';
 							NextLine(sout, indent + indent_amt);
 						}
 						++i;
