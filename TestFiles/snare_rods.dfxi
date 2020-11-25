@@ -1,0 +1,58 @@
+dfxi =
+{
+	path = "snare_rods/0",
+	
+	velocities =
+	[
+		v48 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 =
+				{
+					fname = "Snare_Rods_Lt_1.wav",
+				},
+				
+				r2 =
+				{
+					fname = "Snare_Rods_Lt_2.wav",
+				}
+			]
+		},
+		
+		v72 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 =
+				{
+					fname = "Snare_Rods_Med_1.wav",
+				},
+				
+				r2 =
+				{
+					fname = "Snare_Rods_Med_2.wav",
+				}
+			]
+		},
+		
+		v94 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 =
+				{
+					fname = "Snare_Rods_1.wav",
+				},
+				
+				r2 =
+				{
+					fname = "Snare_Rods_2.wav",
+				}
+			]
+		}
+	]
+}

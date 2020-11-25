@@ -184,7 +184,7 @@ namespace dfx
 			BuildVelocityLayer(drum->velocityLayers, vlayer_sh_ptr);
 		}
 
-		drums.emplace_back(std::move(drum));
+		drums.push_back(std::move(drum));
 	}
 
 	void DrumFont::BuildVelocityLayer(std::vector<VelocityLayer>& vlayers, std::shared_ptr<Value>& vlayer_sh_ptr)

@@ -1,0 +1,41 @@
+dfxi = 
+{
+	path = "snare/0",
+	
+	velocities =
+	[
+		v48 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 =
+				{
+					fname = "Snare_1.wav",
+				},
+				
+				r2 =
+				{
+					fname = "Snare_2.wav",
+				}
+			]
+		},
+		
+		v72 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 =
+				{
+					fname = "Snare_Medium1.wav",
+				},
+				
+				r2 =
+				{
+					fname = "Snare_Medium2.wav",
+				}
+			]
+		}
+	]
+} 

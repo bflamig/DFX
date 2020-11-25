@@ -124,6 +124,11 @@ namespace dfx
 			return root_map;
 		}
 
+		const curly_list_type* GetInstruments(const curly_list_type* kit) const
+		{
+			return GetCurlyListProperty(kit, "instruments");
+		}
+
 		size_t NumKits() const
 		{
 			return root_map->size();
@@ -134,50 +139,6 @@ namespace dfx
 			return errcnt;
 		}
 
-#if 0
-
-		// Not well thought out yet, so we comment this out
-
-		const curly_list_type* GetKit(std::string name) const
-		{
-			const curly_list_type* omp = GetCurlyListProperty(root_map, name);
-			return omp;
-		}
-
-		const std::optional<std::string> GetRelPath(const curly_list_type* kit_map_ptr) const
-		{
-			// Returns "" string if no path found
-
-			auto p = GetSimpleProperty(kit_map_ptr, "path");
-
-			return p;
-		}
-
-#endif
-
-		const curly_list_type* GetInstruments(const curly_list_type* kit) const
-		{
-			return GetCurlyListProperty(kit, "instruments"); 
-		}
-
-#if 0
-
-		const curly_list_type* GetInstrument(const curly_list_type* instruments, std::string name) const
-		{
-			// Really need to wrap these with try-catches, because at() throws
-			// an exception if thingy not found.
-			try
-			{
-				auto freaky = instruments->at(name);
-				return ToCurlyList(freaky);
-			}
-			catch (...)
-			{
-				return nullptr;
-			}
-		}
-
-#endif
 
 	public:
 
