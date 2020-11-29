@@ -25,6 +25,8 @@
  *
 \******************************************************************************/
 
+#include <filesystem>
+#include <fstream>
 #include "BryxParser.h"
 
 namespace bryx
@@ -172,7 +174,7 @@ namespace bryx
 	// //////////////////////////////////////////////////////////////////////////
 	//
 	//
-	// BryParser
+	// BryxParser
 	//
 	//
 	// //////////////////////////////////////////////////////////////////////////
@@ -199,6 +201,27 @@ namespace bryx
 	{
 
 	}
+
+	ParserResult Parser::LoadFile(std::string_view& fname)
+	{
+		auto result = ParserResult::NoError;
+		std::fstream f(fname, std::ios_base::in);
+
+		if (!f.is_open())
+		{
+			result = ParserResult::FileOpenError;
+			LogError(result, fname.data(), -1);
+		}
+		else
+		{
+			auto fbuf = f.rdbuf();
+			SetStreamBuf(fbuf);
+			result = Parse();
+		}
+
+		return result;
+	}
+
 
 	// ///////////////////////////////////////////////////////////////////////////
 	// Property-value helpers
@@ -1248,8 +1271,10 @@ namespace bryx
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Parser::PrintError(std::ostream& sout)
+	void Parser::PrintError(std::ostream& sout, std::string_view &ctx)
 	{
+		sout << "Context: " << ctx << std::endl;
+
 		last_parser_error.Print(sout);
 
 		if (last_parser_error.code == ParserResult::LexicalError)

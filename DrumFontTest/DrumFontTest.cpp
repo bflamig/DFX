@@ -41,7 +41,9 @@ using namespace dfx;
 
 void test()
 {
-	std::string filename = "../TestFiles/Test1.dfx";
+	//std::string_view filename = "../TestFiles/Test1.dfx";
+	std::string_view filename = "../TestFiles/TestKitWIncludes.dfx";
+
 	auto df = std::make_unique<DrumFont>();
 	auto result = df->LoadFile(std::cout, filename);
 

@@ -45,7 +45,7 @@ namespace dfx
 	public:
 
 		std::filesystem::path cumulativePath; // For ease of recursing down
-		std::filesystem::path basePath;       // Usually the path of the sound font file
+		std::filesystem::path basePath;       // Usually the path to the sound font file
 		std::filesystem::path kitPath;        // Relative to sound font location
 		std::string name;
 
@@ -55,7 +55,7 @@ namespace dfx
 	public:
 
 		DrumKit();
-		DrumKit(const std::string& name_, const std::string& kitPath_);
+		DrumKit(const std::string& name_, std::filesystem::path basePath_, const std::string& kitPath_);
 		DrumKit(const DrumKit& other);
 		DrumKit(DrumKit&& other) noexcept;
 

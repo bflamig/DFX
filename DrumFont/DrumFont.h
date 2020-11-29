@@ -36,6 +36,7 @@
 
 #include "DfxParser.h"
 #include "DrumKit.h"
+#include <string>
 
 namespace dfx
 {
@@ -51,7 +52,7 @@ namespace dfx
 
 	public:
 
-		DfxResult LoadFile(std::ostream& slog, std::string fname);
+		DfxResult LoadFile(std::ostream& slog, std::string_view &fname);
 		void DumpRobins(std::ostream& sout); // For testing purposes
 
 
@@ -65,9 +66,10 @@ namespace dfx
 
 		void BuildFont();
 
-		std::shared_ptr<DrumKit> BuildKit(const nv_type& kit);
+		std::shared_ptr<DrumKit> BuildKit(std::filesystem::path base_path, const nv_type& kit);
 		void BuildInstruments(std::shared_ptr<DrumKit>& kit, const curly_list_type* instrument_map_ptr);
-		void BuildInstrument(std::vector<drum_ptr>& drums, const nv_type& drum_nv);
+		void BuildInstrument(std::vector<drum_ptr>& drums, std::filesystem::path cumulativePath, const nv_type& drum_nv);
+		drum_ptr MakeInstrument(const std::string &drum_name, std::filesystem::path cumulativePath, int midiNote, const curly_list_type* drum_map_ptr);
 		void BuildVelocityLayer(std::vector<VelocityLayer>& layers, std::shared_ptr<Value>& layer_sh_ptr);
 		void BuildRobin(std::vector<Robin>& robins, NameValue* robin_nv_ptr);
 	};

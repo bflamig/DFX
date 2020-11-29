@@ -53,7 +53,7 @@ namespace dfx
 
 	public:
 
-		MultiLayeredDrum(const std::string& name_, const std::string& drumPath_, int midiNote_);
+		MultiLayeredDrum(const std::string& name_, std::filesystem::path cumulativePath_, const std::string& drumPath_, int midiNote_);
 		MultiLayeredDrum(const MultiLayeredDrum& other);
 		MultiLayeredDrum(MultiLayeredDrum&& other) noexcept;
 		virtual ~MultiLayeredDrum() { }

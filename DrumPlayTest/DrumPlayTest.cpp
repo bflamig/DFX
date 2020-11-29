@@ -116,7 +116,7 @@ int main()
 {
 	static constexpr unsigned systemSampleRate = 48000;
 
-	std::string kitFile = "../TestFiles/TestKit.dfx";
+	std::string_view kitFile = "../TestFiles/TestKit.dfx";
 	auto df = std::make_unique<DrumFont>();
 	auto result = df->LoadFile(std::cout, kitFile);
 

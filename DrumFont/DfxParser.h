@@ -34,7 +34,7 @@
  *
 \******************************************************************************/
 
-#include <fstream>
+//#include <fstream>
 #include <filesystem>
 #include "BryxParser.h"
 
@@ -46,6 +46,7 @@ namespace dfx
 	{
 		NoError,
 		FileNotFound,
+		FileOpenError,
 		InvalidFileType,
 		ParsingError,
 		MustBeSpecified,
@@ -54,6 +55,7 @@ namespace dfx
 		NoteMustBeWholeNumber,
 		KitsMissing,
 		KitValWrongType,
+		InstrumentIncludeDataMissing,
 		InstrumentsMissing,
 		InstrumentsMustBeList,
 		DrumValMustBeList,
@@ -115,7 +117,8 @@ namespace dfx
 
 	public:
 
-		ParserResult LoadFile(std::string fname);
+		ParserResult LoadFile(std::ostream &serr, std::string_view &fname);
+		DfxResult LoadAndVerify(std::ostream& serr, std::string_view& fname, bool as_include = false);
 
 	public:
 
@@ -124,7 +127,12 @@ namespace dfx
 			return root_map;
 		}
 
-		const curly_list_type* GetInstruments(const curly_list_type* kit) const
+		const curly_list_type* GetInstrumentIncludeMapPtr() const
+		{
+			return root_map;
+		}
+
+		const curly_list_type* GetInstrumentMap(const curly_list_type* kit) const
 		{
 			return GetCurlyListProperty(kit, "instruments");
 		}
@@ -143,6 +151,9 @@ namespace dfx
 	public:
 
 		bool Verify();
+
+		bool VerifyIncludeFile();
+
 		bool VerifyKit(const std::string ctx, const nv_type& kit);
 		bool VerifyPath(const std::string ctx, const curly_list_type* parent_map, bool path_must_be_specified = false);
 		bool VerifyInstruments(const std::string ctx, const curly_list_type* instrument_map_ptr);
@@ -153,6 +164,7 @@ namespace dfx
 		bool VerifyRobins(const std::string ctx, const curly_list_type* parent_map_ptr);
 		bool VerifyRobin(const std::string ctx, std::shared_ptr<NameValue>& robin_nv_ptr);
 		bool VerifyFname(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified);
+		bool VerifyFname(const std::string ctx, std::shared_ptr<Value>& vp);
 		bool VerifyOffset(const std::string ctx, const curly_list_type* parent_map, bool offset_must_be_specified);
 		bool VerifyPeak(const std::string ctx, const curly_list_type* parent_map, bool peak_must_be_specified);
 		bool VerifyRMS(const std::string ctx, const curly_list_type* parent_map, bool rms_must_be_specified);
@@ -162,6 +174,7 @@ namespace dfx
 	public:
 
 		void StartLog(std::ostream& slog);
+		ParserResult LogError(const std::string ctx, ParserResult err);
 		DfxResult LogError(const std::string prop, DfxResult err);
 		DfxResult LogError(const std::string prop, DfxResult err, LexiResultPkg& err_pkg);
 		void EndLog();

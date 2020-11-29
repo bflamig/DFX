@@ -37,67 +37,29 @@
 
 using namespace dfx;
 
-std::shared_ptr<DfxParser> OpeningCredits()
+int TestDfx()
 {
-	//std::string filename = "../TestFiles/Test1.dfx";
-	std::string filename = "../TestFiles/Test1NC.dfx";
-	//std::string filename = "../TestFiles/TestKit.dfx";
+	// Test a full dfx file.
 
-	auto df = std::make_shared<DfxParser>();
+	//std::string_view filename = "../TestFiles/Test1.dfx";
+	//std::string_view filename = "../TestFiles/Test1NC.dfx";
+	//std::string_view filename = "../TestFiles/TestKit.dfx";
+	std::string_view filename = "../TestFiles/TestKitWIncludes.dfx";
 
-	auto result = df->LoadFile(filename);
+	auto dp = std::make_unique<DfxParser>();
 
-	if (result == ParserResult::FileOpenError)
+	auto rv = dp->LoadAndVerify(std::cout, filename);
+
+	if (rv == DfxResult::NoError)
 	{
-		std::cout << "failed to open: " << filename << std::endl;
-	}
-	else if (result == ParserResult::CannotDetermineSyntaxMode)
-	{
-		std::cout << "cannot determine syntax mode: " << filename << std::endl;
-	}
-	else if (result != ParserResult::NoError)
-	{
-		std::cout << "Parsing error encountered:\n";
-		df->PrintError(std::cout);
-	}
-	else
-	{
-		df->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
-		std::cout << std::endl;
-		return df;
-	}
-
-	return nullptr;
-}
-
-int explore()
-{
-	auto df = OpeningCredits();
-
-	if (df != nullptr)
-	{
-		auto num_kits = df->NumKits();
+		std::cout << "Dfx schema check VERIFIED." << std::endl;
+		auto num_kits = dp->NumKits();
 		std::cout << "num kits = " << num_kits << std::endl;
-
-		using kits_map = bryx::curly_list_type;
-
-		df->StartLog(std::cout);
-		auto zebra = df->Verify();
-		df->EndLog();
-
-		if (zebra)
-		{
-			std::cout << "Dfx schema check VERIFIED." << std::endl;
-		}
-		else
-		{
-			std::cout << "Dfx FAILED schema check." << std::endl;
-		}
 
 		std::cout << std::endl << std::endl;
 
 		// Might have changed string tokens to number tokens. Let's see.
-		df->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
+		dp->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
 
 		std::cout << std::endl << std::endl;
 
@@ -105,8 +67,48 @@ int explore()
 
 		std::cout << "In Json syntax" << std::endl << std::endl;
 
-		df->WriteDfx(std::cout, SyntaxModeEnum::Json);
+		dp->WriteDfx(std::cout, SyntaxModeEnum::Json);
+	}
+	else
+	{
+		std::cout << "Dfx FAILED schema check." << std::endl;
+	}
 
+	return 0;
+}
+
+int TestDfxi()
+{
+	// Test an dfx instrument include file
+	std::string_view filename = "G:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite/snare.dfxi";
+
+	auto dp = std::make_unique<DfxParser>();
+
+	bool as_include = true;
+	auto rv = dp->LoadAndVerify(std::cout, filename, as_include);
+
+	if (rv == DfxResult::NoError)
+	{
+		std::cout << "Dfxi schema check VERIFIED." << std::endl;
+		auto num_kits = dp->NumKits();
+		std::cout << "num kits = " << num_kits << std::endl;
+
+		std::cout << std::endl << std::endl;
+
+		// Might have changed string tokens to number tokens. Let's see.
+		dp->WriteDfx(std::cout, SyntaxModeEnum::Bryx);
+
+		std::cout << std::endl << std::endl;
+
+		// Let's see what we look like as json
+
+		std::cout << "In Json syntax" << std::endl << std::endl;
+
+		dp->WriteDfx(std::cout, SyntaxModeEnum::Json);
+	}
+	else
+	{
+		std::cout << "Dfxi FAILED schema check." << std::endl;
 	}
 
 	return 0;
@@ -114,6 +116,7 @@ int explore()
 
 int main()
 {
-	explore();
+	TestDfx();
+	//TestDfxi();
 	return 0;
 }

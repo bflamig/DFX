@@ -44,15 +44,17 @@ namespace dfx
 		//std::cout << "DrumKit default ctor called" << std::endl;
 	}
 
-	DrumKit::DrumKit(const std::string& name_, const std::string& kitPath_)
-	: cumulativePath()
-	, basePath()
-	, kitPath(kitPath_)
+	DrumKit::DrumKit(const std::string& name_, std::filesystem::path basePath_, const std::string& kitPath_)
+	: cumulativePath(basePath_)
+	, basePath(basePath_)
+	, kitPath(kitPath_) // @@ TODO: May not be necessary to store this
 	, name(name_)
 	, drums()
 	, noteMap{ 128 }
 	{
 		//std::cout << "DrumKit ctor called" << std::endl;
+		cumulativePath /= kitPath;
+		cumulativePath = cumulativePath.generic_string();
 	}
 
 	DrumKit::DrumKit(const DrumKit& other)
@@ -123,19 +125,12 @@ namespace dfx
 
 	void DrumKit::FinishPaths(std::filesystem::path& soundFontPath_)
 	{
-		basePath = soundFontPath_;
-		basePath.remove_filename();
-
-		cumulativePath = basePath;
-		cumulativePath /= kitPath;
-		cumulativePath = cumulativePath.generic_string(); // Sigh! THey just had to do it wrong!
+		// We sor the velocity layers of all the drums and then
+		// finish instantiating the paths of the individual 
+		// sound files.
 
 		for (auto& d : drums)
 		{
-			d->cumulativePath = cumulativePath;
-			d->cumulativePath /= d->drumPath;
-			d->cumulativePath = d->cumulativePath.generic_string();
-
 			d->SortLayers();
 
 			for (auto &layer : d->velocityLayers)

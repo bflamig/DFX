@@ -28,13 +28,13 @@ dfx =
 			
 			snare =
 			{
-				include = "snare.dfxi",
+				include = "$fontbase$/snare.dfxi",
 				note = 2
 			},
 			
 			snare_rod =
 			{
-				include = "snare_rods.dfxi",
+				include = "$fontbase$/snare_rods.dfxi",
 				note = 3
 			},
 			

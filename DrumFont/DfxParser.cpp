@@ -33,6 +33,7 @@
 \******************************************************************************/
 
 #include "DfxParser.h"
+#include <fstream>
 
 namespace dfx
 {
@@ -44,6 +45,7 @@ namespace dfx
 		{
 			case DfxResult::NoError: s = "NoError"; break;
 			case DfxResult::FileNotFound: s = "File not found"; break;
+			case DfxResult::FileOpenError: "Error opening file"; break;
 			case DfxResult::InvalidFileType: s = "Invalid file type"; break;
 			case DfxResult::ParsingError: s = "Parsing error"; break;
 			case DfxResult::MustBeSpecified: s = "Must be specified"; break;
@@ -52,6 +54,7 @@ namespace dfx
 			case DfxResult::NoteMustBeWholeNumber: s = "Note must be whole number"; break;
 			case DfxResult::KitsMissing: s = "Kits are missing"; break;
 			case DfxResult::KitValWrongType: s = "Kit value must be a {}-list type"; break;
+			case DfxResult::InstrumentIncludeDataMissing: s = "Instrument include file data is missing."; break;
 			case DfxResult::InstrumentsMissing: s = "Instruments are missing"; break;
 			case DfxResult::InstrumentsMustBeList: s = "Instruments must be in a {}-list"; break;
 			case DfxResult::DrumValMustBeList: s = "Drum info must be in a {}-list"; break;
@@ -79,29 +82,79 @@ namespace dfx
 	}
 
 	// ///////////////////////////////////////////////////////////////
-	ParserResult DfxParser::LoadFile(std::string fname)
+	ParserResult DfxParser::LoadFile(std::ostream &serr, std::string_view &fname)
 	{
-		auto result = ParserResult::NoError;
+		auto result = Parser::LoadFile(fname);
 
-		std::fstream f(fname, std::ios_base::in);
-
-		if (!f.is_open())
-		{
-			result = ParserResult::FileOpenError;
-		}
-		else
+		if (result == ParserResult::NoError)
 		{
 			sound_font_path = fname;
 			sound_font_path = sound_font_path.generic_string();
-
-			auto fbuf = f.rdbuf();
-			SetStreamBuf(fbuf);
-			result = Parse();
+		}
+		else
+		{
+			serr << "Parsing error encountered:\n";
+			PrintError(serr, fname);
 		}
 
 		return result;
 	}
 
+	// ///////////////////////////////////////////////////////////////
+	DfxResult DfxParser::LoadAndVerify(std::ostream& serr, std::string_view& fname, bool as_include)
+	{
+		auto load_result = LoadFile(serr, fname);
+
+		if (load_result == ParserResult::NoError)
+		{
+			StartLog(serr);
+
+			auto result = DfxResult::NoError;
+			bool bx;
+
+			if (as_include)
+			{
+				bx = VerifyIncludeFile();
+			}
+			else bx = Verify();
+
+			if (!bx)
+			{
+				result = DfxResult::VerifyFailed;
+			}
+
+			return result;
+		}
+		else
+		{
+			return DfxResult::ParsingError;
+		}
+	}
+
+
+#if 0
+	// ///////////////////////////////////////////////////////////////
+	// A static function that creates a DfxParser object, and then
+	// loads a Dfx(i) file.
+
+	std::shared_ptr<DfxParser> LoadDfx(std::ostream &serr, std::string_view& fname)
+	{
+		// Works for both Dfx and Dfxi files.
+
+		auto dp = std::make_shared<DfxParser>();
+
+		auto result = dp->LoadFile(serr, fname);
+
+		if (result != ParserResult::NoError)
+		{
+			return nullptr;
+		}
+		else
+		{
+			return dp;
+		}
+	}
+#endif
 
 	// //////////////////////////////////////////////////////////////////
 	// Verify
@@ -142,6 +195,50 @@ namespace dfx
 		else
 		{
 			LogError(file_moniker, DfxResult::KitsMissing);
+		}
+
+		return errcnt == 0;
+	}
+
+	// //////////////////////////////////////////////////////////////////
+	// VerifyIncludeFile
+
+	// The outermost level of a Dfx instrument include file must be a
+	// name-value pair. In bryx syntax, that is Dfxi = {...}. In json
+	// syntax, that is "Dfxi" : { ... }. Note that the BryParser has
+	// already consumed the name part of this name-value pair. So we start
+	// with  a value, and that value must be a {}-list. If it passes that
+	// test, then we look deeper. Oh wait, it has already passed that test, 
+	// in the parser itself. Still, we retrieve the pointer that points
+	// to the {}-list and make sure it's not null for some reason.
+
+	bool DfxParser::VerifyIncludeFile()
+	{
+		errcnt = 0; // @@ TODO: Do this here, or in StartLog()? 
+
+		const auto curly_list_map_ptr = GetInstrumentIncludeMapPtr();
+
+		if (curly_list_map_ptr)
+		{
+			// Okay, the {}-list should be mapped (ie searchable) list of 
+			// one or two name-value pairs.
+			// One of these name-value pairs is optional: a relative path
+			// to the directory containing the variations (velocities and
+			//robins) of the instrument. 
+			// The other name-value pair should be named "velocities" with the
+			// body value being a []-list of velocity layer specifications.
+			// If the requirements above are not met, we log any error ecountered.
+
+			// First, we verify that there is a path, it has the right form.
+			static constexpr bool must_be_specified = false;
+			VerifyPath(file_moniker, curly_list_map_ptr, must_be_specified);
+
+			// Second, we verify the velocity layers, which must be there.
+			VerifyVelocityLayers(file_moniker, curly_list_map_ptr);
+		}
+		else
+		{
+			LogError(file_moniker, DfxResult::InstrumentIncludeDataMissing);
 		}
 
 		return errcnt == 0;
@@ -293,20 +390,41 @@ namespace dfx
 		{
 			// Okay, an instrument spec must have at least a note mapping
 			// (that is, what midi note does it map to.)
-			// It can have an optional relative path.
-			// It must have at least one velocity layer.
 
-			bool must_be_specified = false;
-			VerifyPath(new_ctx, drum_map_ptr, must_be_specified);
-
-			// Look for note
-
-			must_be_specified = true;
+			bool must_be_specified = true;
 			VerifyNote(new_ctx, drum_map_ptr, must_be_specified);
 
-			// Look for at least one velocity layer
+			// It can have an optional relative path and at least one
+			// velocity layer. These can be inserted immediately in this
+			// file, or they can be included from an external file.
 
-			VerifyVelocityLayers(new_ctx, drum_map_ptr);
+			// See if the drum velocity layers are in an include file instead
+			// of being immediate.
+
+			auto ip = GetPropertyValue(drum_map_ptr, "include");
+
+			if (ip)
+			{
+				// We defer full verify of the included text to
+				// when the drum kit is built. Here, we simply
+				// verify that our property looks like a file name.
+				// Why do we defer it? Mainly because we don't have the 
+				// full paths built yet and we don't want to parse
+				// twice and/or don't want to store parse state of
+				// the included file.
+				VerifyFname(new_ctx, ip);
+			}
+			else
+			{
+				// It can have an optional relative path.
+
+				must_be_specified = false;
+				VerifyPath(new_ctx, drum_map_ptr, must_be_specified);
+
+				// It must have at least one velocity layer.
+
+				VerifyVelocityLayers(new_ctx, drum_map_ptr);
+			}
 		}
 		else
 		{
@@ -579,28 +697,7 @@ namespace dfx
 
 		if (vp)
 		{
-			// Well, there is an fname property. Is it the right type? 
-			// Ie. a simple string value?
-
-			auto svp = AsSimpleValue(vp);
-
-			if (svp)
-			{
-				// Okay, it's a simple value. Is it a string?
-
-				if (svp->is_string())
-				{
-					// @@ TODO: Does it look like a fname?
-				}
-				else
-				{
-					LogError(new_ctx, DfxResult::MustBeString);
-				}
-			}
-			else
-			{
-				LogError(new_ctx, DfxResult::MustBeString);
-			}
+			VerifyFname(new_ctx, vp);
 		}
 		else
 		{
@@ -608,6 +705,37 @@ namespace dfx
 			{
 				LogError(new_ctx, DfxResult::MustBeSpecified);
 			}
+		}
+
+		return errcnt == save_errcnt;
+	}
+
+
+	bool DfxParser::VerifyFname(const std::string ctx, std::shared_ptr<Value> &vp)
+	{
+		int save_errcnt = errcnt;
+
+		// Well, there is an fname property. Is it the right type? 
+		// Ie. a simple string value?
+
+		auto svp = AsSimpleValue(vp);
+
+		if (svp)
+		{
+			// Okay, it's a simple value. Is it a string?
+
+			if (svp->is_string())
+			{
+				// @@ TODO: Does it look like a fname?
+			}
+			else
+			{
+				LogError(ctx, DfxResult::MustBeString);
+			}
+		}
+		else
+		{
+			LogError(ctx, DfxResult::MustBeString);
 		}
 
 		return errcnt == save_errcnt;
@@ -880,19 +1008,29 @@ namespace dfx
 		errcnt = 0;
 	}
 
-	DfxResult DfxParser::LogError(const std::string prop, DfxResult err)
+	ParserResult DfxParser::LogError(const std::string ctx, ParserResult err)
 	{
-		std::ostream & sl = *slog;
-		sl << "Property " << prop << ": ";
+		std::ostream& sl = *slog;
+		sl << "Context " << ctx << ": ";
 		sl << to_string(err) << std::endl;
 		++errcnt;
 		return err;
 	}
 
-	DfxResult DfxParser::LogError(const std::string prop, DfxResult err, LexiResultPkg &err_pkg)
+
+	DfxResult DfxParser::LogError(const std::string ctx, DfxResult err)
+	{
+		std::ostream & sl = *slog;
+		sl << "Context " << ctx << ": ";
+		sl << to_string(err) << std::endl;
+		++errcnt;
+		return err;
+	}
+
+	DfxResult DfxParser::LogError(const std::string ctx, DfxResult err, LexiResultPkg &err_pkg)
 	{
 		std::ostream& sl = *slog;
-		sl << "Property " << prop << ": ";
+		sl << "Context " << ctx << ": ";
 		sl << to_string(err) << std::endl;
 		sl << "Lexical err --> " << err_pkg.msg << " near (" << err_pkg.extent.ecol << ")" << std::endl;
 		++errcnt;

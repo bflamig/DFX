@@ -274,6 +274,8 @@ namespace bryx
 		explicit Parser(std::streambuf* sb_);
 		virtual ~Parser();
 
+		ParserResult LoadFile(std::string_view& fname);
+
 		void SetStreamBuf(std::streambuf* sb_)
 		{
 			lexi.SetStreamBuf(sb_);
@@ -364,7 +366,7 @@ namespace bryx
 
 	public:
 
-		void PrintError(std::ostream& sout);
+		void PrintError(std::ostream& sout, std::string_view &ctx);
 
 		void PrintWalk(std::ostream& sout, const Value& jv, int indent);
 

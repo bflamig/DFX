@@ -37,14 +37,15 @@
 
 namespace dfx
 {
-	MultiLayeredDrum::MultiLayeredDrum(const std::string& name_, const std::string& drumPath_, int midiNote_)
-	: cumulativePath()
+	MultiLayeredDrum::MultiLayeredDrum(const std::string& name_, std::filesystem::path cumulativePath_, const std::string& drumPath_, int midiNote_)
+	: cumulativePath(cumulativePath_)
 	, drumPath(drumPath_)
 	, name(name_)
 	, velocityLayers()
 	, midiNote(midiNote_)
 	{
-
+		cumulativePath /= drumPath;
+		cumulativePath = cumulativePath.generic_string();
 	}
 
 	MultiLayeredDrum::MultiLayeredDrum(const MultiLayeredDrum& other)
