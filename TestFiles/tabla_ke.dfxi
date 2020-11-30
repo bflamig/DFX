@@ -1,0 +1,69 @@
+dfxi = 
+{
+	path = "Ke",
+	
+	velocities =
+	[
+		v16 = 
+		{ 
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V01_Ke_SP.wav" },
+				r2 = { fname = "RR2_V01_Ke_SP.wav" },
+			]
+		},
+		
+		v32 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V02_Ke_SP.wav" },
+				r2 = { fname = "RR2_V02_Ke_SP.wav" },
+			]
+		},
+		
+		v48 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V03_Ke_SP.wav" },
+				r2 = { fname = "RR2_V03_Ke_SP.wav" },
+			]
+		},
+		
+		v64 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V04_Ke_SP.wav" },
+				r2 = { fname = "RR2_V04_Ke_SP.wav" },
+			]
+		},
+		
+		v80 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V05_Ke_SP.wav" },
+				r2 = { fname = "RR2_V05_Ke_SP.wav" },
+			]
+		},
+		
+		v96 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V06_Ke_SP.wav" },
+				r2 = { fname = "RR2_V06_Ke_SP.wav" },
+			]
+		},
+		
+		
+	]
+} 

@@ -242,12 +242,15 @@ namespace dfx
 	}
 
 
-	void MultiLayeredDrum::LoadWaves()
+	int MultiLayeredDrum::LoadWaves(std::ostream &serr)
 	{
+		int errcnt = 0;
 		for (auto& lp : velocityLayers)
 		{
-			lp.LoadWaves();
+			int local_errcnt = lp.LoadWaves(serr);
+			errcnt += local_errcnt;
 		}
+		return errcnt;
 	}
 
 }

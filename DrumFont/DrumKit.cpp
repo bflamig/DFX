@@ -159,12 +159,15 @@ namespace dfx
 		}
 	}
 
-	void DrumKit::LoadWaves()
+	int DrumKit::LoadWaves(std::ostream &serr)
 	{
+		int errcnt = 0;
 		for (auto& d : drums)
 		{
-			d->LoadWaves();
+			int local_errcnt = d->LoadWaves(serr);
+			errcnt += local_errcnt;
 		}
+		return errcnt;
 	}
 
 } // end of namespace

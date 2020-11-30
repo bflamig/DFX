@@ -9,19 +9,106 @@ constexpr unsigned raw_nChannels = 1;
 constexpr auto raw_format = SampleFormat::SINT16;
 constexpr double raw_file_rate = 22050.0;
 
-std::tuple<size_t, size_t, double, double, double, double> ComputeStats(SoundFile &f, FrameBuffer<double>& buffer, double duration)
+template<typename T>
+int EffectiveIntegerBits(T x)
 {
-#if 0
-	auto nframes = size_t(duration * f.fileRate + 0.5);
+	int nd = 0;
 
-	if (nframes > buffer.nFrames)
+	while (true)
 	{
+		if (x == 0) return nd;
+		x /= 2;
+		nd++;
+	}
+
+	return nd;
+}
+
+int EffectiveBits(double x, SampleFormat file_type)
+{
+	switch (file_type)
+	{
+		case SampleFormat::SINT16:
+		{
+			auto d = int16_t(x * 32767.5 - 0.5);
+			return EffectiveIntegerBits(d);
+
+		}
+		break;
+		case SampleFormat::SINT24:
+		{
+			auto d = int32_t(x * 8388607.5 - 0.5);
+			return EffectiveIntegerBits(d);
+
+		}
+		break;
+		case SampleFormat::SINT32:
+		{
+			auto d = int32_t(x * 2147483647.5 - 0.5);
+			return EffectiveIntegerBits(d);
+		}
+		break;
+		case SampleFormat::FLOAT32:
+		case SampleFormat::FLOAT64:
+		{
+			x += 0.5;
+			x /= 2147483647.5;
+			x = int32_t(x);
+			return EffectiveIntegerBits(x);
+		}
+	}
+
+	throw std::exception("Invalid sample format");
+}
+
+
+struct WaveStats
+{
+	size_t start;
+	size_t end;
+	double neg_peak;
+	double pos_peak;
+	double peak;
+	double rms;
+	int effective_bits;
+
+	WaveStats() = default;
+
+	WaveStats(size_t start_, size_t end_, double neg_peak_, double pos_peak_, double peak_, double rms_, int effective_bits_)
+	: start(start_)
+	, end(end_)
+	, neg_peak(neg_peak_)
+	, pos_peak(pos_peak_)
+	, peak(peak_)
+	, rms(rms_)
+	, effective_bits(effective_bits_)
+	{
+
+	}
+};
+
+
+WaveStats ComputeStats(FrameBuffer<double>& buffer, SampleFormat file_type, double file_rate = 0.0, double duration = 0.0)
+{
+	unsigned nframes;
+
+	if (duration > 0.0)
+	{
+		// If we want to just look at a portion of the samples
+
+		nframes = size_t(duration * file_rate + 0.5);
+
+		if (nframes > buffer.nFrames)
+		{
+			nframes = buffer.nFrames;
+		}
+	}
+	else
+	{
+		// If we want to look at all of the samples
+
 		nframes = buffer.nFrames;
 	}
-#else
-    // Doing auto
-	auto nframes = buffer.nFrames;
-#endif
 
 	if (nframes == 0)
 	{
@@ -144,61 +231,9 @@ std::tuple<size_t, size_t, double, double, double, double> ComputeStats(SoundFil
 
 	rms = sqrt(rms);
 
-	return { start, end, neg_peak, pos_peak, peak, rms };
+	int effective_bits = EffectiveBits(peak, file_type);
+	return WaveStats(start, end, neg_peak, pos_peak, peak, rms, effective_bits);
 }
-
-template<typename T>
-int EffectiveIntegerBits(T x)
-{
-	int nd = 0;
-
-	while (true)
-	{
-		if (x == 0) return nd;
-		x /= 2;
-		nd++;
-	}
-
-	return nd;
-}
-
-int EffectiveBits(double x, SampleFormat file_type)
-{
-	switch (file_type)
-	{
-		case SampleFormat::SINT16:
-		{
-			auto d = int16_t(x * 32767.5 - 0.5);
-			return EffectiveIntegerBits(d);
-
-		}
-		break;
-		case SampleFormat::SINT24:
-		{
-			auto d = int32_t(x * 8388607.5 - 0.5);
-			return EffectiveIntegerBits(d);
-
-		}
-		break;
-		case SampleFormat::SINT32:
-		{
-			auto d = int32_t(x * 2147483647.5 - 0.5);
-			return EffectiveIntegerBits(d);
-		}
-		break;
-		case SampleFormat::FLOAT32:
-		case SampleFormat::FLOAT64:
-		{
-			x += 0.5;
-			x /= 2147483647.5;
-			x = int32_t(x);
-			return EffectiveIntegerBits(x);
-		}
-	}
-
-	throw std::exception("Invalid sample format");
-}
-
 
 void ScanFile(const std::string_view& fname, bool raw)
 {
@@ -232,29 +267,22 @@ void ScanFile(const std::string_view& fname, bool raw)
 	bool doNormalize = true;
 	f.Read(buffer, 0, doNormalize);
 
-	double window = 0.100; // in seconds
+	double window = 0; //  0.100; // in seconds
+	double fileRate = f.fileRate;
+	auto dataType = f.dataType;
 
-	auto zebra = ComputeStats(f, buffer, window);
+	auto zebra = ComputeStats(buffer, dataType, fileRate, window);
 
-	auto start = std::get<0>(zebra);
-	auto end = std::get<1>(zebra);
-	auto neg_peak = std::get<2>(zebra);
-	auto pos_peak = std::get<3>(zebra);
-	auto peak = std::get<4>(zebra);
-	auto rms = std::get<5>(zebra);
+	std::cout << "   Start            " << zebra.start << " (" << (zebra.start / fileRate) << ") secs" << std::endl;
+	std::cout << "   End              " << zebra.end << " (" << (zebra.end / fileRate) << ") secs" << std::endl;
+	std::cout << "   Neg peak         " << zebra.neg_peak << std::endl;
+	std::cout << "   Pos peak         " << zebra.pos_peak << std::endl;
+	std::cout << "   Effective bits   " << zebra.effective_bits << std::endl;
 
-	std::cout << "   Start            " << start << " (" << (start / f.fileRate) << ") secs" << std::endl;
-	std::cout << "   End              " << end << " (" << (end / f.fileRate) << ") secs" << std::endl;
-	std::cout << "   Neg peak         " << neg_peak << std::endl;
-	std::cout << "   Pos peak         " << pos_peak << std::endl;
+	auto mv = maxVal(dataType);
 
-	auto x = int(peak + 0.5);
-	std::cout << "   Effective bits   " << EffectiveBits(peak, f.dataType) << std::endl;
-
-	auto mv = maxVal(f.dataType);
-
-	auto linear_scaled_peak = peak;
-	auto linear_scaled_rms = rms;
+	auto linear_scaled_peak = zebra.peak;
+	auto linear_scaled_rms = zebra.rms;
 
 	std::cout << "   Normalized peak  " << linear_scaled_peak << std::endl;
 	std::cout << "   Normalized RMS   " << linear_scaled_rms << std::endl;
@@ -265,7 +293,7 @@ void ScanFile(const std::string_view& fname, bool raw)
 	std::cout << "   Relative peak    " << db_peak << " dB" << std::endl;
 	std::cout << "   Relative rms     " << db_rms << " dB" << std::endl;
 
-	std::cout << "   Est Midi vel     " << int(rms * 127.0) << std::endl;
+	std::cout << "   Est Midi vel     " << int(zebra.rms * 127.0) << std::endl;
 
 	f.Close();
 }

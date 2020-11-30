@@ -61,7 +61,7 @@ namespace dfx
 
 		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-		void LoadWave();
+		bool LoadWave(std::ostream &serr);
 	};
 
 
@@ -83,7 +83,7 @@ namespace dfx
 
 		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-		void LoadWaves();
+		int LoadWaves(std::ostream &serr);
 
 		Robin& ChooseRobin(); // Lower level
 

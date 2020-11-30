@@ -116,7 +116,8 @@ int main()
 {
 	static constexpr unsigned systemSampleRate = 48000;
 
-	std::string_view kitFile = "../TestFiles/TestKit.dfx";
+	//std::string_view kitFile = "../TestFiles/TestKit.dfx";
+	std::string_view kitFile = "../TestFiles/Tabla.dfx";
 	auto df = std::make_unique<DrumFont>();
 	auto result = df->LoadFile(std::cout, kitFile);
 
@@ -125,7 +126,13 @@ int main()
 		return -1;
 	}
 
-	df->drumKits[0]->LoadWaves();
+	int errcnt = df->drumKits[0]->LoadWaves(std::cout);
+
+	if (errcnt != 0)
+	{
+		std::cout << "Stopping due to " << errcnt << " file loading error(s)." << std::endl;
+		return -1;
+	}
 
 	auto da = MakeAudioApi();
 

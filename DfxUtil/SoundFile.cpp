@@ -1039,12 +1039,12 @@ namespace dfx
 			}
 			if (doNormalize) 
 			{
-				double gain = 1.0 / 32768.0;
+				double scale = 1.0 / 32768.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
-					dest_buffer[i] = read_buf[i] * gain;
+					dest_buffer[i] = read_buf[i] * scale;
 				}
 			}
 			else 
@@ -1071,12 +1071,12 @@ namespace dfx
 
 			if (doNormalize) 
 			{
-				double gain = 1.0 / 2147483648.0;
+				double scale = 1.0 / 2147483648.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
-					dest_buffer[i] = read_buf[i] * gain;
+					dest_buffer[i] = read_buf[i] * scale;
 				}
 			}
 			else 
@@ -1196,7 +1196,7 @@ namespace dfx
 
 			int32_t temp;
 			unsigned char* ptr = (unsigned char*)&temp;
-			double gain = 1.0 / 2147483648.0;
+			double scale = 1.0 / 2147483648.0;
 			if (fseek(fd, dataOffset + (offset * 3), SEEK_SET) == -1) goto error;
 
 			for (i = 0; i < nSamples; i++) {
@@ -1230,7 +1230,7 @@ namespace dfx
 
 				if (doNormalize) 
 				{
-					dest_buffer[i] = (double)temp * gain; // "gain" also  includes 1 / 256 factor.
+					dest_buffer[i] = (double)temp * scale; // scale also  includes 1 / 256 factor.
 				}
 				else
 				{

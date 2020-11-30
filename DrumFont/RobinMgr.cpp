@@ -118,9 +118,14 @@ namespace dfx
 		fullPath = fullPath.generic_string();
 	}
 
-	void Robin::LoadWave()
+	bool Robin::LoadWave(std::ostream &serr)
 	{
-		wave.Load(fullPath);
+		bool b = wave.Load(fullPath);
+		if (!b)
+		{
+			serr << "Error loading file: " << fullPath << std::endl;
+		}
+		return b;
 	}
 
 	// ////////////////////////////////////////////////////
@@ -180,12 +185,20 @@ namespace dfx
 		}
 	}
 
-	void RobinMgr::LoadWaves()
+	int RobinMgr::LoadWaves(std::ostream &serr)
 	{
+		int errcnt = 0;
+
 		for (auto& r : robins)
 		{
-			r.LoadWave();
+			bool b = r.LoadWave(serr);
+			if (!b)
+			{
+				++errcnt;
+			}
 		}
+
+		return errcnt;
 	}
 
 	// Using simple round robin for now

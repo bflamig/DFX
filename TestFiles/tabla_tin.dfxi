@@ -1,0 +1,103 @@
+dfxi = 
+{
+	path = "Tin",
+	
+	velocities =
+	[
+		v16 = 
+		{ 
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V01_Tin_SP.wav" },
+				r2 = { fname = "RR1_V02_Tin_SP.wav" },
+				r3 = { fname = "RR1_V03_Tin_SP.wav" },
+				r4 = { fname = "RR1_V04_Tin_SP.wav" },
+				r5 = { fname = "RR1_V05_Tin_SP.wav" },
+				r6 = { fname = "RR1_V06_Tin_SP.wav" },
+				r7 = { fname = "RR1_V07_Tin_SP.wav" },
+				r8 = { fname = "RR1_V08_Tin_SP.wav" },
+			]
+		},
+		
+		v32 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR2_V01_Tin_SP.wav" },
+				r2 = { fname = "RR2_V02_Tin_SP.wav" },
+				r3 = { fname = "RR2_V03_Tin_SP.wav" },
+				r4 = { fname = "RR2_V04_Tin_SP.wav" },
+				r5 = { fname = "RR2_V05_Tin_SP.wav" },
+				r6 = { fname = "RR2_V06_Tin_SP.wav" },
+				r7 = { fname = "RR2_V07_Tin_SP.wav" },
+				r8 = { fname = "RR2_V08_Tin_SP.wav" },
+			]
+		},
+		
+		v48 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR3_V01_Tin_SP.wav" },
+				r2 = { fname = "RR3_V02_Tin_SP.wav" },
+				r3 = { fname = "RR3_V03_Tin_SP.wav" },
+				r4 = { fname = "RR3_V04_Tin_SP.wav" },
+				r5 = { fname = "RR3_V05_Tin_SP.wav" },
+				r6 = { fname = "RR3_V06_Tin_SP.wav" },
+				r7 = { fname = "RR3_V07_Tin_SP.wav" },
+				r8 = { fname = "RR3_V08_Tin_SP.wav" },
+			]
+		},
+		
+		v64 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR4_V01_Tin_SP.wav" },
+				r2 = { fname = "RR4_V02_Tin_SP.wav" },
+				r3 = { fname = "RR4_V03_Tin_SP.wav" },
+				r4 = { fname = "RR4_V04_Tin_SP.wav" },
+				r5 = { fname = "RR4_V05_Tin_SP.wav" },
+				r6 = { fname = "RR4_V06_Tin_SP.wav" },
+				r7 = { fname = "RR4_V07_Tin_SP.wav" },
+				r8 = { fname = "RR4_V08_Tin_SP.wav" },
+			]
+		},
+		
+		v80 = 
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR5_V01_Tin_SP.wav" },
+				r2 = { fname = "RR5_V02_Tin_SP.wav" },
+				r3 = { fname = "RR5_V03_Tin_SP.wav" },
+				r4 = { fname = "RR5_V04_Tin_SP.wav" },
+				r5 = { fname = "RR5_V05_Tin_SP.wav" },
+				r6 = { fname = "RR5_V06_Tin_SP.wav" },
+				r7 = { fname = "RR5_V07_Tin_SP.wav" },
+				r8 = { fname = "RR5_V08_Tin_SP.wav" },
+			]
+		},
+		
+		v100 = 
+		{
+			path = "",
+			robins =
+			[
+				r2 = { fname = "RR6_V02_Tin_SP.wav" },
+				r3 = { fname = "RR6_V03_Tin_SP.wav" },
+				r4 = { fname = "RR6_V04_Tin_SP.wav" },
+				r5 = { fname = "RR6_V05_Tin_SP.wav" },
+				r6 = { fname = "RR6_V06_Tin_SP.wav" },
+				r7 = { fname = "RR6_V07_Tin_SP.wav" },
+				r8 = { fname = "RR6_V08_Tin_SP.wav" },
+			]
+		},
+		
+	]
+} 

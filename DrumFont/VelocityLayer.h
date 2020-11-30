@@ -83,7 +83,7 @@ namespace dfx
 
 		void FinishPaths(std::filesystem::path& cumulativePath_);
 
-		void LoadWaves();
+		bool LoadWaves(std::ostream &serr);
 
 	};
 

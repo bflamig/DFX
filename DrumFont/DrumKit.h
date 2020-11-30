@@ -69,7 +69,7 @@ namespace dfx
 		void ClearNotes();
 		void FinishPaths(std::filesystem::path& soundFontPath_);
 		void BuildNoteMap();
-		void LoadWaves();
+		int LoadWaves(std::ostream &serr);
 
 	};
 

@@ -71,7 +71,7 @@ namespace dfx
 
 	public:
 
-		void LoadWaves();
+		int LoadWaves(std::ostream &serr);
 
 		MemWave& ChooseWave(int vel);    // Mostly for debugging
 		MemWave& ChooseWave(double vel);

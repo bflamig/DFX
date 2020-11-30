@@ -133,9 +133,9 @@ namespace dfx
 		robinMgr.FinishPaths(cumulativePath);
 	}
 
-	void VelocityLayer::LoadWaves()
+	bool VelocityLayer::LoadWaves(std::ostream &serr)
 	{
-		robinMgr.LoadWaves();
+		return robinMgr.LoadWaves(serr);
 	}
 
 } // end of namespace

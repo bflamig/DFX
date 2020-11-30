@@ -1,0 +1,41 @@
+dfx = 
+{
+	mydrumkit =
+	{
+		path = "S:/Downloaded Instrument Samples/TablaSessions_Wav_SP/One Shots",
+	
+		instruments = 
+		{
+			Ke = 
+			{
+				note = 1,
+				include = "$fontbase$/tabla_ke.dfxi"
+			},
+			
+			Ta =	
+			{ 
+				note = 2,
+				include = "$fontbase$/tabla_ta.dfxi"
+			},
+			
+			Ti =	
+			{ 
+				note = 3,
+				include = "$fontbase$/tabla_ti.dfxi"
+			},
+			
+			Tin =	
+			{ 
+				note = 4,
+				include = "$fontbase$/tabla_tin.dfxi"
+			},
+			
+			Tun =	
+			{ 
+				note = 5,
+				include = "$fontbase$/tabla_tun.dfxi"
+			},
+			
+		}
+	}
+} 
