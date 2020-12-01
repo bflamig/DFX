@@ -398,4 +398,35 @@ namespace dfx
 
 	};
 
+    //
+	// /////////////////////////////////////
+	//
+
+	struct WaveStats
+	{
+		size_t start;
+		size_t end;
+		double neg_peak;
+		double pos_peak;
+		double peak;
+		double rms;
+		int effective_bits;
+
+		WaveStats() = default;
+
+		WaveStats(size_t start_, size_t end_, double neg_peak_, double pos_peak_, double peak_, double rms_, int effective_bits_)
+			: start(start_)
+			, end(end_)
+			, neg_peak(neg_peak_)
+			, pos_peak(pos_peak_)
+			, peak(peak_)
+			, rms(rms_)
+			, effective_bits(effective_bits_)
+		{
+
+		}
+	};
+
+	extern WaveStats ComputeStats(FrameBuffer<double>& buffer, SampleFormat file_type, double file_rate = 0.0, double duration = 0.0);
+
 } // End of namespace
