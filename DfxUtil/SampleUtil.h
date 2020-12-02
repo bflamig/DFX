@@ -54,16 +54,29 @@ namespace dfx
 
         void operator=(const int32_t& i)
         {
+#if 0
             // @@TODO: The data is assummed to be in the lower three bytes
             // of the int32_t val. We might want to assume it's in the
             // upper three bytes.
             c[0] = (i & 0x000000ff);
             c[1] = (i & 0x0000ff00) >> 8;
             c[2] = (i & 0x00ff0000) >> 16;
+#else
+            // The data is assumed to be in the upper three bytes of
+            // the int32_t val. (The other way to think of this is that
+            // we are chopping off the lowest byte.) In some circumstances,
+            // that lowest byte can be thought of as "dither" we're going
+            //to throw away.
+
+            c[0] = (i & 0x000000ff >> 8);
+            c[1] = (i & 0x0000ff00) >> 16;
+            c[2] = (i & 0x00ff0000) >> 24;
+#endif
         }
 
         int32_t asInt()
         {
+#if 0
             // @@TODO: The data is assummed to be in the lower three bytes
             // of the int32_t val. We might want to assume it's in the
             // upper three bytes.
@@ -72,6 +85,13 @@ namespace dfx
             {
                 i |= 0xff000000;
             }
+#else
+            // For the int32_t return value, we put the 24 bit data in the
+            // upper three bytes. The lowest byte is set to zero. That lowest
+            // byte is where dither could go if we wanted.
+            int32_t i = (c[0] << 8) | (c[1] << 16) | (c[2] << 24);
+            return i;
+#endif
             return i;
         }
 

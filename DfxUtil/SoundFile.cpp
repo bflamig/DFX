@@ -1187,7 +1187,8 @@ namespace dfx
 		else if (dataType == SampleFormat::SINT24) 
 		{
 			// @@ TODO: The "don't normalize" scale seems weird, eh?
-			const double scale = doNormalize ? 256.0 / 2147483648.0 : 1.0 / 256.0;
+			//const double scale = doNormalize ? 256.0 / 2147483648.0 : 1.0 / 256.0; // If 24-bit data is in lower three bytes of int32_t
+			const double scale = doNormalize ? 1.0 / 2147483648.0 : 1.0; // If 24-bit data is in upper three bytes of int32_t
 
 			// signed 24-bit data
 			auto read_buf = reinterpret_cast<int24_t*>(dest_buffer); // Aliasing!

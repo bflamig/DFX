@@ -662,7 +662,8 @@ namespace dfx
                         {
                             for (int j = 0; j < nChannels; j++)
                             {
-                                out[j] = (int16_t)(in[j].asInt() >> 8);
+                                //out[j] = (int16_t)(in[j].asInt() >> 8);  // If 24-bit data is in lower three bytes of int32_t.
+                                out[j] = (int16_t)(in[j].asInt() >> 16); // If 24-bit data is in upper three bytes of int32_t.
                             }
                             in += inStride;
                             out += outStride;
@@ -830,7 +831,7 @@ namespace dfx
                             {
                                 auto& d = out[j];
                                 d = (int32_t)in[j].asInt();
-                                d <<= 8;
+                                //d <<= 8; If 24-bit data is in lower three bytes of int32_t.
                             }
                             in += inStride;
                             out += outStride;
@@ -915,13 +916,14 @@ namespace dfx
                     case SampleFormat::SINT24:
                     {
                         auto in = (int24_t*)inBuffer;
-                        scale = (float)(1.0 / 8388607.5);
+                        //scale = (float)(1.0 / 8388607.5); // If 24-bit data is in lower three bytes of int32_t
+                        scale = (float)(1.0 / 2147483647.5); // If 24-bit data is in upper three bytes of int32_t
                         for (unsigned i = 0; i < nSamples; i++)
                         {
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[j];
-                                d = (float)(in[j].asInt());
+                                d = (float) (double) (in[j].asInt()); // @@ This could overflow unless we cast to double first.
                                 d += 0.5f; // @@ BRY
                                 d *= scale;
                             }
@@ -940,7 +942,7 @@ namespace dfx
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[j];
-                                d = (float)in[j];
+                                d = (float)in[j]; // @@ Watch for overflow problems here
                                 d += 0.5f; // @@ BRY
                                 d *= scale;
                             }
@@ -1013,7 +1015,8 @@ namespace dfx
                     case SampleFormat::SINT24:
                     {
                         auto in = (int24_t*)inBuffer;
-                        scale = 1.0 / 8388607.5;
+                        //scale = 1.0 / 8388607.5;  // If 24-bit data is in lower three bytes of int32_t
+                        scale = 1.0 / 2147483647.5; // If 24-bit data is in upper three bytes of int32_t
                         for (unsigned i = 0; i < nSamples; i++)
                         {
                             for (int j = 0; j < nChannels; j++)
@@ -1140,7 +1143,8 @@ namespace dfx
                         {
                             for (int j = 0; j < nChannels; j++)
                             {
-                                out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]].asInt() >> 8);
+                                //out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]].asInt() >> 8); // If 24-bit data is in lower three bytes of int32_t
+                                out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]].asInt() >> 16); // If 24-bit data is in upper three bytes of int32_t
                             }
                             in += inStride;
                             out += outStride;
@@ -1308,7 +1312,7 @@ namespace dfx
                             {
                                 auto& d = out[info.outOffset[j]];
                                 d = (int32_t)in[info.inOffset[j]].asInt();
-                                d <<= 8;
+                                //d <<= 8; If 24-bit data is in lower three bytes of int32_t.
                             }
                             in += inStride;
                             out += outStride;
@@ -1394,13 +1398,14 @@ namespace dfx
                     case SampleFormat::SINT24:
                     {
                         auto in = (int24_t*)inBuffer;
-                        scale = (float)(1.0 / 8388607.5);
+                        //scale = (float)(1.0 / 8388607.5);  // If 24-bit data is in lower three bytes of int32_t.
+                        scale = (float)(1.0 / 2147483647.5); // If 24-bit data is in upper three bytes of int32_t.
                         for (unsigned i = 0; i < nSamples; i++)
                         {
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[info.outOffset[j]];
-                                d = (float)(in[info.inOffset[j]].asInt());
+                                d = (float)(double)(in[info.inOffset[j]].asInt()); // @@ This could overflow unless we cast to double first.
                                 d += 0.5f; // @@ BRY
                                 d *= scale;
                             }
@@ -1492,7 +1497,8 @@ namespace dfx
                     case SampleFormat::SINT24:
                     {
                         auto in = (int24_t*)inBuffer;
-                        scale = 1.0 / 8388607.5;
+                        //scale = 1.0 / 8388607.5;  // If 24-bit data is in lower three bytes of int32_t
+                        scale = 1.0 / 2147483647.5; // If 24-bit data is in upper three bytes of int32_t
                         for (unsigned i = 0; i < nSamples; i++)
                         {
                             for (int j = 0; j < nChannels; j++)
