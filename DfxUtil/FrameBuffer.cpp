@@ -89,7 +89,7 @@ namespace dfx
 	}
 
 
-	WaveStats ComputeStats(FrameBuffer<double>& buffer, SampleFormat file_type, double file_rate, double duration)
+	WaveStats ComputeStats(FrameBuffer<double>& buffer, SampleFormat data_type, double file_rate, double duration)
 	{
 		unsigned nframes;
 
@@ -232,7 +232,7 @@ namespace dfx
 
 		rms = sqrt(rms);
 
-		int effective_bits = EffectiveBits(peak, file_type);
+		int effective_bits = EffectiveBits(peak, data_type);
 		return WaveStats(start, end, neg_peak, pos_peak, peak, rms, effective_bits);
 	}
 

@@ -415,13 +415,13 @@ namespace dfx
 		WaveStats() = default;
 
 		WaveStats(size_t start_, size_t end_, double neg_peak_, double pos_peak_, double peak_, double rms_, int effective_bits_)
-			: start(start_)
-			, end(end_)
-			, neg_peak(neg_peak_)
-			, pos_peak(pos_peak_)
-			, peak(peak_)
-			, rms(rms_)
-			, effective_bits(effective_bits_)
+		: start(start_)
+		, end(end_)
+		, neg_peak(neg_peak_)
+		, pos_peak(pos_peak_)
+		, peak(peak_)
+		, rms(rms_)
+		, effective_bits(effective_bits_)
 		{
 
 		}

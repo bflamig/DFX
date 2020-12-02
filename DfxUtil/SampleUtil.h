@@ -46,59 +46,41 @@ namespace dfx
     class int24_t {
     protected:
 
-        unsigned char c3[3];
+        unsigned char c[3];
 
     public:
 
         int24_t() {}
 
-#if 0
-
-        int24_t(const double& d)
+        void operator=(const int32_t& i)
         {
-            *this = (int)d;
+            // @@TODO: The data is assummed to be in the lower three bytes
+            // of the int32_t val. We might want to assume it's in the
+            // upper three bytes.
+            c[0] = (i & 0x000000ff);
+            c[1] = (i & 0x0000ff00) >> 8;
+            c[2] = (i & 0x00ff0000) >> 16;
         }
 
-        int24_t(const float& f)
+        int32_t asInt()
         {
-            *this = (int)f;
-        }
-
-        int24_t(const short& s)
-        {
-            *this = (int)s;
-        }
-
-#endif
-
-#if 0
-        int24_t(const int& s) // @@ Why not this too?
-        {
-            *this = (int)s;
-        }
-#endif
-
-
-#if 0
-        int24_t(const char& c)
-        {
-            *this = (int)c;
-        }
-
-#endif
-
-        void operator=(const int& i)
-        {
-            c3[0] = (i & 0x000000ff);
-            c3[1] = (i & 0x0000ff00) >> 8;
-            c3[2] = (i & 0x00ff0000) >> 16;
-        }
-
-        int asInt()
-        {
-            int i = c3[0] | (c3[1] << 8) | (c3[2] << 16);
-            if (i & 0x800000) i |= ~0xffffff;
+            // @@TODO: The data is assummed to be in the lower three bytes
+            // of the int32_t val. We might want to assume it's in the
+            // upper three bytes.
+            int32_t i = c[0] | (c[1] << 8) | (c[2] << 16);
+            if (i & 0x00800000)
+            {
+                i |= 0xff000000;
+            }
             return i;
+        }
+
+        int24_t *ByteSwap()
+        {
+            unsigned char t = c[0];
+            c[0] = c[3];
+            c[3] = t;
+            return this;
         }
     };
 

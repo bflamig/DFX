@@ -156,9 +156,7 @@ int DrumsPlayBack(void* outBuff, void* inBuff, unsigned nFrames, double streamTi
 int main()
 {
 	//
-	// Using 48kHz sample rate seems reasonable to us, since
-	// many audio devices like that rate (or multiples of it)
-	// internally.
+	// Using 48kHz sample rate is a reasonable choice.
 	//
 
 	static constexpr unsigned systemSampleRate = 48000;

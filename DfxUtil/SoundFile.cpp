@@ -1039,7 +1039,7 @@ namespace dfx
 			}
 			if (doNormalize) 
 			{
-				double scale = 1.0 / 32768.0;
+				static constexpr double scale = 1.0 / 32768.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
@@ -1071,7 +1071,7 @@ namespace dfx
 
 			if (doNormalize) 
 			{
-				double scale = 1.0 / 2147483648.0;
+				static constexpr double scale = 1.0 / 2147483648.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
@@ -1140,12 +1140,12 @@ namespace dfx
 
 			if (doNormalize) 
 			{
-				double gain = 1.0 / 128.0;
+				static constexpr double scale = 1.0 / 128.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
-					dest_buffer[i] = (read_buf[i] - 128) * gain; // convert to signed values
+					dest_buffer[i] = (read_buf[i] - 128) * scale; // convert to signed values
 				}
 			}
 			else 
@@ -1166,12 +1166,12 @@ namespace dfx
 
 			if (doNormalize) 
 			{
-				double gain = 1.0 / 128.0;
+				static constexpr double scale = 1.0 / 128.0;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
-					dest_buffer[i] = read_buf[i] * gain;
+					dest_buffer[i] = read_buf[i] * scale;
 				}
 			}
 			else 
@@ -1186,61 +1186,28 @@ namespace dfx
 #endif
 		else if (dataType == SampleFormat::SINT24) 
 		{
-			// @@ TODO: This needs to be rewritten. Go ahead and use two buffers,
-			// c'est la vie! The below is very inefficient. This is important,
-			// since I might use 24 bit files a lot.
+			// @@ TODO: The "don't normalize" scale seems weird, eh?
+			const double scale = doNormalize ? 256.0 / 2147483648.0 : 1.0 / 256.0;
 
-			// 24-bit values are harder to import efficiently since there is
-			// no native 24-bit type.  The following routine works but is much
-			// less efficient than that used for the other data types.
+			// signed 24-bit data
+			auto read_buf = reinterpret_cast<int24_t*>(dest_buffer); // Aliasing!
+			if (fseek(fd, dataOffset + (offset * sizeof(int24_t)), SEEK_SET) == -1) goto error;
+			if (fread(read_buf, sizeof(int24_t), nSamples, fd) != nSamples) goto error;
 
-			int32_t temp;
-			unsigned char* ptr = (unsigned char*)&temp;
-			double scale = 1.0 / 2147483648.0;
-			if (fseek(fd, dataOffset + (offset * 3), SEEK_SET) == -1) goto error;
+			if (byteswap)
+			{
+				byteSwapBuffer(dataType, read_buf, nSamples);
+			}
 
-			for (i = 0; i < nSamples; i++) {
-
-#ifdef __LITTLE_ENDIAN__
-				if (byteswap) 
-				{
-					if (fread(ptr, sizeof(unsigned char), 3, fd) != 3) goto error;
-					temp &= 0x00ffffff;
-					swap32(ptr);
-				}
-				else 
-				{
-					auto rv = fread(ptr + 1, sizeof(unsigned char), 3, fd);
-					if (rv != 3) goto error;
-					temp &= 0xffffff00;
-				}
-#else
-				if (byteswap) 
-				{
-					if (fread(ptr + 1, sizeof(unsigned char), 3, fd) != 3) goto error;
-					temp &= 0xffffff00;
-					swap32(ptr);
-				}
-				else 
-				{
-					if (fread(ptr, sizeof(unsigned char), 3, fd) != 3) goto error;
-					temp &= 0x00ffffff;
-				}
-#endif
-
-				if (doNormalize) 
-				{
-					dest_buffer[i] = (double)temp * scale; // scale also  includes 1 / 256 factor.
-				}
-				else
-				{
-					dest_buffer[i] = (double)temp / 256;  // right shift without affecting the sign bit
-				}
+			// There are aliasing / spacing tricks going on here
+			for (i = nSamples - 1; i >= 0; i--)
+			{
+				auto temp = read_buf[i].asInt();
+				dest_buffer[i] = double(temp) * scale;
 			}
 		}
 
 		buffer.SetDataRate(fileRate);
-
 		return true;
 
 	error:
