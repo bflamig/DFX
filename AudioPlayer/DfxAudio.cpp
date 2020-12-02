@@ -923,7 +923,7 @@ namespace dfx
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[j];
-                                d = (float) (double) (in[j].asInt()); // @@ This could overflow unless we cast to double first.
+                                d = in[j].asFloat(); // @@ asFloat has subtle casting.
                                 d += 0.5f; // @@ BRY
                                 d *= scale;
                             }
@@ -1022,7 +1022,7 @@ namespace dfx
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[j];
-                                d = (double)(in[j].asInt());
+                                d = in[j].asDouble();
                                 d += 0.5;
                                 d *= scale;
                             }
@@ -1405,7 +1405,7 @@ namespace dfx
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[info.outOffset[j]];
-                                d = (float)(double)(in[info.inOffset[j]].asInt()); // @@ This could overflow unless we cast to double first.
+                                d = in[info.inOffset[j]].asFloat(); // @@ asFloat has subtle casting
                                 d += 0.5f; // @@ BRY
                                 d *= scale;
                             }
@@ -1504,7 +1504,7 @@ namespace dfx
                             for (int j = 0; j < nChannels; j++)
                             {
                                 auto& d = out[info.outOffset[j]];
-                                d = (double)(in[info.inOffset[j]].asInt());
+                                d = in[info.inOffset[j]].asDouble();
                                 d += 0.5;
                                 d *= scale;
                             }

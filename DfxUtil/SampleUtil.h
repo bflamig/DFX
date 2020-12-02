@@ -95,6 +95,18 @@ namespace dfx
             return i;
         }
 
+        inline double asDouble()
+        {
+            return (double)asInt();
+        }
+
+        inline float asFloat()
+        {
+            // @@ WARNING: Convert to double first before going to float. 
+            // This prevents possible overflow problems.
+            return (float)(double)asInt(); 
+        }
+
         int24_t *ByteSwap()
         {
             unsigned char t = c[0];

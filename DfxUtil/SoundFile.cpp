@@ -1203,8 +1203,8 @@ namespace dfx
 			// There are aliasing / spacing tricks going on here
 			for (i = nSamples - 1; i >= 0; i--)
 			{
-				auto temp = read_buf[i].asInt();
-				dest_buffer[i] = double(temp) * scale;
+				auto temp = read_buf[i].asDouble();
+				dest_buffer[i] = temp * scale;
 			}
 		}
 
