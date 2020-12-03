@@ -156,6 +156,7 @@ namespace dfx
 
 		bool VerifyKit(const std::string ctx, const nv_type& kit);
 		bool VerifyPath(const std::string ctx, const curly_list_type* parent_map, bool path_must_be_specified = false);
+		bool VerifyIncludeBasePath(const std::string ctx, const curly_list_type* parent_map, bool path_must_be_specified = false);
 		bool VerifyInstruments(const std::string ctx, const curly_list_type* instrument_map_ptr);
 		bool VerifyInstrument(const std::string ctx, const nv_type& drum_nv);
 		bool VerifyNote(const std::string ctx, const curly_list_type* parent_map, bool note_must_be_specified);

@@ -84,6 +84,16 @@ namespace dfx
 
 		EndLog();
 
+		if (rv == DfxResult::NoError)
+		{
+			// But we might have had problems building the font
+			if (errcnt > 0)
+			{
+				sout << errcnt << " Errors encountered building the font" << std::endl;
+				rv = DfxResult::UnspecifiedError;
+			}
+		}
+
 		return rv;
 	}
 
@@ -177,7 +187,7 @@ namespace dfx
 			// Velocity layer stuff is in an include file.
 			// So first we get the path. Now it defaults to
 			// being relative to our cumulative path so far, but
-			// if the include file name starts with "$fontbase$/"
+			// if the include file name starts with "$fontbase/"
 			// then we make it relative to the sound font file.
 			// Then we load and verify the included information
 			// and build the rest of the instrument from that.
@@ -187,11 +197,11 @@ namespace dfx
 
 			std::filesystem::path include_path;
 
-			if (rel_path.find("$fontbase$/") == 0)
+			if (rel_path.find("$fontbase/") == 0)
 			{
 				include_path = sound_font_path;
 				include_path.remove_filename();
-				include_path /= rel_path.erase(0, 11);
+				include_path /= rel_path.erase(0, 10);
 			}
 			else
 			{

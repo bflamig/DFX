@@ -103,12 +103,12 @@ namespace dfx
 	// ///////////////////////////////////////////////////////////////
 	DfxResult DfxParser::LoadAndVerify(std::ostream& serr, std::string_view& fname, bool as_include)
 	{
+		StartLog(serr);
+
 		auto load_result = LoadFile(serr, fname);
 
 		if (load_result == ParserResult::NoError)
 		{
-			StartLog(serr);
-
 			auto result = DfxResult::NoError;
 			bool bx;
 
@@ -127,34 +127,18 @@ namespace dfx
 		}
 		else
 		{
-			return DfxResult::ParsingError;
+			// @@ TODO: Investigate converting string_view into string.
+			// It would seem using string_view is turning out to be a
+			// real pain. I'm not sure it's worth it.
+			
+			// UPDATE: That's not the issue. The issue is that slog is null.
+
+			//std::string zebra(fname.data());
+			//return LogError(zebra, DfxResult::ParsingError);
+			return LogError("opening file", DfxResult::ParsingError);
 		}
 	}
 
-
-#if 0
-	// ///////////////////////////////////////////////////////////////
-	// A static function that creates a DfxParser object, and then
-	// loads a Dfx(i) file.
-
-	std::shared_ptr<DfxParser> LoadDfx(std::ostream &serr, std::string_view& fname)
-	{
-		// Works for both Dfx and Dfxi files.
-
-		auto dp = std::make_shared<DfxParser>();
-
-		auto result = dp->LoadFile(serr, fname);
-
-		if (result != ParserResult::NoError)
-		{
-			return nullptr;
-		}
-		else
-		{
-			return dp;
-		}
-	}
-#endif
 
 	// //////////////////////////////////////////////////////////////////
 	// Verify
@@ -271,6 +255,11 @@ namespace dfx
 			bool must_be_specified = false;
 			VerifyPath(kit_name, kitmap_ptr, must_be_specified);
 
+			// It also might have an optional include file base path
+
+			must_be_specified = false;
+			VerifyIncludeBasePath(kit_name, kitmap_ptr, must_be_specified);
+
 			// Okay, on to the main show: the {}-list of instruments.
 
 			auto vp = GetPropertyValue(kitmap_ptr, "instruments");
@@ -332,6 +321,56 @@ namespace dfx
 				if (svp->tkn->type == TokenEnum::QuotedChars || svp->tkn->type == TokenEnum::UnquotedChars)
 				{
 					// @@ TODO: Does it look like a path?
+				}
+				else
+				{
+					LogError(new_ctx, DfxResult::MustBeString);
+				}
+			}
+			else
+			{
+				LogError(new_ctx, DfxResult::MustBeString);
+			}
+		}
+		else
+		{
+			if (must_be_specified)
+			{
+				LogError(new_ctx, DfxResult::MustBeSpecified);
+			}
+		}
+
+		return errcnt == save_errcnt;
+	}
+
+	bool DfxParser::VerifyIncludeBasePath(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
+	{
+		int save_errcnt = errcnt;
+
+		// Check for a possibly optional "relative path".
+		// If we find such a path property, we make sure the value of that 
+		// path is a valid path string.
+
+		auto new_ctx = ctx + '/' + "include_base_path";
+
+		auto vp = GetPropertyValue(parent_map, "include_base_path");
+
+		if (vp)
+		{
+			// Well, there is a path property. Is it the right type? 
+			// Ie. a simple string value?
+
+			auto svp = AsSimpleValue(vp);
+
+			if (svp)
+			{
+				// Okay, it's a simple value. Is it a set of quoted characters?
+				// Or unquoted characters?
+
+				if (svp->tkn->type == TokenEnum::QuotedChars || svp->tkn->type == TokenEnum::UnquotedChars)
+				{
+					// @@ TODO: Does it look like a path?
+					// @@ TODO: Can have $ as first argument, for macro like strings.
 				}
 				else
 				{
@@ -416,6 +455,7 @@ namespace dfx
 			}
 			else
 			{
+				// The velocity layer stuff are given immediately.
 				// It can have an optional relative path.
 
 				must_be_specified = false;

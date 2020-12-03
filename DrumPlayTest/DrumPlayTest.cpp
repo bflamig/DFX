@@ -169,6 +169,9 @@ int main()
 	std::string_view dfxFile = "../TestFiles/Tabla.dfx";
 
 	auto df = std::make_unique<DrumFont>();
+
+	// @@ TODO: Error handling still a jumbled mess.
+
 	auto result = df->LoadFile(std::cout, dfxFile);
 	if (result != DfxResult::NoError)
 	{

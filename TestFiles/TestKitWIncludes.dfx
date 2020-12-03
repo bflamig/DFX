@@ -3,6 +3,7 @@ dfx =
 	mydrumkit =
 	{
 		path = "g:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite",
+		include_base_path = "$fontbase",
 	
 		instruments = 
 		{
@@ -28,13 +29,13 @@ dfx =
 			
 			snare =
 			{
-				include = "$fontbase$/snare.dfxi",
+				include = "$fontbase/snare.dfxi",
 				note = 2
 			},
 			
 			snare_rod =
 			{
-				include = "$fontbase$/snare_rods.dfxi",
+				include = "$fontbase/snare_rods.dfxi",
 				note = 3
 			},
 			
