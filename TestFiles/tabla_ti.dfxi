@@ -4,7 +4,7 @@ dfxi =
 	
 	velocities =
 	[
-		v24 = 
+		v0 = 
 		{ 
 			path = "",
 			robins =
@@ -16,7 +16,7 @@ dfxi =
 			]
 		},
 		
-		v48 = 
+		v36 = 
 		{
 			path = "",
 			robins =
@@ -40,7 +40,7 @@ dfxi =
 			]
 		},
 		
-		v96 = 
+		v106 = 
 		{
 			path = "",
 			robins =
@@ -51,8 +51,5 @@ dfxi =
 				r4 = { fname = "RR4_V04_Ti_SP.wav" },
 			]
 		},
-		
-		
-		
 	]
 } 

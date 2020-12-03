@@ -4,7 +4,7 @@ dfxi =
 	
 	velocities =
 	[
-		v20 = 
+		v0 = 
 		{ 
 			path = "",
 			robins =
@@ -14,7 +14,7 @@ dfxi =
 			]
 		},
 		
-		v40 = 
+		v20 = 
 		{
 			path = "",
 			robins =
@@ -24,7 +24,7 @@ dfxi =
 			]
 		},
 		
-		v60 = 
+		v40 = 
 		{
 			path = "",
 			robins =
@@ -34,7 +34,7 @@ dfxi =
 			]
 		},
 		
-		v80 = 
+		v60 = 
 		{
 			path = "",
 			robins =
@@ -44,7 +44,7 @@ dfxi =
 			]
 		},
 		
-		v100 = 
+		v80 = 
 		{
 			path = "",
 			robins =
@@ -54,7 +54,7 @@ dfxi =
 			]
 		},
 		
-		v120 = 
+		v100 = 
 		{
 			path = "",
 			robins =
@@ -63,7 +63,5 @@ dfxi =
 				r2 = { fname = "RR2_V06_Ke_SP.wav" },
 			]
 		},
-		
-		
 	]
 } 

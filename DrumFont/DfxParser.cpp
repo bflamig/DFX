@@ -200,6 +200,8 @@ namespace dfx
 	{
 		errcnt = 0; // @@ TODO: Do this here, or in StartLog()? 
 
+		std::string ctx = sound_font_path.generic_string();
+
 		const auto curly_list_map_ptr = GetInstrumentIncludeMapPtr();
 
 		if (curly_list_map_ptr)
@@ -215,10 +217,10 @@ namespace dfx
 
 			// First, we verify that there is a path, it has the right form.
 			static constexpr bool must_be_specified = false;
-			VerifyPath(file_moniker, curly_list_map_ptr, must_be_specified);
+			VerifyPath(ctx, curly_list_map_ptr, must_be_specified);
 
 			// Second, we verify the velocity layers, which must be there.
-			VerifyVelocityLayers(file_moniker, curly_list_map_ptr);
+			VerifyVelocityLayers(ctx + "/velocities/", curly_list_map_ptr);
 		}
 		else
 		{
@@ -463,7 +465,7 @@ namespace dfx
 
 				// It must have at least one velocity layer.
 
-				VerifyVelocityLayers(new_ctx, drum_map_ptr);
+				VerifyVelocityLayers(new_ctx + "/velocities/", drum_map_ptr);
 			}
 		}
 		else
@@ -596,7 +598,7 @@ namespace dfx
 			}
 			else
 			{
-				LogError(ctx, DfxResult::InvalidVelocityCode);
+				LogError(ctx + vel_code_str, DfxResult::InvalidVelocityCode);
 			}
 
 			// Okay, regardless of whether we have a valid velocity code,
@@ -1052,6 +1054,7 @@ namespace dfx
 	ParserResult DfxParser::LogError(const std::string ctx, ParserResult err)
 	{
 		std::ostream& sl = *slog;
+		sl << "ERROR: ";
 		sl << "Context " << ctx << ": ";
 		sl << to_string(err) << std::endl;
 		++errcnt;
@@ -1062,6 +1065,7 @@ namespace dfx
 	DfxResult DfxParser::LogError(const std::string ctx, DfxResult err)
 	{
 		std::ostream & sl = *slog;
+		sl << "ERROR: ";
 		sl << "Context " << ctx << ": ";
 		sl << to_string(err) << std::endl;
 		++errcnt;
@@ -1071,6 +1075,7 @@ namespace dfx
 	DfxResult DfxParser::LogError(const std::string ctx, DfxResult err, LexiResultPkg &err_pkg)
 	{
 		std::ostream& sl = *slog;
+		sl << "ERROR: ";
 		sl << "Context " << ctx << ": ";
 		sl << to_string(err) << std::endl;
 		sl << "Lexical err --> " << err_pkg.msg << " near (" << err_pkg.extent.ecol << ")" << std::endl;

@@ -37,6 +37,29 @@ dfx =
 				include = "tabla_tun.dfxi"
 			},
 			
+			GheBend =
+			{
+				note = 6,
+				include = "tabla_ghe_bend.dfxi"
+			},
+			
+			OpenGhe =
+			{
+				note = 7,
+				include = "tabla_open_ghe.dfxi"
+			},
+			
+			PitchedGhe =
+			{
+				note = 8,
+				include = "tabla_pitched_ghe.dfxi"
+			},
+			
+			MutedGhe =
+			{
+				note = 9,
+				include = "tabla_muted_ghe.dfxi"
+			}
 		}
 	}
 } 

@@ -203,6 +203,10 @@ namespace dfx
 			// then we make it relative to the sound font file.
 			// Then we load and verify the included information
 			// and build the rest of the instrument from that.
+			// UPDATE: You can also add an include_base_path
+			// property to set the include base path for all
+			// include files, including using $fontbase to
+			// make them relative to the sound font path.
 
 			auto valptr = AsSimpleValue(ip);
 			auto rel_path = valptr->tkn->to_string();
@@ -243,6 +247,11 @@ namespace dfx
 			}
 			else
 			{
+				// Unless otherwise specified, the include path defaults
+				// to the current cumulative path (so the include files
+				// are thus stored in the same place as the current 
+				// instrument.
+
 				include_path = kit->cumulativePath;
 				include_path /= rel_path;
 			}

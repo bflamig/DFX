@@ -5,7 +5,7 @@ dfxi =
 	velocities =
 	[
 
-		v12 = 
+		v0 = 
 		{ 
 			path = "",
 			robins =
@@ -18,7 +18,7 @@ dfxi =
 			]
 		},
 		
-		v24 = 
+		v16 = 
 		{
 			path = "",
 			robins =
@@ -32,7 +32,7 @@ dfxi =
 			]
 		},
 		
-		v36 = 
+		v32 = 
 		{
 			path = "",
 			robins =
@@ -60,7 +60,7 @@ dfxi =
 			]
 		},
 		
-		v60 = 
+		v64 = 
 		{
 			path = "",
 			robins =
@@ -74,7 +74,7 @@ dfxi =
 			]
 		},
 		
-		v72 = 
+		v80 = 
 		{
 			path = "",
 			robins =
@@ -88,7 +88,7 @@ dfxi =
 			]
 		},
 		
-		v84 = 
+		v96 = 
 		{
 			path = "",
 			robins =
@@ -102,7 +102,7 @@ dfxi =
 			]
 		},
 		
-		v96 = 
+		v112 = 
 		{
 			path = "",
 			robins =

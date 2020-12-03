@@ -1,0 +1,59 @@
+dfxi = 
+{
+	path = "03 Pitched Ghe",
+	include_base_path = "$fontbase",
+	
+	velocities =
+	[
+		v0 = 
+		{ 
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V01_PitchedGhe_SP.wav" },
+				r2 = { fname = "RR2_V01_PitchedGhe_SP.wav" },
+			],
+		},
+		
+		v28 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V02_PitchedGhe_SP.wav" },
+				r2 = { fname = "RR2_V02_PitchedGhe_SP.wav" },
+			]
+		},
+		
+		v56 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V03_PitchedGhe_SP.wav" },
+				r2 = { fname = "RR2_V03_PitchedGhe_SP.wav" },
+			]
+		},
+		
+		v84 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V04_PitchedGhe_SP.wav" },
+				r2 = { fname = "RR2_V04_PitchedGhe_SP.wav" },
+			]
+		},
+		
+		v102 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V05_PitchedGhe_SP.wav" },
+				r2 = { fname = "RR2_V05_PitchedGhe_SP.wav" },
+			]
+		},
+	]
+}
+				

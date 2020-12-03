@@ -1,0 +1,70 @@
+dfxi = 
+{
+	path = "01 Ghe Bend",
+	include_base_path = "$fontbase",
+	
+	velocities =
+	[
+		v0 = 
+		{ 
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V01_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V01_GheBend_SP.wav" },
+			],
+		},
+		
+		v24 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V02_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V02_GheBend_SP.wav" },
+			]
+		},
+		
+		v48 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V03_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V03_GheBend_SP.wav" },
+			]
+		},
+		
+		v72 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V04_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V04_GheBend_SP.wav" },
+			]
+		},
+		
+		v96 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V05_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V05_GheBend_SP.wav" },
+			]
+		},
+		
+		v110 =
+		{
+			path = "",
+			robins =
+			[
+				r1 = { fname = "RR1_V06_GheBend_SP.wav" },
+				r2 = { fname = "RR2_V06_GheBend_SP.wav" },
+			]
+		},
+
+	]
+}
+				
