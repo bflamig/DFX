@@ -44,9 +44,10 @@ namespace dfx
 		//std::cout << "DrumKit default ctor called" << std::endl;
 	}
 
-	DrumKit::DrumKit(const std::string& name_, std::filesystem::path basePath_, const std::string& kitPath_)
+	DrumKit::DrumKit(const std::string& name_, std::filesystem::path basePath_, std::filesystem::path includeBasePath_, const std::filesystem::path kitPath_)
 	: cumulativePath(basePath_)
 	, basePath(basePath_)
+	, includeBasePath(includeBasePath_)
 	, kitPath(kitPath_) // @@ TODO: May not be necessary to store this
 	, name(name_)
 	, drums()
@@ -60,6 +61,7 @@ namespace dfx
 	DrumKit::DrumKit(const DrumKit& other)
 	: cumulativePath(other.cumulativePath)
 	, basePath(other.basePath)
+	, includeBasePath(other.includeBasePath)
 	, kitPath(other.kitPath)
 	, name(other.name)
 	, drums(other.drums)
@@ -71,6 +73,7 @@ namespace dfx
 	DrumKit::DrumKit(DrumKit&& other) noexcept
 	: cumulativePath(std::move(other.cumulativePath))
 	, basePath(std::move(other.basePath))
+	, includeBasePath(std::move(other.includeBasePath))
 	, kitPath(std::move(other.kitPath))
 	, name(std::move(other.name))
 	, drums(std::move(other.drums))
@@ -92,6 +95,7 @@ namespace dfx
 		{
 			cumulativePath = other.cumulativePath;
 			basePath = other.basePath;
+			includeBasePath = other.includeBasePath;
 			kitPath = other.kitPath;
 			name = other.name;
 			drums = other.drums;
@@ -107,6 +111,7 @@ namespace dfx
 		{
 			cumulativePath = std::move(other.cumulativePath);
 			basePath = std::move(other.basePath);
+			includeBasePath = std::move(other.includeBasePath);
 			kitPath = std::move(other.kitPath);
 			name = std::move(other.name);
 			drums = std::move(other.drums);

@@ -132,7 +132,7 @@ namespace dfx
 			return root_map;
 		}
 
-		const curly_list_type* GetInstrumentMap(const curly_list_type* kit) const
+		const curly_list_type* GetInstrumentMapPtr(const curly_list_type* kit) const
 		{
 			return GetCurlyListProperty(kit, "instruments");
 		}

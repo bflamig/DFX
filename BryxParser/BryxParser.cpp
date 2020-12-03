@@ -253,18 +253,13 @@ namespace bryx
 
 	curly_list_type* Parser::GetCurlyListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
-		// Really need to wrap these with try-catches, because at() throws
-		// an exception if thingy not found.
+		auto shptr = GetPropertyValue(parent_map_ptr, prop_name);
 
-		try
+		if (shptr)
 		{
-			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return AsCurlyList(sh_val_ptr);
+			return AsCurlyList(shptr);
 		}
-		catch (...)
-		{
-			return nullptr;
-		}
+		else return nullptr;
 	}
 
 	square_list_type* Parser::AsSquareList(std::shared_ptr<Value>& valPtr)
@@ -282,15 +277,13 @@ namespace bryx
 
 	square_list_type* Parser::GetSquareListProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
-		// Really need to wrap these with try-catches, because at() throws
-		// an exception if thingy not found.
+		auto shptr = GetPropertyValue(parent_map_ptr, prop_name);
 
-		try
+		if (shptr)
 		{
-			auto sh_val_ptr = parent_map_ptr->at(prop_name);
-			return AsSquareList(sh_val_ptr);
+			return AsSquareList(shptr);
 		}
-		catch (...)
+		else
 		{
 			return nullptr;
 		}
@@ -302,24 +295,6 @@ namespace bryx
 	}
 
 
-#if 0
-	// @@ PROBLEMATIC
-	std::optional<NameValue> Parser::GetNameValueProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
-	{
-		try
-		{
-			auto shptr = parent_map_ptr->at(prop_name);
-			auto qq = ToNameValue(shptr);
-			auto svptr = qq.get();
-			return *svptr;
-		}
-		catch (...)
-		{
-			return {}; //  nullptr;
-		}
-	}
-#endif
-
 	std::shared_ptr<SimpleValue> Parser::AsSimpleValue(std::shared_ptr<Value>& valPtr)
 	{
 		return std::dynamic_pointer_cast<SimpleValue>(valPtr);
@@ -327,12 +302,17 @@ namespace bryx
 
 	std::shared_ptr<Value> Parser::GetPropertyValue(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
-		try
+		// NOTE: We don't use at() because it throws a std::out_of_range exception if key not found.
+		// While you can catch this exception just fine, the problem is VS still shows in the debug
+		// output window which is annoying. So we do things the tedious way here.
+
+		auto search = parent_map_ptr->find(prop_name);
+
+		if (search != parent_map_ptr->end())
 		{
-			auto shptr = parent_map_ptr->at(prop_name);
-			return shptr;
+			return search->second;
 		}
-		catch (...)
+		else
 		{
 			return nullptr;
 		}
@@ -340,17 +320,18 @@ namespace bryx
 
 	std::optional<std::string> Parser::GetSimpleProperty(const curly_list_type* parent_map_ptr, const std::string prop_name)
 	{
-		try
+		auto shptr = GetPropertyValue(parent_map_ptr, prop_name);
+
+		if (shptr)
 		{
-			auto shptr = parent_map_ptr->at(prop_name);
 			auto qq = std::dynamic_pointer_cast<SimpleValue>(shptr);
 			auto svptr = qq.get();
-			auto &tkn = svptr->tkn;
+			auto& tkn = svptr->tkn;
 			return tkn->to_string();
 		}
-		catch (...)
+		else
 		{
-			return {}; // empty return, whatever that means
+			return {}; // empty return value, whatever that means
 		}
 	}
 

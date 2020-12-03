@@ -613,12 +613,10 @@ namespace dfx
 				auto new_ctx = ctx + '/' + vel_code_str;
 
 				// Might have an optional path
-
 				bool must_be_specified = false;
 				VerifyPath(new_ctx, vlayer_body_map_ptr, must_be_specified);
 
 				// MUST have a non-empty robins array
-
 				VerifyRobins(new_ctx, vlayer_body_map_ptr);
 			}
 			else
@@ -676,7 +674,6 @@ namespace dfx
 		}
 
 		return errcnt == save_errcnt;
-
 	}
 
 	bool DfxParser::VerifyRobin(const std::string ctx, std::shared_ptr<NameValue> &robin_nv_ptr)
@@ -707,11 +704,12 @@ namespace dfx
 
 			must_be_specified = false;
 			VerifyOffset(new_ctx, robin_body_map_ptr, must_be_specified);
+
 			VerifyPeak(new_ctx, robin_body_map_ptr, must_be_specified);
 			VerifyRMS(new_ctx, robin_body_map_ptr, must_be_specified);
 
-			auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
-			auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
+			//auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
+			//auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
 		}
 		else
 		{
@@ -790,6 +788,7 @@ namespace dfx
 
 		auto vp = GetPropertyValue(parent_map, "offset");
 
+#if 1
 		if (vp)
 		{
 			// We found the property. Is it the right type?
@@ -821,6 +820,8 @@ namespace dfx
 				LogError(ctx, DfxResult::OffsetMissing);
 			}
 		}
+
+#endif
 
 		return errcnt == save_errcnt;
 	}

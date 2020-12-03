@@ -141,11 +141,21 @@ namespace dfx
 
 		auto kitmap_ptr = AsCurlyList(kit_val);
 
+		auto include_base_path_opt = GetSimpleProperty(kitmap_ptr, "include_base_path");
+		if (!include_base_path_opt)
+		{
+			include_base_path_opt = "";
+		}
+
 		auto kit_path_opt = GetSimpleProperty(kitmap_ptr, "path");
+		if (!kit_path_opt)
+		{
+			kit_path_opt = "";
+		}
 
-		auto dk = std::make_shared<DrumKit>(kit_name, base_path, *kit_path_opt);
+		auto dk = std::make_shared<DrumKit>(kit_name, base_path, *include_base_path_opt, *kit_path_opt);
 
-		auto instrument_map_ptr = GetInstrumentMap(kitmap_ptr);
+		auto instrument_map_ptr = GetInstrumentMapPtr(kitmap_ptr);
 
 		BuildInstruments(dk, instrument_map_ptr);
 

@@ -80,12 +80,16 @@ int TestDfx()
 int TestDfxi()
 {
 	// Test an dfx instrument include file
-	std::string_view filename = "G:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite/snare.dfxi";
+	std::string_view filename = "../TestFiles/snare.dfxi";
 
 	auto dp = std::make_unique<DfxParser>();
 
+
 	bool as_include = true;
+	//auto rv = dp->LoadFile(std::cout, filename);
 	auto rv = dp->LoadAndVerify(std::cout, filename, as_include);
+
+#if 1
 
 	if (rv == DfxResult::NoError)
 	{
@@ -111,12 +115,14 @@ int TestDfxi()
 		std::cout << "Dfxi FAILED schema check." << std::endl;
 	}
 
+#endif
+
 	return 0;
 }
 
 int main()
 {
-	TestDfx();
-	//TestDfxi();
+	//TestDfx();
+	TestDfxi();
 	return 0;
 }

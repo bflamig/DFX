@@ -3,8 +3,7 @@ dfx =
 	mydrumkit =
 	{
 		path = "g:/DrumSW/WaveLibrary/DownloadedWaves/FocusRite",
-		include_base_path = "$fontbase",
-	
+
 		instruments = 
 		{
 			bass_drum =	
