@@ -16,25 +16,25 @@ dfx =
 			Ta =	
 			{ 
 				note = 2,
-				include = "$fontbase/tabla_ta.dfxi"
+				include = "tabla_ta.dfxi"
 			},
 			
 			Ti =	
 			{ 
 				note = 3,
-				include = "$fontbase/tabla_ti.dfxi"
+				include = "tabla_ti.dfxi"
 			},
 			
 			Tin =	
 			{ 
 				note = 4,
-				include = "$fontbase/tabla_tin.dfxi"
+				include = "tabla_tin.dfxi"
 			},
 			
 			Tun =	
 			{ 
 				note = 5,
-				include = "$fontbase/tabla_tun.dfxi"
+				include = "tabla_tun.dfxi"
 			},
 			
 		}

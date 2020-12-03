@@ -169,11 +169,13 @@ namespace dfx
 
 		for (auto& drum_nv : *instrument_map_ptr)
 		{
-			BuildInstrument(kit->drums, kit->cumulativePath, drum_nv);
+			//BuildInstrument(kit->drums, kit->cumulativePath, drum_nv);
+			BuildInstrument(kit, drum_nv);
 		}
 	}
 
-	void DrumFont::BuildInstrument(std::vector<drum_ptr>& drums, std::filesystem::path cumulativePath, const nv_type& drum_nv)
+	//void DrumFont::BuildInstrument(std::vector<drum_ptr>& drums, std::filesystem::path cumulativePath, const nv_type& drum_nv)
+	void DrumFont::BuildInstrument(std::shared_ptr<DrumKit>& kit, const nv_type& drum_nv)
 	{
 		auto& drum_name = drum_nv.first;
 		auto& drum_val = drum_nv.second;
@@ -209,13 +211,39 @@ namespace dfx
 
 			if (rel_path.find("$fontbase/") == 0)
 			{
+				// local override of include base path
 				include_path = sound_font_path;
 				include_path.remove_filename();
 				include_path /= rel_path.erase(0, 10);
 			}
+			else if (!kit->includeBasePath.empty())
+			{
+				// We have a file-wide include file base path specified.
+
+				if (kit->includeBasePath == "$fontbase")
+				{
+					// So we should use the sound font path as the
+					// include path for this instrument file
+
+					include_path = sound_font_path;
+					include_path.remove_filename();
+					include_path /= rel_path;
+				}
+				else
+				{
+					// So we presume here that the include path is
+					// relative to the cumulative path so far (or its
+					// a complete path specification.) Both are covered
+					// by the /= operator, I believe
+
+					include_path = kit->cumulativePath;
+					include_path /= kit->includeBasePath;
+					include_path /= rel_path;
+				}
+			}
 			else
 			{
-				include_path = cumulativePath;
+				include_path = kit->cumulativePath;
 				include_path /= rel_path;
 			}
 
@@ -229,8 +257,8 @@ namespace dfx
 			if (rv == DfxResult::NoError)
 			{
 				auto dmp = dp->GetInstrumentIncludeMapPtr();
-				auto drum = MakeInstrument(drum_name, cumulativePath, midi_note, dmp);
-				drums.push_back(std::move(drum));
+				auto drum = MakeInstrument(drum_name, kit->cumulativePath, midi_note, dmp);
+				kit->drums.push_back(std::move(drum));
 			}
 			else
 			{
@@ -241,8 +269,8 @@ namespace dfx
 		else
 		{
 			// Velocity layer stuff is embedded in main file. So easy peasy.
-			auto drum = MakeInstrument(drum_name, cumulativePath, midi_note, drum_map_ptr);
-			drums.push_back(std::move(drum));
+			auto drum = MakeInstrument(drum_name, kit->cumulativePath, midi_note, drum_map_ptr);
+			kit->drums.push_back(std::move(drum));
 		}
 	}
 
