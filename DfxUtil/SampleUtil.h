@@ -46,7 +46,7 @@ namespace dfx
     class int24_t {
     protected:
 
-        unsigned char c[3];
+        unsigned char c[3] {};
 
     public:
 
@@ -110,8 +110,8 @@ namespace dfx
         int24_t *ByteSwap()
         {
             unsigned char t = c[0];
-            c[0] = c[3];
-            c[3] = t;
+            c[0] = c[2];
+            c[2] = t;
             return this;
         }
     };
