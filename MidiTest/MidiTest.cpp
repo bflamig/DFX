@@ -46,7 +46,8 @@ void test2()
 
 	dm->ScanPorts();
 
-	dm->OpenPort("AKM320 2");
+	//dm->OpenPort("AKM320 2");
+	dm->OpenPort("2- UMC404HD 192k MIDI In 0");
 
 	// There is an option in VS 2019 to turn off Ctrl-C generating
 	// an exception: Debug/Windows/Exception Settings/Win32 Exceptions/ControlC

@@ -324,10 +324,12 @@ namespace dfx
 
 		auto vlayer_path_opt = GetSimpleProperty(vlayer_body_map_ptr, "path");
 
-		std::cout << "  velocity layer " << vel_code_str << std::endl;
-		std::cout << "    path " << '"' << *vlayer_path_opt << '"' << std::endl;
+		std::string vpath = vlayer_path_opt ? *vlayer_path_opt : "";
 
-		VelocityLayer vlayer(*vlayer_path_opt, vel_code);
+		std::cout << "  velocity layer " << vel_code_str << std::endl;
+		std::cout << "    path " << '"' << vpath << '"' << std::endl;
+
+		VelocityLayer vlayer(vpath, vel_code);
 
 		// We should have a []-list of robins. Each robin is represented
 		// in the Parser as a name-value pair.

@@ -45,7 +45,8 @@ void ScanFile(const std::string_view& fname, bool raw)
 	double fileRate = f.fileRate;
 	auto dataType = f.dataType;
 
-	auto zebra = ComputeStats(buffer, dataType, fileRate, window);
+	//auto zebra = ComputeStats(buffer, dataType, fileRate, window);
+	auto zebra = ComputeStatsII(buffer, dataType, fileRate, window); // For loudnes
 
 	std::cout << "   Start            " << zebra.start << " (" << (zebra.start / fileRate) << ") secs" << std::endl;
 	std::cout << "   End              " << zebra.end << " (" << (zebra.end / fileRate) << ") secs" << std::endl;

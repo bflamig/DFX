@@ -383,7 +383,6 @@ namespace dfx
 		T GetMinOfFrame(unsigned f)
 		{
 			unsigned sampleIndx = f * nChannels;
-
 			T m = 0;
 
 			for (unsigned i = 0; i < nChannels; i++)
@@ -395,6 +394,21 @@ namespace dfx
 			return m;
 		}
 
+		T GetAvgOfFrame(unsigned f)
+		{
+			// @@ Not optimized yet
+
+			unsigned sampleIndx = f * nChannels;
+			T s = 0;
+
+			for (unsigned i = 0; i < nChannels; i++)
+			{
+				auto v = samples[sampleIndx + i];
+				s += v;
+			}
+
+			return (double(s) / nChannels);
+		}
 
 	};
 
@@ -428,5 +442,11 @@ namespace dfx
 	};
 
 	extern WaveStats ComputeStats(FrameBuffer<double>& buffer, SampleFormat file_type, double file_rate = 0.0, double duration = 0.0);
+
+	// This version isn't worried about the actual peaks found, but instead averages the channels together.
+	// It's simpler, and more appropriate for loudness measurements.
+
+	WaveStats ComputeStatsII(FrameBuffer<double>& buffer, SampleFormat data_type, double file_rate, double duration);
+
 
 } // End of namespace

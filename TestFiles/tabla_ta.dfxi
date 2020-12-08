@@ -6,7 +6,6 @@ dfxi =
 	[
 		v0 = 
 		{ 
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V01_Ta_SP.wav" },
@@ -20,7 +19,6 @@ dfxi =
 		
 		v20 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V02_Ta_SP.wav" },
@@ -34,7 +32,6 @@ dfxi =
 		
 		v40 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V03_Ta_SP.wav" },
@@ -48,7 +45,6 @@ dfxi =
 		
 		v60 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V04_Ta_SP.wav" },
@@ -62,7 +58,6 @@ dfxi =
 		
 		v80 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V05_Ta_SP.wav" },
@@ -76,7 +71,6 @@ dfxi =
 		
 		v100 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V06_Ta_SP.wav" },

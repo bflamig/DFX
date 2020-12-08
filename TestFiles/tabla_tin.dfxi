@@ -7,7 +7,6 @@ dfxi =
 
 		v0 = 
 		{ 
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V01_Tin_SP.wav" },
@@ -20,7 +19,6 @@ dfxi =
 		
 		v16 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V02_Tin_SP.wav" },
@@ -34,7 +32,6 @@ dfxi =
 		
 		v32 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V03_Tin_SP.wav" },
@@ -48,7 +45,6 @@ dfxi =
 		
 		v48 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V04_Tin_SP.wav" },
@@ -62,7 +58,6 @@ dfxi =
 		
 		v64 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V05_Tin_SP.wav" },
@@ -76,7 +71,6 @@ dfxi =
 		
 		v80 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V06_Tin_SP.wav" },
@@ -90,7 +84,6 @@ dfxi =
 		
 		v96 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V07_Tin_SP.wav" },
@@ -104,7 +97,6 @@ dfxi =
 		
 		v112 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V08_Tin_SP.wav" },

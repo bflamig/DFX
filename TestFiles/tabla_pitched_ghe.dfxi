@@ -1,13 +1,12 @@
 dfxi = 
 {
-	path = "03 Pitched Ghe",
+	path = "Pitched Ghe",
 	include_base_path = "$fontbase",
 	
 	velocities =
 	[
 		v0 = 
 		{ 
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V01_PitchedGhe_SP.wav" },
@@ -17,7 +16,6 @@ dfxi =
 		
 		v28 =
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V02_PitchedGhe_SP.wav" },
@@ -27,7 +25,6 @@ dfxi =
 		
 		v56 =
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V03_PitchedGhe_SP.wav" },
@@ -37,7 +34,6 @@ dfxi =
 		
 		v84 =
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V04_PitchedGhe_SP.wav" },
@@ -47,7 +43,6 @@ dfxi =
 		
 		v102 =
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V05_PitchedGhe_SP.wav" },

@@ -6,7 +6,6 @@ dfxi =
 	[
 		v0 = 
 		{ 
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V01_Tun_SP.wav" },
@@ -16,7 +15,6 @@ dfxi =
 		
 		v24 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V02_Tun_SP.wav" },
@@ -26,7 +24,6 @@ dfxi =
 		
 		v48 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V03_Tun_SP.wav" },
@@ -36,7 +33,6 @@ dfxi =
 		
 		v72 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V04_Tun_SP.wav" },
@@ -46,7 +42,6 @@ dfxi =
 		
 		v96 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V05_Tun_SP.wav" },
@@ -56,7 +51,6 @@ dfxi =
 		
 		v110 = 
 		{
-			path = "",
 			robins =
 			[
 				r1 = { fname = "RR1_V06_Tun_SP.wav" },
