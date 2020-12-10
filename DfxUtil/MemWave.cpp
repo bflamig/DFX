@@ -133,20 +133,20 @@ namespace dfx
 		finished = false;
 	}
 
-	bool MemWave::Load(const std::filesystem::path& path_)
+	bool MemWave::Load(const std::filesystem::path& path_, size_t start_frame, size_t end_frame)
 	{
 		path = path_;
 
 		if (sound_file.Open(path_.string()))
 		{
-			auto nFrames = sound_file.fileFrames;
+			auto nFrames = (end_frame > 0 ? end_frame : sound_file.fileFrames) - start_frame;
 			auto nChannels = sound_file.nChannels;
 			auto fileRate = sound_file.fileRate;
 			buff.dataRate = fileRate;
 			buff.Resize(nFrames, nChannels);
 
 			bool doNormalize = true;
-			bool b = sound_file.Read(buff, 0, doNormalize);
+			bool b = sound_file.Read(buff, start_frame, end_frame, doNormalize);
 
 			sound_file.Close();
 
@@ -168,7 +168,7 @@ namespace dfx
 			buff.Resize(nFrames, nChannels);
 
 			bool doNormalize = true;
-			bool b = sound_file.Read(buff, 0, doNormalize);
+			bool b = sound_file.Read(buff, 0, 0, doNormalize);
 
 			sound_file.Close();
 

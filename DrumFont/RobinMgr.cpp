@@ -39,13 +39,14 @@ namespace dfx
 {
 	// ////////////////////////////////////////////////////
 
-	Robin::Robin(std::string fileName_, double peak_, double rms_, size_t offset_)
+	Robin::Robin(std::string fileName_, double peak_, double rms_, size_t start_frame_, size_t end_frame_)
 	: wave()
 	, fullPath()
 	, fileName(fileName_)
 	, peak(peak_)
 	, rms(rms_)
-	, offset(offset_)
+	, start_frame(start_frame_)
+	, end_frame(end_frame_)
 	{
 
 	}
@@ -56,7 +57,8 @@ namespace dfx
 	, fileName(other.fileName)
 	, peak(other.peak)
 	, rms(other.rms)
-	, offset(other.offset)
+	, start_frame(other.start_frame)
+	, end_frame(other.end_frame)
 	{
 
 	}
@@ -67,12 +69,14 @@ namespace dfx
 	, fileName(std::move(other.fileName))
 	, peak(other.peak)
 	, rms(other.rms)
-	, offset(other.offset)
+	, start_frame(other.start_frame)
+	, end_frame(other.end_frame)
 	{
 		// Just keeping move pedantics :)
 		other.peak = 0;
 		other.rms = 0;
-		other.offset = 0;
+		other.start_frame = 0;
+		other.end_frame = 0;
 	}
 
 
@@ -85,7 +89,8 @@ namespace dfx
 			fileName = other.fileName;
 			peak = other.peak;
 			rms = other.rms;
-			offset = other.offset;
+			start_frame = other.start_frame;
+			end_frame = other.end_frame;
 		}
 
 		return *this;
@@ -100,12 +105,14 @@ namespace dfx
 			fileName = std::move(other.fileName);
 			peak = other.peak;
 			rms = other.rms;
-			offset = other.offset;
+			start_frame = other.start_frame;
+			end_frame = other.end_frame;
 
 			// Just keeping move pedantics :)
 			other.peak = 0;
 			other.rms = 0;
-			other.offset = 0;
+			other.start_frame = 0;
+			other.end_frame = 0;
 		}
 
 		return *this;
@@ -120,7 +127,7 @@ namespace dfx
 
 	bool Robin::LoadWave(std::ostream &serr)
 	{
-		bool b = wave.Load(fullPath);
+		bool b = wave.Load(fullPath, start_frame, end_frame);
 		if (!b)
 		{
 			serr << "Error loading file: " << fullPath << std::endl;

@@ -2701,6 +2701,11 @@ std::string MidiInWinMM :: getPortName( unsigned int portNumber )
   // Next lines added to add the portNumber to the name so that
   // the device's names are sure to be listed with individual names
   // even when they have the same brand name
+
+// @@ BRY HACK: defining this to turn this feature off
+
+#define RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES
+
 #ifndef RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES
   std::ostringstream os;
   os << " ";

@@ -133,15 +133,15 @@ namespace dfx
 		// Set the max vel's.
 
 		// But first, let's inspect the first layer. If its minimum velocity
-		// isn't zero, then make it. It kinda needs to be.
+		// isn't one, then make it. It kinda needs to be.
 		// NOTE: Remember, when we come in here, only the minimum velocities
 		// are specified, (because that's how we do the velocity layers in the
 		// fonts). So ..
 
-		if (velocityLayers[0].vrange.iMinVel != 0)
+		if (velocityLayers[0].vrange.iMinVel != 1)
 		{
 			//velocityLayers[0].vrange.iMaxVel = velocityLayers[0].vrange.iMinVel;
-			velocityLayers[0].vrange.iMinVel = 0;
+			velocityLayers[0].vrange.iMinVel = 1;
 		}
 
 		// onward

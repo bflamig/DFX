@@ -65,8 +65,8 @@ namespace dfx
 			case DfxResult::RobinsMustBeNonEmptySquareList: s = "Robins must be in a non-empty []-list"; break;
 			case DfxResult::RobinMustBeNameValue: s = "Robin must be a name-value pair"; break;
 			case DfxResult::RobinNameMustBeValidPath: s = "Robin name must be valid path"; break;
-			case DfxResult::OffsetMustBeWholeNumber: s = "Offset must be whole number"; break;
-			case DfxResult::OffsetMissing: s = "offset must be specified"; break;
+			case DfxResult::BoundMustBeWholeNumber: s = "Bound must be whole number"; break;
+			case DfxResult::BoundMissing: s = "Bound must be specified"; break;
 			case DfxResult::PeakMustBeNumber: s = "Peak must be whole or floating point number (suffix units allowed)"; break;
 			case DfxResult::PeakMissing: s = "peak must be specified"; break;
 			case DfxResult::RmsMustBeNumber: s = "Rms must be whole or floating point number (suffix units allowed)"; break;
@@ -693,7 +693,7 @@ namespace dfx
 		auto new_ctx = ctx + '/' + robin_name;
 
 		// The body of a robin must be a {}-list having the file name to
-		// the robin, plus three optional items: offset, peak, and rms.
+		// the robin, plus three optional items: start, end, peak, and rms.
 
 		auto& robin_body = robin_nv_ptr->pair.second;
 
@@ -705,7 +705,8 @@ namespace dfx
 			VerifyFname(ctx, robin_body_map_ptr, must_be_specified);
 
 			must_be_specified = false;
-			VerifyOffset(new_ctx, robin_body_map_ptr, must_be_specified);
+			VerifyStart(new_ctx, robin_body_map_ptr, must_be_specified);
+			VerifyEnd(new_ctx, robin_body_map_ptr, must_be_specified);
 
 			VerifyPeak(new_ctx, robin_body_map_ptr, must_be_specified);
 			VerifyRMS(new_ctx, robin_body_map_ptr, must_be_specified);
@@ -781,16 +782,15 @@ namespace dfx
 		return errcnt == save_errcnt;
 	}
 
-	bool DfxParser::VerifyOffset(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
+	bool DfxParser::VerifyStart(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
 	{
 		int save_errcnt = errcnt;
 
-		// Check for a possibly optional offset.
+		// Check for a possibly optional starting offset.
 		// If we find such a property, we make sure the value it's a whole number.
 
-		auto vp = GetPropertyValue(parent_map, "offset");
+		auto vp = GetPropertyValue(parent_map, "start");
 
-#if 1
 		if (vp)
 		{
 			// We found the property. Is it the right type?
@@ -807,23 +807,65 @@ namespace dfx
 				}
 				else
 				{
-					LogError(ctx, DfxResult::OffsetMustBeWholeNumber);
+					LogError(ctx, DfxResult::BoundMustBeWholeNumber);
 				}
 			}
 			else
 			{
-				LogError(ctx, DfxResult::OffsetMustBeWholeNumber);
+				LogError(ctx, DfxResult::BoundMustBeWholeNumber);
 			}
 		}
 		else
 		{
 			if (must_be_specified)
 			{
-				LogError(ctx, DfxResult::OffsetMissing);
+				LogError(ctx, DfxResult::BoundMissing);
 			}
 		}
 
-#endif
+		return errcnt == save_errcnt;
+	}
+
+	bool DfxParser::VerifyEnd(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified)
+	{
+		int save_errcnt = errcnt;
+
+		// Check for a possibly optional ending offset.
+		// If we find such a property, we make sure the value it's a whole number.
+
+		auto vp = GetPropertyValue(parent_map, "end");
+
+		if (vp)
+		{
+			// We found the property. Is it the right type?
+			// Is it a whole number?
+
+			auto svp = AsSimpleValue(vp);
+
+			if (svp)
+			{
+				// Okay, it's a simple value. Is it a whole number?
+
+				if (svp->tkn->IsWholeNumber())
+				{
+				}
+				else
+				{
+					LogError(ctx, DfxResult::BoundMustBeWholeNumber);
+				}
+			}
+			else
+			{
+				LogError(ctx, DfxResult::BoundMustBeWholeNumber);
+			}
+		}
+		else
+		{
+			if (must_be_specified)
+			{
+				LogError(ctx, DfxResult::BoundMissing);
+			}
+		}
 
 		return errcnt == save_errcnt;
 	}

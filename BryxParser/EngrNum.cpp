@@ -621,31 +621,75 @@ namespace bryx
 	void EngrNum::adjust_trailing_zeros()
 	{
 		// adjust metric exponent due to trailing zeros (for sure) if > 3 zeros, adjust mexp, chop off the three zeros, repeat
+		// @@ BUG! If there is a decimal point, we for sure don't want to be incrementing the engr exponent!
+		// TEST: We'd like 5000 ---> 5 x 10^3, and 50000 -> 50 x 10^3,500000 -> 500 x 10^3, 500000 -> 5 x 10^6
+
+		// First off, we need to know if there is a decimal point in the mantissa.
 
 		char* p = mantissa;
 
-		int n = strlen(p) - 1;
+		bool has_decimal_pt = false;
 
-		if (n > 0)
+		while (*p)
 		{
-			p += n;
-
-			int dc = 0;
-			while (n > 0 && *p == '0')
+			if (*p == '.')
 			{
-				++dc;
-				if (dc == 3)
-				{
-					++engr_exp;
-					char* q = p;
-					*q++ = 0; // this is the only one necessary
-					*q++ = 0; // but we'll keep things tidy
-					*q++ = 0; // ""
+				has_decimal_pt = true;
+				break;
+			}
 
-					dc = 0;
+			++p;
+		}
+
+		if (has_decimal_pt)
+		{
+			// p points right at the decimal point.
+
+			int n = strlen(p) - 1;
+
+			if (n > 0)
+			{
+				char* q = p + n;
+
+				while (n > 0 && *q == '0')
+				{
+					*q-- = 0;
+					--n;
 				}
-				--p;
-				--n;
+
+				if (*q == '.')
+				{
+					*q = 0;
+				}
+			}
+		}
+		else
+		{
+			char* p = mantissa;
+
+			int n = strlen(p) - 1;
+
+			if (n > 0)
+			{
+				p += n;
+
+				int dc = 0;
+				while (n > 0 && *p == '0')
+				{
+					++dc;
+					if (dc == 3)
+					{
+						++engr_exp;
+						char* q = p;
+						*q++ = 0; // this is the only one necessary
+						*q++ = 0; // but we'll keep things tidy
+						*q++ = 0; // ""
+
+						dc = 0;
+					}
+					--p;
+					--n;
+				}
 			}
 		}
 	}

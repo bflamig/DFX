@@ -67,8 +67,8 @@ namespace dfx
 		RobinsMustBeNonEmptySquareList,
 		RobinMustBeNameValue,
 		RobinNameMustBeValidPath,
-		OffsetMustBeWholeNumber,
-		OffsetMissing, // We put this here in case we decide it's not optional
+		BoundMustBeWholeNumber,
+		BoundMissing, // We put this here in case we decide it's not optional
 		PeakMustBeNumber,
 		PeakMissing, // We put this here in case we decide it's not optional
 		RmsMustBeNumber,
@@ -166,7 +166,8 @@ namespace dfx
 		bool VerifyRobin(const std::string ctx, std::shared_ptr<NameValue>& robin_nv_ptr);
 		bool VerifyFname(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified);
 		bool VerifyFname(const std::string ctx, std::shared_ptr<Value>& vp);
-		bool VerifyOffset(const std::string ctx, const curly_list_type* parent_map, bool offset_must_be_specified);
+		bool VerifyStart(const std::string ctx, const curly_list_type* parent_map, bool start_must_be_specified);
+		bool VerifyEnd(const std::string ctx, const curly_list_type* parent_map, bool end_must_be_specified);
 		bool VerifyPeak(const std::string ctx, const curly_list_type* parent_map, bool peak_must_be_specified);
 		bool VerifyRMS(const std::string ctx, const curly_list_type* parent_map, bool rms_must_be_specified);
 		bool VerifyWaveMagnitude(const std::string ctx, const token_ptr& tkn);

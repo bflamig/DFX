@@ -40,10 +40,10 @@
 
 using namespace dfx;
 
-const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
+//const char* const ASIO_DRIVER_NAME = "Focusrite USB ASIO";
 //const char* const ASIO_DRIVER_NAME = "JRiver Media Center 26";
 //const char* const ASIO_DRIVER_NAME = "ReaRoute ASIO (x64)";
-//const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
+const char* const ASIO_DRIVER_NAME = "UMC ASIO Driver";
 
 struct PlaybackData
 {
@@ -206,7 +206,7 @@ int main()
 
 	// For our test we'll use a small midi keyboard
 
-	bool b1 = inMidi->OpenPort("AKM320 1");
+	bool b1 = inMidi->OpenPort("AKM320");
 
 	if (b1)
 	{

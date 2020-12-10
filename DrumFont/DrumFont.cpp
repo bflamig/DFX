@@ -358,19 +358,36 @@ namespace dfx
 
 		auto fname_opt = GetSimpleProperty(robin_body_map_ptr, "fname");
 
-		auto offset_vp = GetPropertyValue(robin_body_map_ptr, "offset");
-		int offset;
+		// //
+		auto start_vp = GetPropertyValue(robin_body_map_ptr, "start");
+		int start;
 
-		if (offset_vp)
+		if (start_vp)
 		{
-			auto t = ProcessAsNumber("BuildRobin", offset_vp);
+			auto t = ProcessAsNumber("BuildRobin", start_vp);
 			auto nt = std::dynamic_pointer_cast<NumberToken>(t);
-			offset = static_cast<int>(nt->engr_num.X());
+			start = static_cast<int>(nt->engr_num.X());
 		}
 		else
 		{
 			// Use default
-			offset = 0;
+			start = 0;
+		}
+
+		// //
+		auto end_vp = GetPropertyValue(robin_body_map_ptr, "end");
+		int end;
+
+		if (end_vp)
+		{
+			auto t = ProcessAsNumber("BuildRobin", end_vp);
+			auto nt = std::dynamic_pointer_cast<NumberToken>(t);
+			end = static_cast<int>(nt->engr_num.X());
+		}
+		else
+		{
+			// Use default
+			end = 0;
 		}
 
 		auto peak_vp = GetPropertyValue(robin_body_map_ptr, "peak");
@@ -404,11 +421,12 @@ namespace dfx
 		}
 
 		std::cout << "      robin " << '"' << *fname_opt << '"' << std::endl;
-		std::cout << "        offset " << offset << std::endl;
+		std::cout << "        start " << start << std::endl;
+		std::cout << "        end " << end << std::endl;
 		std::cout << "        peak " << peak << std::endl;
 		std::cout << "        rms " << rms << std::endl;
 
-		Robin robin(*fname_opt, peak, rms, offset);
+		Robin robin(*fname_opt, peak, rms, start, end);
 
 		robins.emplace_back(std::move(robin));
 	}

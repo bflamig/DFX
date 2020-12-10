@@ -99,7 +99,7 @@ namespace dfx
 		bool Open(const std::string_view &fileName_);
 		bool OpenRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
-		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize);
+		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize);
 
 		void Close();
 

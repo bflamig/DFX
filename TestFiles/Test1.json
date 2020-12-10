@@ -16,23 +16,24 @@
                "gain" : "6dB"
             },
             "velocities" : [
-               "v32" : {
+               "v1" : {
                   "path" : "",
                   "robins" : [
                      "r1" : {
                         "peak" : "-40dB",
-                        "offset" : 1492,
+                        "start" : 1492,
+						"end" : 5000,
                         "fname" : "kick_lo.wav",
                         "rms" : "-54db"
                      }
                   ]
                },
-               "v64" : {
+               "v48" : {
                   "path" : "",
                   "robins" : [
                      "r1" : {
                         "peak" : "-30dB",
-                        "offset" : 1742,
+                        "start" : 1742,
                         "fname" : "kick_med.wav",
                         "rms" : "-44db"
                      }
@@ -43,7 +44,7 @@
                   "robins" : [
                      "r1" : {
                         "peak" : "-6db",
-                        "offset" : 1742,
+                        "start" : 1742,
                         "fname" : "kick_hi.wav",
                         "rms" : "-10db"
                      }
@@ -55,18 +56,18 @@
             "path" : "snares/sonor",
             "note" : 61,
             "velocities" : [
-               "v16" : {
+               "v1" : {
                   "path" : "",
                   "robins" : [
                      "r1" : {
                         "peak" : "-70db",
-                        "offset" : 2200,
+                        "start" : 2200,
                         "fname" : "snare_pp_1.wav",
                         "rms" : "-74db"
                      },
                      "r2" : {
                         "peak" : "-65db",
-                        "offset" : 470,
+                        "start" : 470,
                         "fname" : "snare_pp_2.wav",
                         "rms" : "-73db"
                      }
@@ -77,13 +78,13 @@
                   "robins" : [
                      "r1" : {
                         "peak" : "-20db",
-                        "offset" : 200,
+                        "start" : 200,
                         "fname" : "snare_med_1.wav",
                         "rms" : "-24db"
                      },
                      "r2" : {
                         "peak" : "-25db",
-                        "offset" : 470,
+                        "start" : 470,
                         "fname" : "snare_med_2.wav",
                         "rms" : "-33db"
                      }

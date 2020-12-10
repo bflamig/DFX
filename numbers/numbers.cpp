@@ -243,6 +243,13 @@ void testh()
 
 	testengr("45.0034");
 
+	testengr("50");
+	testengr("500");
+	testengr("5000"); // @@ BUG! This fails! Culprit is adjust trailing zeros
+	testengr("50000");
+	testengr("500000");
+	testengr("5000000");
+
 	testengr("0");
 	testengr("12");
 	testengr("123");

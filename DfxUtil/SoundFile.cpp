@@ -964,13 +964,18 @@ namespace dfx
 		return false;
 	}
 
-	// ///////////////////////////////////////////////
+	// ////////////////////////////////////////////////////////////////////////
+	//
 	// Finally, the main event
-	// ///////////////////////////////////////////////
+	//
+	// ////////////////////////////////////////////////////////////////////////
 
 
-	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, bool doNormalize)
+	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize)
 	{
+		// NOTE: It's ASSUMED the buffer size has already taken into account the
+		// specifiedstarting and ending frames.
+
 		// Make sure we have an open file.
 		if (fd == 0) 
 		{
@@ -980,7 +985,8 @@ namespace dfx
 			return false;
 		}
 
-		// Check the buffer size.
+		// Check the buffer size. Note that this size already has the
+		// start and end frame parameters accounted for.
 		unsigned nFrames = buffer.nFrames;
 		if (nFrames == 0) 
 		{
@@ -1001,24 +1007,38 @@ namespace dfx
 			return false;
 		}
 
-		if (startFrame >= fileFrames) 
+		// @@ TODO: Do we have all the cases covered here?
+
+		if (endFrame >= fileFrames)
 		{
 			std::stringstream msg;
-			msg << "startFrame argument is >= file size";
+			msg << "endFrame argument is >= file size";
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+			return false;
+		}
+
+		unsigned buffEnd = endFrame > 0 ? endFrame : fileFrames;
+
+		if (startFrame >= buffEnd) 
+		{
+			std::stringstream msg;
+			msg << "startFrame argument is >= virtual file size";
 			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
 			return false;
 		}
 
 		// Check for file end.
-		if (startFrame + nFrames > fileFrames)
+		if (startFrame + nFrames > buffEnd)
 		{
-			nFrames = fileFrames - startFrame;
+			nFrames = buffEnd - startFrame;
 		}
 
 		long i;
 		long nSamples = (long)(nFrames * nChannels);
 		unsigned long offset = startFrame * nChannels;
 
+		// /////////////////////////////////////////////////////////////////////////////////////////
+		// Okay, ready to read in the samples, given the type of samples.
 		// There are aliasing tricks going on here. dest buffer sample type is actually double
 		// but read buffer type might be something else, (but must be <= in size)
 

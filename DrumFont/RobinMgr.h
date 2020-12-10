@@ -50,9 +50,10 @@ namespace dfx
 		std::filesystem::path fileName;
 		double peak; // In db, as given in the drum font
 		double rms;  // In db, as given in the drum font
-		size_t offset; // in frames, as given in the drum font
+		size_t start_frame; // in frames, as given in the drum font
+		size_t end_frame;   // in frames
 
-		Robin(std::string fileName_, double peak_, double rms_, size_t offset_);
+		Robin(std::string fileName_, double peak_, double rms_, size_t start_frame_, size_t end_frame_);
 		Robin(const Robin& other);
 		Robin(Robin&& other) noexcept;
 

@@ -39,7 +39,7 @@ void ScanFile(const std::string_view& fname, bool raw)
 	FrameBuffer<double> buffer(f.fileFrames, f.nChannels);
 
 	bool doNormalize = true;
-	f.Read(buffer, 0, doNormalize);
+	f.Read(buffer, 0, 0, doNormalize);
 
 	double window = 0; //  0.100; // in seconds
 	double fileRate = f.fileRate;
