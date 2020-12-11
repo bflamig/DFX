@@ -94,10 +94,12 @@ namespace dfx
 		void operator=(const SoundFile& other);
 		void operator=(SoundFile&& other) noexcept;
 
-		void Clear();
+		void Clear(bool but_not_errors = false);
 		
 		bool Open(const std::string_view &fileName_);
 		bool OpenRaw(const std::string_view& fileName_, unsigned nChannels_, SampleFormat format_, double fileRate_);
+
+		bool CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame);
 
 		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize);
 

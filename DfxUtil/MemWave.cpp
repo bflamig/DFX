@@ -139,14 +139,19 @@ namespace dfx
 
 		if (sound_file.Open(path_.string()))
 		{
-			auto nFrames = (end_frame > 0 ? end_frame : sound_file.fileFrames) - start_frame;
-			auto nChannels = sound_file.nChannels;
-			auto fileRate = sound_file.fileRate;
-			buff.dataRate = fileRate;
-			buff.Resize(nFrames, nChannels);
+			bool b = sound_file.CheckBoundarySanity(start_frame, end_frame);
 
-			bool doNormalize = true;
-			bool b = sound_file.Read(buff, start_frame, end_frame, doNormalize);
+			if (b)
+			{
+				auto nFrames = (end_frame > 0 ? end_frame : sound_file.fileFrames) - start_frame;
+				auto nChannels = sound_file.nChannels;
+				auto fileRate = sound_file.fileRate;
+				buff.dataRate = fileRate;
+				buff.Resize(nFrames, nChannels);
+
+				bool doNormalize = true;
+				b = sound_file.Read(buff, start_frame, end_frame, doNormalize);
+			}
 
 			sound_file.Close();
 

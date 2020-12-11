@@ -31,7 +31,17 @@ namespace dfx
 
 		bool b = mw.LoadRaw(waveFile1, 1, SampleFormat::SINT16, 22050.0);
 
-		b = mw.Load(waveFile2);
+		// Test reading only a portion of the file in.
+
+		unsigned start_frame = 100;
+		unsigned end_frame = 4904257; // If end is 0, it means "to the end of the file")
+
+		b = mw.Load(waveFile2, start_frame, end_frame);
+
+		if (!b)
+		{
+			mw.sound_file.LastError().Print(std::cout);
+		}
 	}
 
 } // end of namespace

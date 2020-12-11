@@ -199,9 +199,13 @@ namespace dfx
 	}
 
 
-	void SoundFile::Clear()
+	void SoundFile::Clear(bool but_not_errors)
 	{
-		errors.clear();
+		if (!but_not_errors)
+		{
+			errors.clear();
+		}
+
 		fileName = "";
 		fd = 0;
 		byteswap = false;
@@ -244,7 +248,8 @@ namespace dfx
 			fclose(fd);
 		}
 
-		Clear();
+		bool but_not_errors = true;
+		Clear(but_not_errors);
 	}
 
 	bool SoundFile::Open(const std::string_view &fileName_)
@@ -964,6 +969,31 @@ namespace dfx
 		return false;
 	}
 
+	bool SoundFile::CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame)
+	{
+		if (proposedEndFrame >= fileFrames)
+		{
+			std::stringstream msg;
+			msg << "endFrame argument " << proposedEndFrame << " is >= file size " << fileFrames;
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+			return false;
+		}
+
+		// If proposed end frame is 0, it means "till the end of file"
+
+		unsigned buffEnd = proposedEndFrame > 0 ? proposedEndFrame : fileFrames;
+
+		if (proposedStartFrame >= buffEnd)
+		{
+			std::stringstream msg;
+			msg << "startFrame argument " << proposedStartFrame << " is >= virtual file size " << buffEnd;
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+			return false;
+		}
+
+		return true;
+	}
+
 	// ////////////////////////////////////////////////////////////////////////
 	//
 	// Finally, the main event
@@ -974,7 +1004,7 @@ namespace dfx
 	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize)
 	{
 		// NOTE: It's ASSUMED the buffer size has already taken into account the
-		// specifiedstarting and ending frames.
+		// specified starting and ending frames.
 
 		// Make sure we have an open file.
 		if (fd == 0) 
@@ -985,8 +1015,16 @@ namespace dfx
 			return false;
 		}
 
+		bool sane = CheckBoundarySanity(startFrame, endFrame);
+
+		if (!sane)
+		{
+			return false;
+		}
+
 		// Check the buffer size. Note that this size already has the
 		// start and end frame parameters accounted for.
+
 		unsigned nFrames = buffer.nFrames;
 		if (nFrames == 0) 
 		{
@@ -996,41 +1034,23 @@ namespace dfx
 			return false;
 		}
 
+		unsigned buffEnd = endFrame > 0 ? endFrame : fileFrames;
+
+		auto testNFrames = buffEnd - startFrame;
+
+		if (testNFrames != nFrames)
+		{
+			std::stringstream msg;
+			msg << "buffer size inconsistent with start and end parameters";
+			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
+		}
+
 		if (buffer.nChannels != nChannels) 
 		{
-			//oStream_ << "FileRead::read: StkFrames argument has incompatible number of channels!";
-			//Stk::handleError(StkError::FUNCTION_ARGUMENT);
-
 			std::stringstream msg;
 			msg << "frame buffer has incompatible number of channels";
 			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
 			return false;
-		}
-
-		// @@ TODO: Do we have all the cases covered here?
-
-		if (endFrame >= fileFrames)
-		{
-			std::stringstream msg;
-			msg << "endFrame argument is >= file size";
-			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
-			return false;
-		}
-
-		unsigned buffEnd = endFrame > 0 ? endFrame : fileFrames;
-
-		if (startFrame >= buffEnd) 
-		{
-			std::stringstream msg;
-			msg << "startFrame argument is >= virtual file size";
-			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
-			return false;
-		}
-
-		// Check for file end.
-		if (startFrame + nFrames > buffEnd)
-		{
-			nFrames = buffEnd - startFrame;
 		}
 
 		long i;
@@ -1039,12 +1059,14 @@ namespace dfx
 
 		// /////////////////////////////////////////////////////////////////////////////////////////
 		// Okay, ready to read in the samples, given the type of samples.
-		// There are aliasing tricks going on here. dest buffer sample type is actually double
-		// but read buffer type might be something else, (but must be <= in size)
+		// To space, our read buffer and dest buffer are one and the same -- the buffer passed in,
+		// So there are aliasing tricks going on here. The dest buffer sample type is actually
+		// double but read buffer type might be something else, though it must be <= in size.
 
 		double* dest_buffer = buffer.samples.get();
 
-		// Read samples into StkFrames data buffer.
+		// Read samples into the read buffer using the appropriate type.
+
 		if (dataType == SampleFormat::SINT16) 
 		{
 			auto read_buf = reinterpret_cast<int16_t *>(dest_buffer); // Aliasing!
@@ -1206,10 +1228,6 @@ namespace dfx
 #endif
 		else if (dataType == SampleFormat::SINT24) 
 		{
-			// @@ TODO: The "don't normalize" scale seems weird, eh?
-			//const double scale = doNormalize ? 256.0 / 2147483648.0 : 1.0 / 256.0; // If 24-bit data is in lower three bytes of int32_t
-			const double scale = doNormalize ? 1.0 / 2147483648.0 : 1.0; // If 24-bit data is in upper three bytes of int32_t
-
 			// signed 24-bit data
 			auto read_buf = reinterpret_cast<int24_t*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int24_t)), SEEK_SET) == -1) goto error;
@@ -1220,11 +1238,27 @@ namespace dfx
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
+			// Determine the scale to use. Now, in the course of processing below, each 24-bit sample gets
+			// stored momentarily into an int32_t, and then into a double. At that point, it has a scale
+			// that reflects 24 bits. If we are going to do normalization, we divde by that scale to get a
+			// number between -1.0 to 1.0.
+
+			// At the point in time when the sample is in a 32 bit integer, the question becomes, what part of
+			// that 32 bits is the 24 bit number stored? The upper three bytes, or lower three bytes? Right now,
+			// I believe we always store it in the upper three bytes, so the number can take on the full range
+			// of a 32-bit number. Otherwise, its range would be 256 times smaller.
+
+			static constexpr double scale_factor = 1.0 / 2147483648.0; // If in upper three bytes.
+			//static constexpr double scale_factor = 256.0 / 2147483648.0; // If in lower three bytes.
+
+			const double normal_scale_factor = doNormalize ? scale_factor : 1.0;
+
 			// There are aliasing / spacing tricks going on here
 			for (i = nSamples - 1; i >= 0; i--)
 			{
 				auto temp = read_buf[i].asDouble();
-				dest_buffer[i] = temp * scale;
+				auto x = temp * normal_scale_factor;
+				dest_buffer[i] = x;
 			}
 		}
 
