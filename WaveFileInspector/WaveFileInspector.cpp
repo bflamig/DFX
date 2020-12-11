@@ -36,7 +36,11 @@ void ScanFile(const std::string_view& fname, bool raw)
 	std::cout << "   Length:          " << f.fileFrames << " frames\n";
 	std::cout << "   Duration:        " << f.fileFrames / f.fileRate << " secs\n";
 
-	FrameBuffer<double> buffer(f.fileFrames, f.nChannels);
+	// FrameBuffer<double> buffer(f.fileFrames, f.nChannels);
+
+	FrameBuffer<double> buffer; // Sizing done below;
+
+	buffer.SetDataRate(f.fileRate);
 
 	bool doNormalize = true;
 	f.Read(buffer, 0, 0, doNormalize);
@@ -157,8 +161,8 @@ int main(int argc, const char* argv[])
 		auto curr_path = fs::current_path();
 		auto rel_path = fs::path(fname);
 		std::cout << curr_path << std::endl;
-		//std::string fname = "S:/Program Files (x86)/NDK/samples/snares/sn10jungle/stx/snare_on/ord/sn10wjungle_stxl_ord_049.wav";
-		//std::string fname = "S:/Program Files (x86)/NDK/samples/snares/sn10jungle/stx/snare_on/ord/";
+		//std::string fname = "W:/Program Files (x86)/NDK/samples/snares/sn10jungle/stx/snare_on/ord/sn10wjungle_stxl_ord_049.wav";
+		//std::string fname = "W:/Program Files (x86)/NDK/samples/snares/sn10jungle/stx/snare_on/ord/";
 		ScanDir(curr_path, rel_path, recurse, do_raw);
 	}
 }

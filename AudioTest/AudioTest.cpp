@@ -290,7 +290,7 @@ void testWave(const std::string_view waveFile)
 		return;
 	}
 
-	frames.Resize(sf.fileFrames, sf.nChannels);
+	// Now automatically done inside the Read function: frames.Resize(sf.fileFrames, sf.nChannels);
 
 	frames.SetDataRate(48000);
 

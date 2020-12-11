@@ -143,11 +143,11 @@ namespace dfx
 
 			if (b)
 			{
-				auto nFrames = (end_frame > 0 ? end_frame : sound_file.fileFrames) - start_frame;
-				auto nChannels = sound_file.nChannels;
-				auto fileRate = sound_file.fileRate;
-				buff.dataRate = fileRate;
-				buff.Resize(nFrames, nChannels);
+				//auto nFrames = (end_frame > 0 ? end_frame : sound_file.fileFrames) - start_frame;
+				//auto nChannels = sound_file.nChannels;
+				//auto fileRate = sound_file.fileRate;
+				buff.dataRate = sound_file.fileRate;
+				//buff.Resize(nFrames, nChannels);
 
 				bool doNormalize = true;
 				b = sound_file.Read(buff, start_frame, end_frame, doNormalize);
@@ -166,11 +166,11 @@ namespace dfx
 
 		if (sound_file.OpenRaw(path_.string(), nChannels_, format_, fileRate_))
 		{
-			auto nFrames = sound_file.fileFrames;
-			auto nChannels = sound_file.nChannels;
-			auto fileRate = sound_file.fileRate;
-			buff.dataRate = fileRate;
-			buff.Resize(nFrames, nChannels);
+			//auto nFrames = sound_file.fileFrames;
+			//auto nChannels = sound_file.nChannels;
+			//auto fileRate = sound_file.fileRate;
+			buff.dataRate = sound_file.fileRate;
+			//buff.Resize(nFrames, nChannels);
 
 			bool doNormalize = true;
 			bool b = sound_file.Read(buff, 0, 0, doNormalize);

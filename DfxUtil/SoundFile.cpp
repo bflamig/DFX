@@ -1003,8 +1003,8 @@ namespace dfx
 
 	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize)
 	{
-		// NOTE: It's ASSUMED the buffer size has already taken into account the
-		// specified starting and ending frames.
+		// @@ We've changed the logic. Now, we auto-resise the buffer here if need be. That's so we can keep
+		// the boundary checking logic in one place.
 
 		// Make sure we have an open file.
 		if (fd == 0) 
@@ -1022,36 +1022,11 @@ namespace dfx
 			return false;
 		}
 
-		// Check the buffer size. Note that this size already has the
-		// start and end frame parameters accounted for.
-
-		unsigned nFrames = buffer.nFrames;
-		if (nFrames == 0) 
-		{
-			std::stringstream msg;
-			msg << "buffer size is zero in (" << fileName << ").";
-			LogError(AudioResult::FILE_ERROR, msg);
-			return false;
-		}
-
 		unsigned buffEnd = endFrame > 0 ? endFrame : fileFrames;
 
-		auto testNFrames = buffEnd - startFrame;
+		unsigned nFrames = buffEnd - startFrame;
 
-		if (testNFrames != nFrames)
-		{
-			std::stringstream msg;
-			msg << "buffer size inconsistent with start and end parameters";
-			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
-		}
-
-		if (buffer.nChannels != nChannels) 
-		{
-			std::stringstream msg;
-			msg << "frame buffer has incompatible number of channels";
-			LogError(AudioResult::FUNCTION_ARGUMENT, msg);
-			return false;
-		}
+		buffer.Resize(nFrames, nChannels);
 
 		long i;
 		long nSamples = (long)(nFrames * nChannels);

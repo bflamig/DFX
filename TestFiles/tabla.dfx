@@ -2,7 +2,7 @@ dfx =
 {
 	mydrumkit =
 	{
-		path = "S:/Downloaded Instrument Samples/TablaSessions_Wav_SP/One Shots",
+		path = "W:/Downloaded Instrument Samples/TablaSessions_Wav_SP/One Shots",
 		include_base_path = "$fontbase",
 	
 		instruments = 
