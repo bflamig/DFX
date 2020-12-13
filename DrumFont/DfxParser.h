@@ -164,6 +164,7 @@ namespace dfx
 		bool VerifyVelocityLayer(const std::string ctx, std::shared_ptr<Value>& vlayer_sh_ptr);
 		bool VerifyRobins(const std::string ctx, const curly_list_type* parent_map_ptr);
 		bool VerifyRobin(const std::string ctx, std::shared_ptr<NameValue>& robin_nv_ptr);
+		bool VerifyRobinBody(const std::string ctx, const curly_list_type* robin_body_map_ptr);
 		bool VerifyFname(const std::string ctx, const curly_list_type* parent_map, bool must_be_specified);
 		bool VerifyFname(const std::string ctx, std::shared_ptr<Value>& vp);
 		bool VerifyStart(const std::string ctx, const curly_list_type* parent_map, bool start_must_be_specified);

@@ -577,14 +577,26 @@ namespace dfx
 			auto& vel_code_str = corby->pair.first;
 			//auto& vlayer_body = corby->pair.second;
 
-			// vel_code must start with a "v"
+			// vel_code must start with a "v" or "vr"
 
-			if (vel_code_str[0] == 'v')
+			bool simplified_robin = false;
+			const char* p = nullptr;
+
+			if (vel_code_str.find("vr", 0) == 0)
+			{
+				simplified_robin = true;
+				p = vel_code_str.c_str();
+				p += 2; // past the vr
+			}
+			else if (vel_code_str.find("v", 0) == 0)
+			{
+				p = vel_code_str.c_str();
+				++p; // past the v
+			}
+
+			if (p)
 			{
 				// The rest of the characters must be digits between 0-9
-
-				auto p = vel_code_str.c_str();
-				++p; // past the v
 
 				while (*p)
 				{
@@ -614,12 +626,19 @@ namespace dfx
 			{
 				auto new_ctx = ctx + '/' + vel_code_str;
 
-				// Might have an optional path
-				bool must_be_specified = false;
-				VerifyPath(new_ctx, vlayer_body_map_ptr, must_be_specified);
+				if (simplified_robin)
+				{
+					VerifyRobinBody(new_ctx, vlayer_body_map_ptr);
+				}
+				else
+				{
+					// Might have an optional path
+					bool must_be_specified = false;
+					VerifyPath(new_ctx, vlayer_body_map_ptr, must_be_specified);
 
-				// MUST have a non-empty robins array
-				VerifyRobins(new_ctx, vlayer_body_map_ptr);
+					// MUST have a non-empty robins array
+					VerifyRobins(new_ctx, vlayer_body_map_ptr);
+				}
 			}
 			else
 			{
@@ -635,7 +654,6 @@ namespace dfx
 
 		return errcnt == save_errcnt;
 	}
-
 
 	bool DfxParser::VerifyRobins(const std::string ctx, const curly_list_type* parent_map_ptr)
 	{
@@ -701,18 +719,7 @@ namespace dfx
 
 		if (robin_body_map_ptr)
 		{
-			bool must_be_specified = true;
-			VerifyFname(ctx, robin_body_map_ptr, must_be_specified);
-
-			must_be_specified = false;
-			VerifyStart(new_ctx, robin_body_map_ptr, must_be_specified);
-			VerifyEnd(new_ctx, robin_body_map_ptr, must_be_specified);
-
-			VerifyPeak(new_ctx, robin_body_map_ptr, must_be_specified);
-			VerifyRMS(new_ctx, robin_body_map_ptr, must_be_specified);
-
-			//auto peak_opt = GetSimpleProperty(robin_body_map_ptr, "peak");
-			//auto rms_opt = GetSimpleProperty(robin_body_map_ptr, "rms");
+			VerifyRobinBody(new_ctx, robin_body_map_ptr);
 		}
 		else
 		{
@@ -720,6 +727,22 @@ namespace dfx
 			// it's a name value
 			LogError(ctx, DfxResult::RobinMustBeNameValue);
 		}
+
+		return errcnt == save_errcnt;
+	}
+
+	bool DfxParser::VerifyRobinBody(const std::string ctx, const curly_list_type* robin_body_map_ptr)
+	{
+		int save_errcnt = errcnt;
+		bool must_be_specified = true;
+		VerifyFname(ctx, robin_body_map_ptr, must_be_specified);
+
+		must_be_specified = false;
+		VerifyStart(ctx, robin_body_map_ptr, must_be_specified);
+		VerifyEnd(ctx, robin_body_map_ptr, must_be_specified);
+
+		VerifyPeak(ctx, robin_body_map_ptr, must_be_specified);
+		VerifyRMS(ctx, robin_body_map_ptr, must_be_specified);
 
 		return errcnt == save_errcnt;
 	}

@@ -15,9 +15,8 @@ dfx =
 				velcurve = {type = logexp, knee = 0.6, gain = 6dB},
 				velocities =
 				[
-					vs32 = 
+					vr1 = 
 					{
-						path = "",
 						fname = "kick_lo.wav",
 						start = 1492,
 						end = 5000,
@@ -25,7 +24,7 @@ dfx =
 						rms =  -54db
 					},
 					
-					vs64 = 
+					vr48 = 
 					{
 						fname = "kick_med.wav",
 						start = 1742,
@@ -33,7 +32,7 @@ dfx =
 						rms =  -44db
 					},
 					
-					vs96 = 
+					vr96 = 
 					{
 						fname = "kick_hi.wav",
 						start = 1742,
@@ -51,7 +50,7 @@ dfx =
 				
 				velocities =
 				[
-					v16 = 
+					v1 = 
 					{
 						path = "",
 					

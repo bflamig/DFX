@@ -316,42 +316,79 @@ namespace dfx
 		auto& vel_code_str = nvp->pair.first;
 		auto& vlayer_body = nvp->pair.second;
 
-		// vel_code starts with a "v", so skip past that
+		// vel_code starts with either a "v", or "vr"
 
-		int vel_code = std::stoi(vel_code_str.substr(1));
+		int vel_code = 0;
+
+		bool simplified_robin = false;
+		const char* p = nullptr;
+
+		if (vel_code_str.find("vr", 0) == 0)
+		{
+			simplified_robin = true;
+			vel_code = std::stoi(vel_code_str.substr(2));
+			p = vel_code_str.c_str();
+			p += 2; // past the vr
+		}
+		else if (vel_code_str.find("v", 0) == 0)
+		{
+			vel_code = std::stoi(vel_code_str.substr(1));
+			p = vel_code_str.c_str();
+			++p; // past the v
+		}
 
 		auto vlayer_body_map_ptr = AsCurlyList(vlayer_body);
 
-		auto vlayer_path_opt = GetSimpleProperty(vlayer_body_map_ptr, "path");
-
-		std::string vpath = vlayer_path_opt ? *vlayer_path_opt : "";
-
-		std::cout << "  velocity layer " << vel_code_str << std::endl;
-		std::cout << "    path " << '"' << vpath << '"' << std::endl;
-
-		VelocityLayer vlayer(vpath, vel_code);
-
-		// We should have a []-list of robins. Each robin is represented
-		// in the Parser as a name-value pair.
-
-		auto robins_arr_ptr = GetSquareListProperty(vlayer_body_map_ptr, "robins");
-
-		auto nrobins = robins_arr_ptr->size();
-
-		vlayer.robinMgr.robins.reserve(nrobins);
-
-		for (auto robin_sh_ptr : *robins_arr_ptr)
+		if (simplified_robin)
 		{
-			auto robin_nv_ptr = dynamic_cast<NameValue*>(robin_sh_ptr.get());
-			BuildRobin(vlayer.robinMgr.robins, robin_nv_ptr);
-		}
+			// A simplified velocity/robin layer has just a single robin
+			// for the velocity
 
-		vlayers.emplace_back(std::move(vlayer));
+			std::cout << "  velocity/robin layer " << vel_code_str << std::endl;
+			VelocityLayer vlayer("", vel_code);
+			vlayer.robinMgr.robins.reserve(1);
+
+			//auto robin_nv_ptr = dynamic_cast<NameValue*>(vlayer_sh_ptr.get());
+			BuildRobin(vlayer.robinMgr.robins, nvp);
+
+			vlayers.emplace_back(std::move(vlayer));
+		}
+		else
+		{
+			auto vlayer_path_opt = GetSimpleProperty(vlayer_body_map_ptr, "path");
+
+			std::string vpath = vlayer_path_opt ? *vlayer_path_opt : "";
+
+			std::cout << "  velocity layer " << vel_code_str << std::endl;
+			std::cout << "    path " << '"' << vpath << '"' << std::endl;
+
+			VelocityLayer vlayer(vpath, vel_code);
+
+			// We should have a []-list of robins. Each robin is represented
+			// in the Parser as a name-value pair.
+
+			auto robins_arr_ptr = GetSquareListProperty(vlayer_body_map_ptr, "robins");
+
+			auto nrobins = robins_arr_ptr->size();
+
+			vlayer.robinMgr.robins.reserve(nrobins);
+
+			for (auto robin_sh_ptr : *robins_arr_ptr)
+			{
+				auto robin_nv_ptr = dynamic_cast<NameValue*>(robin_sh_ptr.get());
+				BuildRobin(vlayer.robinMgr.robins, robin_nv_ptr);
+			}
+
+			vlayers.emplace_back(std::move(vlayer));
+		}
 	}
 
 	void DrumFont::BuildRobin(std::vector<Robin>& robins, NameValue* robin_nv_ptr)
 	{
-		// new: first is just a robin name. Note used. auto& fname = robin_nv_ptr->pair.first;
+		// The first part of the pair is just a robin name, and at the moment,
+		// we don't really care about it. 
+		// auto& fname = robin_nv_ptr->pair.first;
+
 		auto& robin_body = robin_nv_ptr->pair.second;
 
 		auto robin_body_map_ptr = AsCurlyList(robin_body);

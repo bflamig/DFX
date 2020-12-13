@@ -15,7 +15,7 @@ dfx =
 				velcurve = {type = logexp, knee = 0.6, gain = 6dB},
 				velocities =
 				[
-					v32 = 
+					v1 = 
 					{
 						path = "",
 						robins = 
@@ -30,7 +30,7 @@ dfx =
 							}
 						]
 					},
-					v64 = 
+					v48 = 
 					{
 						path = "",
 						robins = 
@@ -70,7 +70,7 @@ dfx =
 				
 				velocities =
 				[
-					v16 = 
+					v1 = 
 					{
 						path = "",
 						

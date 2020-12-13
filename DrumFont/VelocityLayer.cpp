@@ -73,7 +73,7 @@ namespace dfx
 	}
 
 
-	VelocityLayer::VelocityLayer(std::string& localPath_, int vel_code_)
+	VelocityLayer::VelocityLayer(const std::string& localPath_, int vel_code_)
 	: VelocityLayer{}
 	{
 		localPath = localPath_;

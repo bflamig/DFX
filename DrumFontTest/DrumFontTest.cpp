@@ -41,7 +41,8 @@ using namespace dfx;
 
 void test()
 {
-	std::string_view filename = "../TestFiles/Test1.dfx";
+	//std::string_view filename = "../TestFiles/Test1.dfx";
+	std::string_view filename = "../TestFiles/Test2.dfx";
 	//std::string_view filename = "../TestFiles/TestKitWIncludes.dfx";
 	//std::string_view filename = "../TestFiles/Tabla.dfx";
 

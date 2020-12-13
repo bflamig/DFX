@@ -42,9 +42,10 @@ int TestDfx()
 	// Test a full dfx file.
 
 	//std::string_view filename = "../TestFiles/Test1.dfx";
+	std::string_view filename = "../TestFiles/Test2.dfx";
 	//std::string_view filename = "../TestFiles/Test1NC.dfx";
 	//std::string_view filename = "../TestFiles/TestKit.dfx";
-	std::string_view filename = "../TestFiles/TestKitWIncludes.dfx";
+	//std::string_view filename = "../TestFiles/TestKitWIncludes.dfx";
 
 	auto dp = std::make_unique<DfxParser>();
 
@@ -122,7 +123,7 @@ int TestDfxi()
 
 int main()
 {
-	//TestDfx();
-	TestDfxi();
+	TestDfx();
+	//TestDfxi();
 	return 0;
 }
