@@ -14,15 +14,19 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)AudioUtil.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FrameBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MemWave.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SampleUtil.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SimpleSoundFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SoundFile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)AudioUtil.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FrameBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MemWave.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SampleUtil.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SimpleSoundFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SoundFile.h" />
   </ItemGroup>
 </Project>

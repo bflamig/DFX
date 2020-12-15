@@ -166,7 +166,8 @@ int main()
 	//
 
 	//std::string_view dfxile = "../TestFiles/TestKit.dfx";
-	std::string_view dfxFile = "../TestFiles/Tabla.dfx";
+	//std::string_view dfxFile = "../TestFiles/Tabla.dfx";
+	std::string_view dfxFile = "W:/reaper/ExpDrum.dfx";
 
 	auto df = std::make_unique<DrumFont>();
 

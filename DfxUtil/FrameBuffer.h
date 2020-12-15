@@ -150,7 +150,7 @@ namespace dfx
 		{
 			for (unsigned i = 0; i < nSamples; i++)
 			{
-				samples[i] = 0.0;
+				samples[i] = 0;
 			}
 		}
 

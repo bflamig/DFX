@@ -70,7 +70,7 @@ namespace dfx
 		void BuildInstruments(std::shared_ptr<DrumKit>& kit, const curly_list_type* instrument_map_ptr);
 		//void BuildInstrument(std::vector<drum_ptr>& drums, std::filesystem::path cumulativePath, const nv_type& drum_nv);
 		void BuildInstrument(std::shared_ptr<DrumKit>& kit, const nv_type& drum_nv);
-		drum_ptr MakeInstrument(const std::string &drum_name, std::filesystem::path cumulativePath, int midiNote, const curly_list_type* drum_map_ptr);
+		drum_ptr MakeInstrument(const std::string &drum_name, std::filesystem::path cumulativePath, std::filesystem::path drumPath, int midiNote, const curly_list_type* drum_map_ptr);
 		void BuildVelocityLayer(std::vector<VelocityLayer>& layers, std::shared_ptr<Value>& layer_sh_ptr);
 		void BuildRobin(std::vector<Robin>& robins, NameValue* robin_nv_ptr);
 	};

@@ -72,6 +72,7 @@
 
 namespace dfx
 {
+#if 0
 	std::string to_string(AudioResult r)
 	{
 		switch (r)
@@ -97,6 +98,8 @@ namespace dfx
 			default: return "UNSPECIFIED";
 		}
 	}
+
+#endif
 
 
 	SoundFile::SoundFile()
@@ -484,7 +487,7 @@ namespace dfx
 			if (fread(&chunkSize, 4, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-			swap32(&chunkSize);
+			swap(&chunkSize);
 #endif
 			if (fseek(fd, chunkSize, SEEK_CUR) == -1) goto error;
 			if (fread(&id, 4, 1, fd) != 1) goto error;
@@ -497,8 +500,8 @@ namespace dfx
 		if (fread(&format_tag, 2, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-		swap16(&format_tag);
-		swap32(&chunkSize);
+		swap(&format_tag);
+		swap(&chunkSize);
 #endif
 		if (format_tag == 0xFFFE) 
 		{ 
@@ -512,7 +515,7 @@ namespace dfx
 			if (fread(&extSize, 2, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-			swap16(&extSize);
+			swap(&extSize);
 #endif
 			if (extSize == 0) goto error;
 			if (fseek(fd, 6, SEEK_CUR) == -1) goto error;
@@ -520,7 +523,7 @@ namespace dfx
 			if (fread(&format_tag, 2, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-			swap16(&format_tag);
+			swap(&format_tag);
 #endif
 			if (fseek(fd, dataOffset, SEEK_SET) == -1) goto error;
 		}
@@ -538,7 +541,7 @@ namespace dfx
 		if (fread(&temp, 2, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-		swap16(&temp);
+		swap(&temp);
 #endif
 		nChannels = static_cast<unsigned>(temp);
 
@@ -548,7 +551,7 @@ namespace dfx
 		if (fread(&srate, 4, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-		swap32(&srate);
+		swap(&srate);
 #endif
 		fileRate = (double)srate;
 
@@ -560,7 +563,7 @@ namespace dfx
 		if (fread(&temp, 2, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-		swap16(&temp);
+		swap(&temp);
 #endif
 		if (format_tag == 1) 
 		{
@@ -622,7 +625,7 @@ namespace dfx
 			if (fread(&chunkSize, 4, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-			swap32(&chunkSize);
+			swap(&chunkSize);
 #endif
 			chunkSize += chunkSize % 2; // chunk sizes must be even
 			if (fseek(fd, chunkSize, SEEK_CUR) == -1) goto error;
@@ -635,7 +638,7 @@ namespace dfx
 		if (fread(&bytes, 4, 1, fd) != 1) goto error;
 
 #ifndef __LITTLE_ENDIAN__
-		swap32(&bytes);
+		swap(&bytes);
 #endif
 		fileFrames = bytes / temp / nChannels;  // sample frames
 		fileFrames *= 8;  // sample frames  // @@ ?? WHAT?
@@ -666,7 +669,7 @@ namespace dfx
 		if (fread(&format, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&format);
+		swap(&format);
 #endif
 
 		//if (format == 2) dataType = SampleFormat::SINT8;
@@ -688,7 +691,7 @@ namespace dfx
 		if (fread(&srate, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&srate);
+		swap(&srate);
 #endif
 		fileRate = (double)srate;
 
@@ -698,7 +701,7 @@ namespace dfx
 		if (fread(&chans, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&chans);
+		swap(&chans);
 #endif
 		nChannels = chans;
 
@@ -707,7 +710,7 @@ namespace dfx
 		if (fread(&offset, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&offset);
+		swap(&offset);
 #endif
 		dataOffset = offset;
 
@@ -717,7 +720,7 @@ namespace dfx
 		if (fread(&fileSize, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&fileSize);
+		swap(&fileSize);
 #endif
 		// Convert to sample frames.
 
@@ -780,7 +783,7 @@ namespace dfx
 			if (fread(&chunkSize, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-			swap32(&chunkSize);
+			swap(&chunkSize);
 #endif
 			chunkSize += chunkSize % 2; // chunk sizes must be even
 			if (fseek(fd, chunkSize, SEEK_CUR) == -1) goto error;
@@ -793,7 +796,7 @@ namespace dfx
 		if (fread(&temp, 2, 1, fd) != 1) goto error;
 		
 #ifdef __LITTLE_ENDIAN__
-		swap16(&temp);
+		swap(&temp);
 #endif
 		nChannels = temp;
 
@@ -802,7 +805,7 @@ namespace dfx
 		if (fread(&frames, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&frames);
+		swap(&frames);
 #endif
 		fileFrames = frames; // sample frames
 
@@ -810,7 +813,7 @@ namespace dfx
 		if (fread(&temp, 2, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-		swap16(&temp);
+		swap(&temp);
 #endif
 
 		// Get file sample rate from the header.  For AIFF files, this value
@@ -826,7 +829,7 @@ namespace dfx
 		mantissa = (unsigned long)*(unsigned long*)(srate + 2);
 
 #ifdef __LITTLE_ENDIAN__
-		swap32(&mantissa);
+		swap((uint32_t *)&mantissa); // @@ TODO: BRY SAYS: REALLY BAD HACK HERE!!!
 #endif
 		exp = 30 - *(srate + 1);
 		last = 0;
@@ -940,7 +943,7 @@ namespace dfx
 			if (fread(&chunkSize, 4, 1, fd) != 1) goto error;
 
 #ifdef __LITTLE_ENDIAN__
-			swap32(&chunkSize);
+			swap(&chunkSize);
 #endif
 			chunkSize += chunkSize % 2; // chunk sizes must be even
 			if (fseek(fd, chunkSize, SEEK_CUR) == -1) goto error;
@@ -1003,7 +1006,7 @@ namespace dfx
 
 	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize)
 	{
-		// @@ We've changed the logic. Now, we auto-resise the buffer here if need be. That's so we can keep
+		// @@ We've changed the logic. Now, we auto-resize the buffer here if need be. That's so we can keep
 		// the boundary checking logic in one place.
 
 		// Make sure we have an open file.

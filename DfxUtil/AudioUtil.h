@@ -34,47 +34,33 @@
  *
 \******************************************************************************/
 
-#include <memory>
-#include <filesystem>
-#include "VelocityLayer.h"
+#include "ResultPkg.h"
 
 namespace dfx
 {
-	class MultiLayeredDrum {
-	public:
-
-		std::filesystem::path cumulativePath;  // For ease of recursing down
-		std::filesystem::path drumPath;        // Relative to kit location
-		std::string name;
-
-		std::vector<VelocityLayer> velocityLayers;
-
-		int midiNote; // 0 - 127
-
-	public:
-
-		MultiLayeredDrum(const std::string& name_, std::filesystem::path cumulativePath_, std::filesystem::path drumPath_, int midiNote_);
-		MultiLayeredDrum(const MultiLayeredDrum& other);
-		MultiLayeredDrum(MultiLayeredDrum&& other) noexcept;
-		virtual ~MultiLayeredDrum() { }
-
-		void operator=(const MultiLayeredDrum& other);
-		void operator=(MultiLayeredDrum&& other) noexcept;
-
-		void SortLayers();
-
-		int FindVelocityLayer(int vel);         // Mostly for debugging
-		int FindVelocityLayer(double vel);
-
-		RobinMgr& SelectVelocityLayer(int vel);  // Mostly for debugging
-		RobinMgr& SelectVelocityLayer(double vel);
-
-	public:
-
-		int LoadWaves(std::ostream &serr);
-
-		MemWave& ChooseWave(int vel);    // Mostly for debugging
-		MemWave& ChooseWave(double vel);
+	enum class AudioResult
+	{
+		NoError,
+		STATUS,
+		WARNING,
+		DEBUG_PRINT,
+		MEMORY_ALLOCATION,
+		MEMORY_ACCESS,
+		FUNCTION_ARGUMENT,
+		FILE_NOT_FOUND,
+		FILE_UNKNOWN_FORMAT,
+		FILE_NAMING,        // @@ BRY ADDED THIS
+		FILE_CONFIGURATION, // @@ BRY ADDED THIS
+		FILE_ERROR,
+		PROCESS_THREAD,
+		PROCESS_SOCKET,
+		PROCESS_SOCKET_IPADDR,
+		AUDIO_SYSTEM,
+		MIDI_SYSTEM,
+		UNSPECIFIED
 	};
 
-} // end of namespace
+	extern std::string to_string(AudioResult r);
+
+	using AudioResultPkg = bryx::ResultPkg<AudioResult>;
+}

@@ -189,6 +189,10 @@ namespace dfx
 
 		int midi_note = static_cast<int>(nt->engr_num.X());
 
+		auto drum_path_opt = GetSimpleProperty(drum_map_ptr, "path");  // @@ TODO: Someday simplify this stuff
+		std::string dpath = drum_path_opt ? *drum_path_opt : "";
+
+
 		// See if the drum velocity layers are in an include file instead
 		// of being immediate.
 
@@ -266,7 +270,7 @@ namespace dfx
 			if (rv == DfxResult::NoError)
 			{
 				auto dmp = dp->GetInstrumentIncludeMapPtr();
-				auto drum = MakeInstrument(drum_name, kit->cumulativePath, midi_note, dmp);
+				auto drum = MakeInstrument(drum_name, kit->cumulativePath, dpath, midi_note, dmp);
 				kit->drums.push_back(std::move(drum));
 			}
 			else
@@ -278,20 +282,18 @@ namespace dfx
 		else
 		{
 			// Velocity layer stuff is embedded in main file. So easy peasy.
-			auto drum = MakeInstrument(drum_name, kit->cumulativePath, midi_note, drum_map_ptr);
+			auto drum = MakeInstrument(drum_name, kit->cumulativePath, dpath, midi_note, drum_map_ptr);
 			kit->drums.push_back(std::move(drum));
 		}
 	}
 
-	drum_ptr DrumFont::MakeInstrument(const std::string &drum_name, std::filesystem::path cumulativePath, int midi_note, const curly_list_type *drum_map_ptr)
+	drum_ptr DrumFont::MakeInstrument(const std::string &drum_name, std::filesystem::path cumulativePath, std::filesystem::path drumPath, int midi_note, const curly_list_type *drum_map_ptr)
 	{
-		auto drum_path_opt = GetSimpleProperty(drum_map_ptr, "path");
-
 		std::cout << "drum " << drum_name << std::endl;
-		std::cout << "  path " << '"' << *drum_path_opt << '"' << std::endl;
+		std::cout << "  path " << '"' << drumPath << '"' << std::endl;
 		std::cout << "  note " << midi_note << std::endl;
 
-		auto drum = std::make_shared<MultiLayeredDrum>(drum_name, cumulativePath, *drum_path_opt, midi_note);
+		auto drum = std::make_shared<MultiLayeredDrum>(drum_name, cumulativePath, drumPath, midi_note);
 
 		// We should have a []-list of velocity layers. Each layer is represented
 		// in the Parser as a name-value pair.

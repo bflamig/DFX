@@ -52,6 +52,11 @@ namespace dfx
 
         int24_t() {}
 
+        int24_t(int32_t x)
+        {
+            operator=(x);
+        }
+
         void operator=(const int32_t& i)
         {
 #if 0
@@ -73,6 +78,15 @@ namespace dfx
             c[2] = (i & 0x00ff0000) >> 24;
 #endif
         }
+
+        // Does work, but let's not right now
+        //void operator+=(int24_t x)
+        //{
+        //    auto a = asInt();
+        //    auto b = x.asInt();
+        //    auto c = a + b;
+        //    operator=(c);
+        //}
 
         int32_t asInt()
         {
@@ -99,6 +113,12 @@ namespace dfx
         {
             return (double)asInt();
         }
+
+        // Does work, but let's not right now
+        //inline operator double()
+        //{
+        //    return (double)asInt();
+        //}
 
         inline float asFloat()
         {
@@ -136,7 +156,7 @@ namespace dfx
 
     // ////////////////////////////////////////////
 
-    inline void swap16(void* ptr)
+    inline void swap(int16_t* ptr)
     {
         unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
         unsigned char val;
@@ -147,7 +167,19 @@ namespace dfx
         *(p + 1) = val;
     }
 
-    inline void swap24(void* ptr)
+    inline void swap(uint16_t* ptr)
+    {
+        unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
+        unsigned char val;
+
+        // Swap 1st and 2nd bytes
+        val = *(p);
+        *(p) = *(p + 1);
+        *(p + 1) = val;
+    }
+
+
+    inline void swap(int24_t* ptr)
     {
         unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
         unsigned char val;
@@ -158,8 +190,7 @@ namespace dfx
         *(p + 2) = val;
     }
 
-
-    inline void swap32(void* ptr)
+    inline void swap(int32_t* ptr)
     {
         unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
         unsigned char val;
@@ -176,7 +207,41 @@ namespace dfx
         *(p + 1) = val;
     }
 
-    inline void swap64(void* ptr)
+    inline void swap(uint32_t* ptr)
+    {
+        unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
+        unsigned char val;
+
+        // Swap 1st and 4th bytes
+        val = *(p);
+        *(p) = *(p + 3);
+        *(p + 3) = val;
+
+        //Swap 2nd and 3rd bytes
+        p += 1;
+        val = *(p);
+        *(p) = *(p + 1);
+        *(p + 1) = val;
+    }
+
+    inline void swap(float* ptr)
+    {
+        unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
+        unsigned char val;
+
+        // Swap 1st and 4th bytes
+        val = *(p);
+        *(p) = *(p + 3);
+        *(p + 3) = val;
+
+        //Swap 2nd and 3rd bytes
+        p += 1;
+        val = *(p);
+        *(p) = *(p + 1);
+        *(p + 1) = val;
+    }
+
+    inline void swap(double* ptr)
     {
         unsigned char* p = reinterpret_cast<unsigned char*>(ptr);
         unsigned char val;

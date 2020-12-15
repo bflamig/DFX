@@ -38,10 +38,11 @@
 #include <vector>
 #include <sstream>
 #include "FrameBuffer.h"
-#include "ResultPkg.h"
+#include "AudioUtil.h"
 
 namespace dfx
 {
+#if 0
 	enum class AudioResult
 	{
 		NoError,
@@ -67,6 +68,8 @@ namespace dfx
 	extern std::string to_string(AudioResult r);
 
 	using AudioResultPkg = bryx::ResultPkg<AudioResult>;
+
+#endif
 
 	class SoundFile {
 	public:
