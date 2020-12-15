@@ -162,6 +162,29 @@ int main()
 	static constexpr unsigned systemSampleRate = 48000;
 
 	//
+	// Setup the input midi controller
+	//
+
+	auto inMidi = MakeInputMidiObject();
+
+	std::cout << "Available input midi ports:" << std::endl;
+	inMidi->ListPorts(std::cout);
+
+	// For our test we'll use a small midi keyboard
+
+	bool b1 = inMidi->OpenPort("AKM320");
+
+	if (b1)
+	{
+		std::cout << "Input midi port successfully opened" << std::endl;
+	}
+	else
+	{
+		std::cout << "FAILURE opening input midi port" << std::endl;
+		return -1;
+	}
+
+	//
 	// Load the drum font file (and verify it and build drum kit)
 	//
 
@@ -193,29 +216,6 @@ int main()
 	{
 		// Note: individual error messages already printed out
 		std::cout << "Stopping due to " << errcnt << " file loading error(s)." << std::endl;
-		return -1;
-	}
-
-	//
-	// Setup the input midi controller
-	//
-
-	auto inMidi = MakeInputMidiObject();
-
-	std::cout << "Available input midi ports:" << std::endl;
-	inMidi->ListPorts(std::cout);
-
-	// For our test we'll use a small midi keyboard
-
-	bool b1 = inMidi->OpenPort("AKM320");
-
-	if (b1)
-	{
-		std::cout << "Input midi port successfully opened" << std::endl;
-	}
-	else
-	{
-		std::cout << "FAILURE opening input midi port" << std::endl;
 		return -1;
 	}
 

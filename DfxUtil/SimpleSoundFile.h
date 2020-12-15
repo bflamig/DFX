@@ -233,12 +233,11 @@ namespace dfx
 
 			if (byteswap)
 			{
-				T q;
 				for (unsigned k = 0; k < nSamples; k++)
 				{
-					q = *p++;
-
-					if (fwrite(&q, sizeof(T), 1, fd) != 1) goto error;
+					T *q = p++;
+					swap(q);
+					if (fwrite(q, sizeof(T), 1, fd) != 1) goto error;
 				}
 			}
 			else
