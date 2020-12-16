@@ -90,7 +90,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == NoteOffMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t note = bytes[1] & 0x7f;
 			uint8_t velocity = bytes[2] & 0x7f;
 			return NoteOffMessage(channel, note, velocity);
@@ -104,7 +106,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == NoteOnMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t note = bytes[1] & 0x7f;
 			uint8_t velocity = bytes[2] & 0x7f;
 			return NoteOnMessage(channel, note, velocity);
@@ -118,7 +122,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == AftertouchMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t note = bytes[1] & 0x7f;
 			uint8_t pressure = bytes[2] & 0x7f;
 			return AftertouchMessage(channel, note, pressure);
@@ -132,7 +138,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == ControlChangeMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t controller = bytes[1] & 0x7f;
 			uint8_t value = bytes[2] & 0x7f;
 			return ControlChangeMessage(channel, controller, value);
@@ -146,7 +154,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == ProgramChangeMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t new_program = bytes[1] & 0x7f;
 			return ProgramChangeMessage(channel, new_program);
 		}
@@ -159,7 +169,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == ChannelAftertouchMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 			uint8_t pressure = bytes[1] & 0x7f;
 			return ChannelAftertouchMessage(channel, pressure);
 		}
@@ -172,7 +184,9 @@ namespace dfx
 
 		if ((bytes[0] & 0xf0) == PitchBendMessage::tag)
 		{
-			uint8_t channel = bytes[0] & 0x0f;
+			// NOTE: To message, channels are 0-15. To user, 
+			// they are 1-16. Let's return the user view.
+			uint8_t channel = (bytes[0] & 0x0f) + 1;
 
 			// @@ TODO: endian issues?
 			int amt = bytes[1] & 0x7f;
