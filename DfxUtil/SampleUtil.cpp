@@ -387,210 +387,6 @@ namespace dfx
 		}
 	}
 
-#if 0
-
-	// ////////////////////////////////////////
-
-	void ByteSwapSrc(int16_t& dest, int16_t src)
-	{
-		unsigned char* src_ptr = reinterpret_cast<unsigned char*>(&src);
-		unsigned char* ptr = src_ptr;
-		unsigned char val;
-
-		// Swap 1st and 2nd bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-
-		memcpy(&dest, src_ptr, sizeof(int16_t));
-	}
-
-
-	void ByteSwapDest(int16_t& dest, int16_t src)
-	{
-		memcpy(&dest, &src, sizeof(int16_t));
-
-		unsigned char* ptr = reinterpret_cast<unsigned char *>(&dest);
-		unsigned char val;
-
-		// Swap 1st and 2nd bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-	}
-
-	void ByteSwapSrc(int24_t& dest, int24_t src)
-	{
-		unsigned char* src_ptr = reinterpret_cast<unsigned char *>(&src);
-		unsigned char* ptr = src_ptr;
-		unsigned char val;
-
-		// Swap 1st and 3rd bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 2);
-		*(ptr + 2) = val;
-
-		memcpy(&dest, src_ptr, sizeof(int24_t));
-	}
-
-	void ByteSwapDest(int24_t& dest, int24_t src)
-	{
-		memcpy(&dest, &src, sizeof(int24_t));
-
-		unsigned char* ptr = reinterpret_cast<unsigned char*>(&dest);
-		unsigned char val;
-
-		// Swap 1st and 3rd bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 2);
-		*(ptr + 2) = val;
-	}
-
-	void ByteSwapSrc(int32_t& dest, int32_t src)
-	{
-		unsigned char* src_ptr = reinterpret_cast<unsigned char*>(&src);
-		unsigned char* ptr = src_ptr;
-		unsigned char val;
-
-		// Swap 1st and 4th bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 2nd and 3rd bytes.
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-
-		memcpy(&dest, src_ptr, sizeof(int32_t));
-	}
-
-
-	void ByteSwapDest(int32_t& dest, int32_t src)
-	{
-		memcpy(&dest, &src, sizeof(int32_t));
-
-		unsigned char* ptr = reinterpret_cast<unsigned char *>(&dest);
-		unsigned char val;
-
-		// Swap 1st and 4th bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 2nd and 3rd bytes.
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-	}
-
-	void ByteSwapSrc(float& dest, float src)
-	{
-		unsigned char* src_ptr = reinterpret_cast<unsigned char*>(&dest);
-		unsigned char* ptr = src_ptr;
-		unsigned char val;
-
-		// Swap 1st and 4th bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 2nd and 3rd bytes.
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-
-		memcpy(&dest, src_ptr, sizeof(float));
-	}
-
-	void ByteSwapDest(float& dest, float src)
-	{
-		memcpy(&dest, &src, sizeof(float));
-
-		unsigned char* ptr = reinterpret_cast<unsigned char*>(&dest);
-		unsigned char val;
-
-		// Swap 1st and 4th bytes.
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 2nd and 3rd bytes.
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-	}
-
-
-	void ByteSwapSrc(double& dest, double src)
-	{
-		unsigned char* src_ptr = reinterpret_cast<unsigned char*>(&src);
-		unsigned char* ptr = src_ptr;
-		unsigned char val;
-
-		// Swap 1st and 8th bytes
-		val = *(ptr);
-		*(ptr) = *(ptr + 7);
-		*(ptr + 7) = val;
-
-		// Swap 2nd and 7th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 5);
-		*(ptr + 5) = val;
-
-		// Swap 3rd and 6th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 4th and 5th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-
-		memcpy(&dest, src_ptr, sizeof(double));
-	}
-
-	void ByteSwapDest(double& dest, double src)
-	{
-		memcpy(&dest, &src, sizeof(double));
-
-		unsigned char* ptr = reinterpret_cast<unsigned char*>(&dest);
-		unsigned char val;
-
-		// Swap 1st and 8th bytes
-		val = *(ptr);
-		*(ptr) = *(ptr + 7);
-		*(ptr + 7) = val;
-
-		// Swap 2nd and 7th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 5);
-		*(ptr + 5) = val;
-
-		// Swap 3rd and 6th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 3);
-		*(ptr + 3) = val;
-
-		// Swap 4th and 5th bytes
-		ptr += 1;
-		val = *(ptr);
-		*(ptr) = *(ptr + 1);
-		*(ptr + 1) = val;
-	}
-
-#endif
-
 	// ////////////////////////////////////////////////////////////////////////////////
 	//
 	// Due to ASIO architecture, can only conveniently do these one channel at a time
@@ -746,5 +542,962 @@ namespace dfx
 			break;
 		}
 	}
+
+	// ////////////////////////////////////////////////////////////////////////
+
+
+    void convertBuffer(SampleFormat outFormat, void* outBuffer, int outStride, SampleFormat inFormat, void* inBuffer, int inStride, unsigned nSamples, int nChannels)
+    {
+        // This function does format conversion, input/output channel compensation.
+        // 24-bit samples are assumed to be stored in our special int24_t type.
+
+        // NOTE: For non-interleaving, set inStride and outStride = nChannels;
+
+        switch (outFormat)
+        {
+        case SampleFormat::SINT16:
+        {
+            auto* out = (int16_t*)outBuffer;
+
+            switch (inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        //out[j] = (int16_t)(in[j].asInt() >> 8);  // If 24-bit data is in lower three bytes of int32_t.
+                        out[j] = (int16_t)(in[j].asInt() >> 16); // If 24-bit data is in upper three bytes of int32_t.
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int16_t)((in[j] >> 16) & 0x0000ffff);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int16_t)(in[j] * 32767.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[j] = (int16_t)(in[j] * 32767.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::SINT24:
+        {
+            auto out = (int24_t*)outBuffer;
+
+            switch (inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int32_t)(in[j] << 8);
+                        //out[j] <<= 8;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[j] = in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int32_t)(in[j] >> 8);
+                        //out[j] >>= 8;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++) {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[j] = (int32_t)(in[j] * 8388607.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++) {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[j] = (int32_t)(in[j] * 8388607.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::SINT32:
+        {
+            auto out = (int32_t*)outBuffer;
+
+            switch (inFormat)
+            {
+
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (int32_t)in[j];
+                        d <<= 16;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (int32_t)in[j].asInt();
+                        //d <<= 8; If 24-bit data is in lower three bytes of int32_t.
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int32_t)(in[j] * 2147483647.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (int32_t)(in[j] * 2147483647.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::FLOAT32:
+        {
+            float scale;
+            auto out = (float*)outBuffer;
+
+            switch (inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                scale = (float)(1.0 / 32767.5);
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (float)in[j];
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                //scale = (float)(1.0 / 8388607.5); // If 24-bit data is in lower three bytes of int32_t
+                scale = (float)(1.0 / 2147483647.5); // If 24-bit data is in upper three bytes of int32_t
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = in[j].asFloat(); // @@ asFloat has subtle casting.
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                scale = (float)(1.0 / 2147483647.5);
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (float)in[j]; // @@ Watch for overflow problems here
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (float)in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::FLOAT64:
+        {
+            double scale;
+            auto* out = (double*)outBuffer;
+
+            switch (inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                scale = 1.0 / 32767.5;
+
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (double)in[j];
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                //scale = 1.0 / 8388607.5;  // If 24-bit data is in lower three bytes of int32_t
+                scale = 1.0 / 2147483647.5; // If 24-bit data is in upper three bytes of int32_t
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = in[j].asDouble();
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                scale = 1.0 / 2147483647.5;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[j];
+                        d = (double)in[j];
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = (double)in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[j] = in[j];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+            }
+        }
+        break;
+
+        }
+
+    }
+
+
+#if 0
+
+    void convertBufferX(DfxStream& stream, char* outBuffer, char* inBuffer, ConvertInfo& info)
+    {
+        // This function does format conversion, input/output channel compensation, and
+        // data interleaving/deinterleaving.  24-bit integers are assumed to occupy
+        // the lower three bytes of a 32-bit integer.
+
+#if 0
+        // Clear our device buffer when in/out duplex device channels are different
+
+        bool duplex = stream.nDevPlayChannels != 0 && stream.nDevRecChannels != 0; // @@ I guess?
+
+        if (outBuffer == stream.devBuffer && duplex && (stream.nDevPlayChannels < stream.nDevRecChannels))
+        {
+            memset(outBuffer, 0, stream.bufferSize * info.outJump * Bytes(info.outFormat));
+        }
+
+#endif
+
+        const unsigned nSamples = stream.bufferSize;
+        const int nChannels = info.nChannels;
+        const int inStride = info.inJump;
+        const int outStride = info.outJump;
+
+        switch (info.outFormat)
+        {
+        case SampleFormat::SINT16:
+        {
+            auto* out = (int16_t*)outBuffer;
+
+            switch (info.inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        //out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]].asInt() >> 8); // If 24-bit data is in lower three bytes of int32_t
+                        out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]].asInt() >> 16); // If 24-bit data is in upper three bytes of int32_t
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int16_t)((in[info.inOffset[j]] >> 16) & 0x0000ffff);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]] * 32767.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[info.outOffset[j]] = (int16_t)(in[info.inOffset[j]] * 32767.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::SINT24:
+        {
+            auto out = (int24_t*)outBuffer;
+
+            switch (info.inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] << 8);
+                        //out[info.outOffset[j]] <<= 8;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[info.outOffset[j]] = in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] >> 8);
+                        //out[info.outOffset[j]] >>= 8;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++) {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] * 8388607.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++) {
+                    for (int j = 0; j < nChannels; j++) {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] * 8388607.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::SINT32:
+        {
+            auto out = (int32_t*)outBuffer;
+
+            switch (info.inFormat)
+            {
+
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (int32_t)in[info.inOffset[j]];
+                        d <<= 16;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (int32_t)in[info.inOffset[j]].asInt();
+                        //d <<= 8; If 24-bit data is in lower three bytes of int32_t.
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (int32_t*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] * 2147483647.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (int32_t)(in[info.inOffset[j]] * 2147483647.5 - 0.5);
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::FLOAT32:
+        {
+            float scale;
+            auto out = (float*)outBuffer;
+
+            switch (info.inFormat)
+            {
+
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                scale = (float)(1.0 / 32767.5);
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (float)in[info.inOffset[j]];
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                //scale = (float)(1.0 / 8388607.5);  // If 24-bit data is in lower three bytes of int32_t.
+                scale = (float)(1.0 / 2147483647.5); // If 24-bit data is in upper three bytes of int32_t.
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = in[info.inOffset[j]].asFloat(); // @@ asFloat has subtle casting
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                scale = (float)(1.0 / 2147483647.5);
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (float)in[info.inOffset[j]];
+                        d += 0.5f; // @@ BRY
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (float)in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            }
+        }
+        break;
+
+        case SampleFormat::FLOAT64:
+        {
+            double scale;
+            auto* out = (double*)outBuffer;
+
+            switch (info.inFormat)
+            {
+            case SampleFormat::SINT16:
+            {
+                auto in = (int16_t*)inBuffer;
+                scale = 1.0 / 32767.5;
+
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (double)in[info.inOffset[j]];
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT24:
+            {
+                auto in = (int24_t*)inBuffer;
+                //scale = 1.0 / 8388607.5;  // If 24-bit data is in lower three bytes of int32_t
+                scale = 1.0 / 2147483647.5; // If 24-bit data is in upper three bytes of int32_t
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = in[info.inOffset[j]].asDouble();
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::SINT32:
+            {
+                auto in = (int32_t*)inBuffer;
+                scale = 1.0 / 2147483647.5;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        auto& d = out[info.outOffset[j]];
+                        d = (double)in[info.inOffset[j]];
+                        d += 0.5;
+                        d *= scale;
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT32:
+            {
+                auto in = (float*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = (double)in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+
+            case SampleFormat::FLOAT64:
+            {
+                // Channel compensation and/or (de)interleaving only.
+                auto in = (double*)inBuffer;
+                for (unsigned i = 0; i < nSamples; i++)
+                {
+                    for (int j = 0; j < nChannels; j++)
+                    {
+                        out[info.outOffset[j]] = in[info.inOffset[j]];
+                    }
+                    in += inStride;
+                    out += outStride;
+                }
+            }
+            break;
+            }
+        }
+        break;
+
+        }
+    }
+
+#endif
+
+
+	// ////////////////////////////////////////////////////////////////////////
 
 } // end of namespace

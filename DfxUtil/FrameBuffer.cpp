@@ -88,7 +88,6 @@ namespace dfx
 		throw std::exception("Invalid sample format");
 	}
 
-
 	// This is an attempt to judge the practical "extent" and "volume" of an audio signal.
 	// We only do this for frame buffers of doubles.
 

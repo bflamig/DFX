@@ -410,6 +410,53 @@ namespace dfx
 			return (double(s) / nChannels);
 		}
 
+
+		T FindMax(double duration)
+		{
+			unsigned nFramesToDo;
+
+			if (duration > 0.0)
+			{
+				// If we want to just look at a portion of the samples
+
+				nFramesToDo = unsigned(duration * dataRate + 0.5);
+
+				if (nFramesToDo > nFrames)
+				{
+					nFramesToDo = nFrames;
+				}
+			}
+			else
+			{
+				// If we want to look at all of the samples
+				nFramesToDo = nFrames;
+			}
+
+			if (nFramesToDo == 0)
+			{
+				throw std::exception("Range of samples empty");
+			}
+
+			size_t nSamplesToDo = nFramesToDo * nChannels;
+
+			// Compute the peak signal seen, either channel
+
+			T neg_peak = 0;
+			T pos_peak = 0;
+
+			auto p = samples.get();
+
+			for (size_t i = 0; i < nSamples; i++)
+			{
+				auto x = *p++;
+				if (x < neg_peak) neg_peak = x;
+				if (x > pos_peak) pos_peak = x;
+			}
+
+			T peak = (-neg_peak) > pos_peak ? -neg_peak : pos_peak;
+			return peak;
+		}
+
 	};
 
     //

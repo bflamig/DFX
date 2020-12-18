@@ -79,6 +79,28 @@ namespace dfx
 #endif
         }
 
+        friend int operator<(int24_t a, int24_t b)
+        {
+            return (a.asInt() - b.asInt()) < 0;
+        }
+
+        friend int operator>(int24_t a, int24_t b)
+        {
+            return (a.asInt() - b.asInt()) > 0;
+        }
+
+        friend int operator==(int24_t a, int24_t b)
+        {
+            return (a.asInt() - b.asInt()) == 0;
+        }
+
+        friend int24_t operator-(int24_t x)
+        {
+            auto z = x.asInt();
+            z = -z;
+            return int24_t(z);
+        }
+
         // Does work, but let's not right now
         //void operator+=(int24_t x)
         //{
@@ -275,6 +297,8 @@ namespace dfx
 
 
     extern void byteSwapBuffer(SampleFormat format, void* buffer, unsigned int nSamples);
+
+    void convertBuffer(SampleFormat outFormat, void* outBuffer, int outStride, SampleFormat inFormat, void* inBuffer, int inStride, unsigned nSamples, int nChannels);
 
     extern void InterleaveChannel(SampleFormat sFormat, void* interleavedBuff, void* nonInterleavedChannel, unsigned whichChannel, unsigned nChannels, unsigned nSamples, bool byte_swap = false);
     extern void DeInterleaveChannel(SampleFormat sFormat, void* interleavedBuff, void* nonInterleavedChannel, unsigned whichChannel, unsigned nChannels, unsigned nSamples, bool byte_swap = false);

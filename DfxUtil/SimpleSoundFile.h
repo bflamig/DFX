@@ -116,8 +116,7 @@ namespace dfx
 
 		template<class T> bool Read(FrameBuffer<T>& buffer, unsigned startFrame = 0, unsigned endFrame = 0)
 		{
-			// @@ We've changed the logic. Now, we auto-resize the buffer here if need be. That's so we can keep
-			// the boundary checking logic in one place.
+			// Buffer is auto-sized here.
 
 			// Make sure we have an open file.
 			if (fd == 0)

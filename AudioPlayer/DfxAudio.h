@@ -244,7 +244,7 @@ namespace dfx
     extern void convertBuffer(DfxStream& stream, char* outBuffer, char* inBuffer, ConvertInfo& info);
 
     // This way does interleave/de-interleave
-    extern void convertBufferX(DfxStream& stream, char* outBuffer, char* inBuffer, ConvertInfo& info);
+    //extern void convertBufferX(DfxStream& stream, char* outBuffer, char* inBuffer, ConvertInfo& info);
 
 
     // /////////////////////////////////////////////////////////////////

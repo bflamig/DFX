@@ -17,6 +17,8 @@ namespace dfx
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
 		FrameBuffer<int24_t> fb;
 
+		double period;
+
 	public:
 
 		// It's useful to have the start threshold to be bigger than the ending one.
@@ -31,8 +33,13 @@ namespace dfx
 		: ssf{}
 		, bounds_map(127)
 		, fb{}
+		, period{ 4 }
 		{
+		}
 
+		void SetPeriod(double period_)
+		{
+			period = period_;
 		}
 
 		// Right now, only 24 bit file support
@@ -65,7 +72,7 @@ namespace dfx
 			// jitter in the timing. The below seems to work at least for 4 sec intervals
 			// at 48 kHz sampling.
 
-			unsigned f = start + 48000 * 4 - 1000; // 4 secs worth minus some slop
+			unsigned f = start + unsigned(48000 * period) - 1000; // period secs worth minus some slop
 
 			for (; f > 0; --f)
 			{
@@ -111,7 +118,7 @@ namespace dfx
 					auto bounds = FindWave(beg_start);
 					std::cout << "i: " << (i + 1) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
 					bounds_map[i] = bounds;
-					beg_start = bounds.first + 48000 * 4 - 1000;
+					beg_start = bounds.first + unsigned(48000 * period) - 1000; // period secs worth minus some slop
 				}
 			}
 			else
@@ -182,26 +189,24 @@ using namespace dfx;
 
 int main()
 {
+#if 0
 	VelocityLayerSplitter splitter;
-
-	std::string drum_name = "Tom2";
 
 	std::filesystem::path basePath = "W:/Reaper";
 
-	std::filesystem::path fname = basePath;
-	fname /= drum_name;
-	fname.replace_extension("wav");
+	std::string drum_name = "Tabla60";
+	std::string period = "3_secs";
+	splitter.SetPeriod(3.0);
 
-	//std::string fname = "W:/TestSample.wav";
-	// std::string fname = "W:/Reaper/Tom4.wav";
+	std::filesystem::path fname = basePath;
+	fname /= drum_name + "." + period;;
+	fname.replace_extension("wav");
 
 	std::string robinPartial = drum_name + "_v";
 
 	std::filesystem::path robinBasePath = basePath;
 	robinBasePath /= drum_name + "Robins";
 	robinBasePath /= robinPartial;
-
-	// std::string robinBasePath = "W:/Reaper/Robins/Tom4_v";
 
 	std::filesystem::path dfxiPath = basePath;
 	dfxiPath /= drum_name;
@@ -210,5 +215,52 @@ int main()
 	splitter.FindWaves(fname.generic_string());
 	splitter.CreateVelocityFiles(robinBasePath.generic_string());
 	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+#else
+
+	SimpleSoundFile ssf;
+
+	//bool b = ssf.OpenForReading("w:/reaper/02-201217_1814.wav");
+	bool b = ssf.OpenForReading("w:/reaper/Tabla65.1_5secs.wav");
+
+	switch (ssf.dataType)
+	{
+		case SampleFormat::SINT16:
+		{
+			FrameBuffer<int16_t> buff;
+			b = ssf.Read(buff);
+			auto m = buff.FindMax(4.0);
+		}
+		break;
+		case SampleFormat::SINT24:
+		{
+			FrameBuffer<int24_t> buff;
+			b = ssf.Read(buff);
+			auto m = buff.FindMax(4.0);
+		}
+		break;
+		case SampleFormat::SINT32:
+		{
+			FrameBuffer<int32_t> buff;
+			b = ssf.Read(buff);
+			auto m = buff.FindMax(4.0);
+		}
+		break;
+		case SampleFormat::FLOAT32:
+		{
+			FrameBuffer<float> buff;
+			b = ssf.Read(buff);
+			auto m = buff.FindMax(4.0);
+		}
+		break;
+		case SampleFormat::FLOAT64:
+		{
+			FrameBuffer<double> buff;
+			b = ssf.Read(buff);
+			auto m = buff.FindMax(4.0);
+		}
+		break;
+	}
+
+#endif
 }
 
