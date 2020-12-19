@@ -65,12 +65,12 @@ namespace dfx
 
 	void PolyTable::SetupEmptyTable()
 	{
-		auto nsoundings = elems.size();
+		unsigned nsoundings = static_cast<unsigned>(elems.size());
 
 		// Set up inactive linked list to take up entire table.
 		// Also clear out any resident wave data.
 
-		for (size_t i = 0; i < nsoundings; i++)
+		for (unsigned i = 0; i < nsoundings; i++)
 		{
 			elems[i].younger = -1;  // Only for active list, which starts out empty
 			elems[i].older = i + 1;

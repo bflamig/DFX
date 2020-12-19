@@ -65,7 +65,7 @@ namespace dfx
 
 		void Clear();
 
-		bool Load(const std::filesystem::path& path_, size_t start_frame = 0, size_t end_frame = 0);
+		bool Load(const std::filesystem::path& path_, unsigned start_frame = 0, unsigned end_frame = 0);
 		bool LoadRaw(const std::filesystem::path& path_, unsigned nChannels_, SampleFormat format_, double fileRate_);
 
 		void Reset();

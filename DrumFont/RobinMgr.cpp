@@ -39,7 +39,7 @@ namespace dfx
 {
 	// ////////////////////////////////////////////////////
 
-	Robin::Robin(std::string fileName_, double peak_, double rms_, size_t start_frame_, size_t end_frame_)
+	Robin::Robin(std::string fileName_, double peak_, double rms_, unsigned start_frame_, unsigned end_frame_)
 	: wave()
 	, fullPath()
 	, fileName(fileName_)

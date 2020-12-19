@@ -15,6 +15,7 @@ namespace dfx
 
 		SimpleSoundFile ssf;
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
+		std::vector<double> peaks; // scaled -1 to +1
 		FrameBuffer<int24_t> fb;
 
 		double period;
@@ -22,9 +23,10 @@ namespace dfx
 	public:
 
 		// It's useful to have the start threshold to be bigger than the ending one.
-		// We don't get "stuck" as easily when hopping to the next wave.
+		// We don't get "stuck" as easily when hopping to the next wave and searching
+		// for start.
 
-		double start_wave_thold = 0.0005;  // Roughly -66dB, where 1.0 is max sample value
+		double start_wave_thold = 0.005;   // Roughly -46dB // Roughly -66dB, where 1.0 is max sample value
 		double end_wave_thold   = 0.0001;  // Roughly -80dB, where 1.0 is max sample value
 
 	public:
@@ -32,6 +34,7 @@ namespace dfx
 		VelocityLayerSplitter()
 		: ssf{}
 		, bounds_map(127)
+		, peaks(127)
 		, fb{}
 		, period{ 4 }
 		{
@@ -50,11 +53,13 @@ namespace dfx
 			for (; f < fb.nFrames; f++)
 			{
 				auto x = fb.GetStereoFrame(f);
-				auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
+				//auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
+				auto maxxie = fb.GetAbsMaxOfFrame(f).asDouble();
 				// Need to scale to our 24 bit world. The 24 bits are in the high three bytes
 				// of a 32 bit integer, and then we convert straight to double from there, so ...
 				const double scaled_thold = start_wave_thold * 2147483647.0; 
-				if (avg > scaled_thold) break;
+				//if (avg > scaled_thold) break;
+				if (maxxie > scaled_thold) break;
 			}
 			return f;
 		}
@@ -77,11 +82,13 @@ namespace dfx
 			for (; f > 0; --f)
 			{
 				auto x = fb.GetStereoFrame(f);
-				auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
+				//auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
+				auto maxxie = fb.GetAbsMaxOfFrame(f).asDouble();
 				// Need to scale to our 24 bit world. The 24 bits are in the high three bytes
 				// of a 32 bit integer, and then we convert straight to double from there, so ...
 				const double scaled_thold = end_wave_thold * 2147483647.0;
-				if (avg > scaled_thold) break; // because 24 bit in high three bytes
+				//if (avg > scaled_thold) break; // because 24 bit in high three bytes
+				if (maxxie > scaled_thold) break; // because 24 bit in high three bytes
 			}
 
 			return f;
@@ -127,6 +134,15 @@ namespace dfx
 			}
 		}
 
+		void ScanForPeaks()
+		{
+			for (int i = 0; i < 127; i++)
+			{
+				int24_t peak = fb.FindMax(bounds_map[i].first, bounds_map[i].second + 1);
+				peaks[i] = peak.asDouble() / 2147483487.0;
+			}
+		}
+
 		void CreateVelocityFiles(const std::string &robinBasePath)
 		{
 			// std::string robinBasePath = "W:/Reaper/Robins/Tom4_v";
@@ -167,7 +183,9 @@ namespace dfx
 				{
 					auto num_str = std::to_string(i + 1);
 					dfxi << "        " << "vr" << num_str << " = { fname = \"";
-					dfxi << robinBase << num_str << ".wav" << "\"" << " }" << std::endl;
+					dfxi << robinBase << num_str << ".wav" << "\"";
+					dfxi << ", peak = " << peaks[i];
+					dfxi << " }" << std::endl;
 				}
 
 				dfxi << "    ]" << std::endl;
@@ -189,18 +207,17 @@ using namespace dfx;
 
 int main()
 {
-#if 0
+#if 1
 	VelocityLayerSplitter splitter;
 
 	std::filesystem::path basePath = "W:/Reaper";
 
-	std::string drum_name = "Tabla60";
-	std::string period = "3_secs";
+	std::string drum_name = "Tabla64";
+	std::string period_str = "3secs";
 	splitter.SetPeriod(3.0);
 
 	std::filesystem::path fname = basePath;
-	fname /= drum_name + "." + period;;
-	fname.replace_extension("wav");
+	fname /= drum_name + "." + period_str + ".wav";
 
 	std::string robinPartial = drum_name + "_v";
 
@@ -212,8 +229,13 @@ int main()
 	dfxiPath /= drum_name;
 	dfxiPath.replace_extension("dfxi");
 
+	std::cout << "Finding wave boundaries" << std::endl;
 	splitter.FindWaves(fname.generic_string());
+	std::cout << "Creating velocity files" << std::endl;
 	splitter.CreateVelocityFiles(robinBasePath.generic_string());
+	std::cout << "Finding waveform peaks" << std::endl;
+	splitter.ScanForPeaks();
+	std::cout << "Creating dfxi file" << std::endl;
 	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
 #else
 
@@ -229,6 +251,8 @@ int main()
 			FrameBuffer<int16_t> buff;
 			b = ssf.Read(buff);
 			auto m = buff.FindMax(4.0);
+
+
 		}
 		break;
 		case SampleFormat::SINT24:

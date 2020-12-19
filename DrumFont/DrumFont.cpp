@@ -300,7 +300,7 @@ namespace dfx
 
 		const square_list_type* vlayers = GetSquareListProperty(drum_map_ptr, "velocities");
 
-		int nlayers = vlayers->size();
+		size_t nlayers = vlayers->size();
 		drum->velocityLayers.reserve(nlayers);
 
 		for (auto vlayer_sh_ptr : *vlayers)

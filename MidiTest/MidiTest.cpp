@@ -155,7 +155,7 @@ void test2()
 					{
 						std::cout << "System message: "; 
 						auto bytes = m->bytes;
-						int nBytes = bytes.size();
+						int nBytes = static_cast<int>(bytes.size());
 
 						for (int i = 0; i < nBytes; i++)
 						{
@@ -171,7 +171,7 @@ void test2()
 					// Fall back for unknown messages
 
 					auto bytes = m->bytes;
-					int nBytes = bytes.size();
+					int nBytes = static_cast<int>(bytes.size());
 
 					std::cout << "Unknown message: ";
 

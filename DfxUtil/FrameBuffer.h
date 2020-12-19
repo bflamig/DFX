@@ -354,14 +354,18 @@ namespace dfx
 		{
 			unsigned sampleIndx = f * nChannels;
 
-			T m = 0;
+			T pos_max = 0;
+			T neg_max = 0;
 
 			for (unsigned i = 0; i < nChannels; i++)
 			{
-				auto v = std::abs(samples[sampleIndx + i]);
-				if (v > m) m = v;
+				auto x = samples[sampleIndx + 1];
+				if (x > pos_max) pos_max = x;
+				if (x < neg_max) neg_max = x;
 			}
 
+			neg_max = -neg_max;
+			auto m = (neg_max > pos_max) ? neg_max : pos_max;
 			return m;
 		}
 
@@ -455,6 +459,44 @@ namespace dfx
 
 			T peak = (-neg_peak) > pos_peak ? -neg_peak : pos_peak;
 			return peak;
+		}
+
+		T FindMax(unsigned startFrame, unsigned endFrame)
+		{
+			// Here, end is supposed to be one past the desired end.
+
+			if (startFrame >= endFrame)
+			{
+				throw std::exception("Inconsistent range in arguments");
+			}
+
+			if (endFrame > nFrames)
+			{
+				// Since end is one past the desired end, and we 
+				// are using base 0, then end > nFrames is out
+				// of range. end should = nFrames if you want all
+				// the way to the last frame.
+				throw std::exception("End argumet is out of range");
+			}
+
+			T neg_peak = 0;
+			T pos_peak = 0;
+
+			for (unsigned i = startFrame; i < endFrame; i++)
+			{
+				auto x = GetMaxOfFrame(i);
+				if (x > pos_peak) pos_peak = x;
+				auto y = GetMinOfFrame(i);
+				if (y < neg_peak) neg_peak = x;
+			}
+
+			T peak = (-neg_peak) > pos_peak ? -neg_peak : pos_peak;
+			return peak;
+		}
+
+		double ComputeRms(unsigned startFrame, unsigned endFrame)
+		{
+			return 0.0;
 		}
 
 	};

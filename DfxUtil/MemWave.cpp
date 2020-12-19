@@ -133,7 +133,7 @@ namespace dfx
 		finished = false;
 	}
 
-	bool MemWave::Load(const std::filesystem::path& path_, size_t start_frame, size_t end_frame)
+	bool MemWave::Load(const std::filesystem::path& path_, unsigned start_frame, unsigned end_frame)
 	{
 		path = path_;
 

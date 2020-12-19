@@ -645,7 +645,7 @@ namespace bryx
 		{
 			// p points right at the decimal point.
 
-			int n = strlen(p) - 1;
+			size_t n = strlen(p) - 1;
 
 			if (n > 0)
 			{
@@ -667,7 +667,7 @@ namespace bryx
 		{
 			char* p = mantissa;
 
-			int n = strlen(p) - 1;
+			size_t n = strlen(p) - 1;
 
 			if (n > 0)
 			{
@@ -815,7 +815,7 @@ namespace bryx
 
 		// At this point, x is offset to just after number
 
-		int n = src.length();
+		int n = static_cast<int>(src.length());
 		x = n - x;
 
 		src.remove_suffix(x);

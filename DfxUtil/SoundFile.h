@@ -104,7 +104,8 @@ namespace dfx
 
 		bool CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame);
 
-		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize);
+		// This version always converts to double, and maybe rescales so that 1 is full scale.
+		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool use_1_fullscale);
 
 		void Close();
 

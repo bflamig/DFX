@@ -176,9 +176,9 @@ namespace dfx
 			//handleError(FUNCTION_ARGUMENT);
 		}
 
-		auto n = velocityLayers.size();
+		int n = static_cast<int>(velocityLayers.size());
 
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			const auto& e = velocityLayers[i].vrange;
 			if ((vel >= e.iMinVel) && (vel <= e.iMaxVel)) return i; //  velocityLayers[i].vrange.robinsIdx;
@@ -201,9 +201,9 @@ namespace dfx
 			//handleError(FUNCTION_ARGUMENT);
 		}
 
-		auto n = velocityLayers.size();
+		int n = static_cast<int>(velocityLayers.size());
 
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			const auto& e = velocityLayers[i].vrange;
 			if ((vel >= e.fMinVel) && (vel <= e.fMaxVel)) return i; //  velocityLayers[i].vrange.robinsIdx;

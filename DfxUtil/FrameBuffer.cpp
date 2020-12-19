@@ -99,7 +99,7 @@ namespace dfx
 		{
 			// If we want to just look at a portion of the samples
 
-			nframes = size_t(duration * file_rate + 0.5);
+			nframes = unsigned(duration * file_rate + 0.5);
 
 			if (nframes > buffer.nFrames)
 			{
@@ -122,35 +122,34 @@ namespace dfx
 
 		constexpr double start_threshold = 0.0001;
 
-		size_t start;
+		unsigned startFrame;
 
-		for (start = 0; start < nframes; ++start)
+		for (startFrame = 0; startFrame < nframes; ++startFrame)
 		{
-			auto x = std::abs(buffer.GetAbsMaxOfFrame(start));
-
+			auto x = std::abs(buffer.GetAbsMaxOfFrame(startFrame));
 			if (x >= start_threshold) break;
 		}
 
-		if (start == nframes)
+		if (startFrame == nframes)
 		{
 			// Nothing above threshold, so we'll have to punt
-			start = 0;
+			startFrame = 0;
 		}
 
 		// Scan from the end till we see a signal above a threshold
 
 		constexpr double end_threshold = 0.0001;
 
-		size_t end = nframes;
+		unsigned endFrame = nframes;
 
 		while (1)
 		{
-			auto x = std::abs(buffer.GetAbsMaxOfFrame(--end));
+			auto x = std::abs(buffer.GetAbsMaxOfFrame(--endFrame));
 			if (x >= end_threshold) break;
-			if (end == 0)
+			if (endFrame == 0)
 			{
 				// Nothing above threshold, so we'll have to punt
-				end = nframes;
+				endFrame = nframes;
 				break;
 			}
 		}
@@ -162,7 +161,7 @@ namespace dfx
 		double neg_peak = 0.0;
 		double pos_peak = 0.0;
 
-		for (size_t i = start; i < end; i++)
+		for (unsigned i = startFrame; i < endFrame; i++)
 		{
 			auto x = buffer.GetMinOfFrame(i);
 			if (x < neg_peak) neg_peak = x;
@@ -183,12 +182,12 @@ namespace dfx
 		double sum_squared = 0.0;
 		double fallback_sum_squared = 0.0;
 
-		size_t i = start;
-		while (i < end)
+		unsigned i = startFrame;
+		while (i < endFrame)
 		{
 			double chunk_sum_squared = 0.0;
 
-			size_t k;
+			unsigned k;
 
 			for (k = 0; k < nframes_chunk; k++)
 			{
@@ -203,7 +202,7 @@ namespace dfx
 					chunk_sum_squared += d * d;
 				}
 
-				if (i++ >= end) break;
+				if (i++ >= endFrame) break;
 			}
 
 			auto s = chunk_sum_squared / buffer.nChannels;
@@ -235,7 +234,7 @@ namespace dfx
 		rms = sqrt(rms);
 
 		int effective_bits = EffectiveBits(peak, data_type);
-		return WaveStats(start, end, neg_peak, pos_peak, peak, rms, effective_bits);
+		return WaveStats(startFrame, endFrame, neg_peak, pos_peak, peak, rms, effective_bits);
 	}
 
 
@@ -250,7 +249,7 @@ namespace dfx
 		{
 			// If we want to just look at a portion of the samples
 
-			nframes = size_t(duration * file_rate + 0.5);
+			nframes = unsigned(duration * file_rate + 0.5);
 
 			if (nframes > buffer.nFrames)
 			{
@@ -273,34 +272,34 @@ namespace dfx
 
 		constexpr double start_threshold = 0.0001;
 
-		size_t start;
+		unsigned startFrame;
 
-		for (start = 0; start < nframes; ++start)
+		for (startFrame = 0; startFrame < nframes; ++startFrame)
 		{
-			auto x = buffer.GetAvgOfFrame(start);
+			auto x = buffer.GetAvgOfFrame(startFrame);
 			if (x >= start_threshold) break;
 		}
 
-		if (start == nframes)
+		if (startFrame == nframes)
 		{
 			// Nothing above threshold, so we'll have to punt
-			start = 0;
+			startFrame = 0;
 		}
 
 		// Scan from the end till we see a signal above a threshold
 
 		constexpr double end_threshold = 0.0001;
 
-		size_t end = nframes;
+		unsigned endFrame = nframes;
 
 		while (1)
 		{
-			auto x = buffer.GetAvgOfFrame(--end);
+			auto x = buffer.GetAvgOfFrame(--endFrame);
 			if (x >= end_threshold) break;
-			if (end == 0)
+			if (endFrame == 0)
 			{
 				// Nothing above threshold, so we'll have to punt
-				end = nframes;
+				endFrame = nframes;
 				break;
 			}
 		}
@@ -312,7 +311,7 @@ namespace dfx
 		double neg_max = 0.0;
 		double pos_max = 0.0;
 
-		for (size_t i = start; i < end; i++)
+		for (unsigned i = startFrame; i < endFrame; i++)
 		{
 			auto x = buffer.GetAvgOfFrame(i);
 			if (x < neg_max) neg_max = x;
@@ -330,12 +329,12 @@ namespace dfx
 		double sum_squared = 0.0;
 		double fallback_sum_squared = 0.0;
 
-		size_t i = start;
-		while (i < end)
+		unsigned i = startFrame;
+		while (i < endFrame)
 		{
 			double chunk_sum_squared = 0.0;
 
-			size_t k;
+			unsigned k;
 
 			for (k = 0; k < nframes_chunk; k++)
 			{
@@ -345,7 +344,7 @@ namespace dfx
 				auto d = buffer.GetAvgOfFrame(i);
 				chunk_sum_squared += d * d;
 
-				if (i++ >= end) break;
+				if (i++ >= endFrame) break;
 			}
 
 			auto s = chunk_sum_squared / buffer.nChannels;
@@ -377,7 +376,7 @@ namespace dfx
 		rms = sqrt(rms);
 
 		int effective_bits = EffectiveBits(peak, data_type);
-		return WaveStats(start, end, neg_max, pos_max, peak, rms, effective_bits);
+		return WaveStats(startFrame, endFrame, neg_max, pos_max, peak, rms, effective_bits);
 	}
 
 

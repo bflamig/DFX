@@ -1150,7 +1150,7 @@ namespace bryx
 		std::shared_ptr<TokenBase> result_token;
 
 		LexiNumberTraits number_traits;
-		number_traits.end_locn = std::distance(s, e); // for default, one past the last character
+		number_traits.end_locn = static_cast<int>(std::distance(s, e)); // for default, one past the last character
 
 		bool have_at_least_one_digit = false;
 
@@ -1238,7 +1238,7 @@ namespace bryx
 
 		if (c == '.')
 		{
-			number_traits.decimal_point_locn = std::distance(s, p);
+			number_traits.decimal_point_locn = static_cast<int>(std::distance(s, p));
 			c = bump_char(p, e);
 
 			// Collect up digits
@@ -1253,7 +1253,7 @@ namespace bryx
 
 		if (c == 'e' || c == 'E')
 		{
-			number_traits.exponent_locn = std::distance(s, p);
+			number_traits.exponent_locn = static_cast<int>(std::distance(s, p));
 			c = bump_char(p, e);
 
 			// Collect possible sign, either plus or minus
@@ -1269,7 +1269,7 @@ namespace bryx
 			{
 				// Ummm,
 				result = LexiResult::UnexpectedChar;
-				Extent extent(0, 0, std::distance(s, p));
+				Extent extent(0, 0, static_cast<int>(std::distance(s, p)));
 				result_token = MakeErrorToken(result, "CollectBryxNumber(): expecting first exponent digit of a number", extent);
 			}
 			else
@@ -1300,7 +1300,7 @@ namespace bryx
 
 		if (idx != -1)
 		{
-			number_traits.metric_pfx_locn = std::distance(s, p);
+			number_traits.metric_pfx_locn = static_cast<int>(std::distance(s, p));
 			c = bump_char(p, e);
 		}
 
@@ -1310,14 +1310,14 @@ namespace bryx
 
 		if (c == '%')
 		{
-			number_traits.units_locn = std::distance(s, p);
+			number_traits.units_locn = static_cast<int>(std::distance(s, p));
 			c = bump_char(p, e);
 		}
 		else if (isalpha(c))
 		{
 			// On to all other units. We collect up all alpha characters.
 
-			number_traits.units_locn = std::distance(s, p);
+			number_traits.units_locn = static_cast<int>(std::distance(s, p));
 
 			while (isalpha(c))
 			{
@@ -1334,7 +1334,7 @@ namespace bryx
 			// We have left over garbage characters. This is now
 			// considered a mistake.
 			result = LexiResult::UnexpectedChar;
-			Extent extent(0, 0, std::distance(s, p));
+			Extent extent(0, 0, static_cast<int>(std::distance(s, p)));
 			result_token = MakeErrorToken(result, "CollectBryxNumber(): unexpected characters", extent);
 		}
 		else
@@ -1346,7 +1346,7 @@ namespace bryx
 			{
 				number_traits.could_be_a_number = true;
 
-				number_traits.end_locn = std::distance(s, p);
+				number_traits.end_locn = static_cast<int>(std::distance(s, p));
 
 				Extent extent(0, 0, number_traits.end_locn);
 
@@ -1366,14 +1366,14 @@ namespace bryx
 				else
 				{
 					result = LexiResult::Unspecified;
-					Extent extent(0, 0, std::distance(s, p));
+					Extent extent(0, 0, static_cast<int>(std::distance(s, p)));
 					result_token = MakeErrorToken(result, "CollectBryxNumber(): processing number and/or units", extent);
 				}
 			}
 			else
 			{
 				result = LexiResult::UnexpectedChar; // @@ TODO put in a better code
-				Extent extent(0, 0, std::distance(s, p));
+				Extent extent(0, 0, static_cast<int>(std::distance(s, p)));
 				result_token = MakeErrorToken(result, "CollectBryxNumber(): don't have at least one digit", extent);
 			}
 		}

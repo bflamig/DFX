@@ -1004,7 +1004,7 @@ namespace dfx
 	// ////////////////////////////////////////////////////////////////////////
 
 
-	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool doNormalize)
+	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool use_1_fullscale)
 	{
 		// @@ We've changed the logic. Now, we auto-resize the buffer here if need be. That's so we can keep
 		// the boundary checking logic in one place.
@@ -1057,7 +1057,7 @@ namespace dfx
 				//endian_swap_16(read_buf, nSamples);
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
-			if (doNormalize) 
+			if (use_1_fullscale) 
 			{
 				static constexpr double scale = 1.0 / 32768.0;
 
@@ -1089,7 +1089,7 @@ namespace dfx
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
-			if (doNormalize) 
+			if (use_1_fullscale)
 			{
 				static constexpr double scale = 1.0 / 2147483648.0;
 
@@ -1111,6 +1111,8 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::FLOAT32) 
 		{
+			// full scale ASSUMED to be 1
+
 			auto read_buf = reinterpret_cast<float*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(float)), SEEK_SET) == -1) goto error;
 
@@ -1130,6 +1132,8 @@ namespace dfx
 		}
 		else if (dataType == SampleFormat::FLOAT64) 
 		{
+			// full scale ASSUMED to be 1
+
 			auto read_buf = reinterpret_cast<double *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(double)), SEEK_SET) == -1) goto error;
 
@@ -1150,60 +1154,6 @@ namespace dfx
 			}
 #endif
 		}
-#if 0
-		else if (dataType == SampleFormat::SINT8 && isWaveFile) 
-		{ 
-			// 8-bit WAV data is unsigned!
-			auto read_buf = reinterpret_cast<unsigned char*>(dest_buffer); // Aliasing!
-			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
-			if (fread(read_buf, sizeof(unsigned char), nSamples, fd) != nSamples) goto error;
-
-			if (doNormalize) 
-			{
-				static constexpr double scale = 1.0 / 128.0;
-
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = (read_buf[i] - 128) * scale; // convert to signed values
-				}
-			}
-			else 
-			{
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = read_buf[i] - 128.0; // convert to signed values
-				}
-			}
-		}
-		else if (dataType == SampleFormat::SINT8) 
-		{ 
-			// signed 8-bit data
-			auto read_buf = reinterpret_cast<char*>(dest_buffer); // Aliasing!
-			if (fseek(fd, dataOffset + offset, SEEK_SET) == -1) goto error;
-			if (fread(read_buf, sizeof(char), nSamples, fd) != nSamples) goto error;
-
-			if (doNormalize) 
-			{
-				static constexpr double scale = 1.0 / 128.0;
-
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = read_buf[i] * scale;
-				}
-			}
-			else 
-			{
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = read_buf[i];
-				}
-			}
-		}
-#endif
 		else if (dataType == SampleFormat::SINT24) 
 		{
 			// signed 24-bit data
@@ -1218,7 +1168,7 @@ namespace dfx
 
 			// Determine the scale to use. Now, in the course of processing below, each 24-bit sample gets
 			// stored momentarily into an int32_t, and then into a double. At that point, it has a scale
-			// that reflects 24 bits. If we are going to do normalization, we divde by that scale to get a
+			// that reflects 24 bits. If we are going to do rescaling, we divde by that scale to get a
 			// number between -1.0 to 1.0.
 
 			// At the point in time when the sample is in a 32 bit integer, the question becomes, what part of
@@ -1229,7 +1179,7 @@ namespace dfx
 			static constexpr double scale_factor = 1.0 / 2147483648.0; // If in upper three bytes.
 			//static constexpr double scale_factor = 256.0 / 2147483648.0; // If in lower three bytes.
 
-			const double normal_scale_factor = doNormalize ? scale_factor : 1.0;
+			const double normal_scale_factor = use_1_fullscale ? scale_factor : 1.0;
 
 			// There are aliasing / spacing tricks going on here
 			for (i = nSamples - 1; i >= 0; i--)

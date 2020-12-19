@@ -51,6 +51,9 @@
 
 namespace dfx
 {
+	// This class ONLY handles wav files. 
+	// It supports writing though, too.
+
 	class SimpleSoundFile {
 	public:
 
@@ -113,6 +116,8 @@ namespace dfx
 		}
 
 		bool CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame);
+
+		// Unlike SoundFile::Read(), this version reads the data as is, does not try to rescale.
 
 		template<class T> bool Read(FrameBuffer<T>& buffer, unsigned startFrame = 0, unsigned endFrame = 0)
 		{
