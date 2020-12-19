@@ -493,12 +493,6 @@ namespace dfx
 			T peak = (-neg_peak) > pos_peak ? -neg_peak : pos_peak;
 			return peak;
 		}
-
-		double ComputeRms(unsigned startFrame, unsigned endFrame)
-		{
-			return 0.0;
-		}
-
 	};
 
     //

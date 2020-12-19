@@ -16,9 +16,12 @@ namespace dfx
 		SimpleSoundFile ssf;
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
 		std::vector<double> peaks; // scaled -1 to +1
+		std::vector<double> rmss;  // scaled to -1 to +1
 		FrameBuffer<int24_t> fb;
 
 		double period;
+		double sampleRate;
+		unsigned slop;
 
 	public:
 
@@ -35,14 +38,23 @@ namespace dfx
 		: ssf{}
 		, bounds_map(127)
 		, peaks(127)
+		, rmss(127)
 		, fb{}
 		, period{ 4 }
+		, sampleRate{ 48000 }
+		, slop { unsigned(sampleRate * 20e-3) } // 20 ms worth of slop
 		{
 		}
 
 		void SetPeriod(double period_)
 		{
 			period = period_;
+		}
+
+		void SetSampleRate(double sampleRate_)
+		{
+			sampleRate = sampleRate_;
+			slop = unsigned(sampleRate * 20e-3); // 20 ms worth of slop
 		}
 
 		// Right now, only 24 bit file support
@@ -77,7 +89,7 @@ namespace dfx
 			// jitter in the timing. The below seems to work at least for 4 sec intervals
 			// at 48 kHz sampling.
 
-			unsigned f = start + unsigned(48000 * period) - 1000; // period secs worth minus some slop
+			unsigned f = start + unsigned(sampleRate * period) - slop; // period secs worth minus some slop
 
 			for (; f > 0; --f)
 			{
@@ -125,7 +137,7 @@ namespace dfx
 					auto bounds = FindWave(beg_start);
 					std::cout << "i: " << (i + 1) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
 					bounds_map[i] = bounds;
-					beg_start = bounds.first + unsigned(48000 * period) - 1000; // period secs worth minus some slop
+					beg_start = bounds.first + unsigned(sampleRate * period) - slop; // period secs worth minus some slop
 				}
 			}
 			else
@@ -142,6 +154,51 @@ namespace dfx
 				peaks[i] = peak.asDouble() / 2147483487.0;
 			}
 		}
+
+		double ComputePeakRms(unsigned startFrame, unsigned endFrame)
+		{
+			// endFrame should be one past last frame of interest
+			// Right now, 24 bit only
+
+			unsigned extent = endFrame - startFrame; // @@ TODO: bounds check!
+
+			unsigned wd = unsigned(sampleRate * 20e-3); // roughly a 20 ms window
+
+			double peakRms = 0.0;
+
+			for (unsigned j = 0; j < extent; j++)
+			{
+				double S = 0.0;
+
+				for (unsigned i = 0; i < wd; i++)
+				{
+					unsigned k = i + wd * j;
+
+					if (k < extent)
+					{
+						double W = fb.GetAbsMaxOfFrame(k + startFrame).asDouble() / 2147483647.0;
+						W = W * W / wd;
+						S += W;
+					}
+					else break;
+				}
+
+				double Rms = sqrt(S);
+				if (Rms > peakRms) peakRms = Rms;
+			}
+
+			return peakRms;
+		}
+
+		void ComputeRmss()
+		{
+			for (int i = 0; i < 127; i++)
+			{
+				double peakRms = ComputePeakRms(bounds_map[i].first, bounds_map[i].second + 1);
+				rmss[i] = peakRms;
+			}
+		}
+
 
 		void CreateVelocityFiles(const std::string &robinBasePath)
 		{
@@ -185,6 +242,7 @@ namespace dfx
 					dfxi << "        " << "vr" << num_str << " = { fname = \"";
 					dfxi << robinBase << num_str << ".wav" << "\"";
 					dfxi << ", peak = " << peaks[i];
+					dfxi << ", rms = " << rmss[i];
 					dfxi << " }" << std::endl;
 				}
 
@@ -232,9 +290,10 @@ int main()
 	std::cout << "Finding wave boundaries" << std::endl;
 	splitter.FindWaves(fname.generic_string());
 	std::cout << "Creating velocity files" << std::endl;
-	splitter.CreateVelocityFiles(robinBasePath.generic_string());
+	//splitter.CreateVelocityFiles(robinBasePath.generic_string());
 	std::cout << "Finding waveform peaks" << std::endl;
 	splitter.ScanForPeaks();
+	splitter.ComputeRmss();
 	std::cout << "Creating dfxi file" << std::endl;
 	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
 #else
