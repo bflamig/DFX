@@ -2,6 +2,8 @@
 #include <ios>
 #include <fstream>
 #include <filesystem>
+#include <cmath>
+#include <algorithm>
 #include "WaveFile.h"
 
 
@@ -14,6 +16,7 @@ namespace dfx
 
 		WaveFile wf;
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
+		std::vector<int> vel_map;  // max velocity of each range
 		std::vector<double> peaks; // scaled -1 to +1
 		std::vector<double> rmss;  // scaled to -1 to +1
 		FrameBuffer<int24_t> fb;   // 24-bit only at the moment
@@ -23,6 +26,8 @@ namespace dfx
 		unsigned slop;
 
 		static constexpr double sloppy_seconds = 20e-3; // OMG
+
+		int num_vels;
 
 	public:
 
@@ -35,16 +40,23 @@ namespace dfx
 
 	public:
 
-		VelocityLayerSplitter()
+		VelocityLayerSplitter(int num_vels_, double period_)
 		: wf{}
-		, bounds_map(127)
-		, peaks(127)
-		, rmss(127)
+		, bounds_map{}
+		, vel_map{}
+		, peaks{}
+		, rmss{}
 		, fb{}
-		, period{ 4 }
+		, period{ period_ }
 		, sampleRate{ 48000 }
 		, slop { unsigned(sampleRate * sloppy_seconds) } // So many samples worth of slop
+		, num_vels { num_vels_ }
 		{
+			bounds_map.reserve(num_vels);
+			vel_map.reserve(num_vels);
+			peaks.reserve(num_vels);
+			rmss.reserve(num_vels);
+			CreateVelMap();
 		}
 
 		void SetPeriod(double period_)
@@ -58,6 +70,16 @@ namespace dfx
 			slop = unsigned(sampleRate * sloppy_seconds); // So many samples worth of slop
 		}
 
+		void CreateVelMap()
+		{
+			double spread = 127.0 / num_vels;
+
+			for (int i = 1; i <= num_vels; i++)
+			{
+				int m = static_cast<int>(spread * i + 0.5);
+				vel_map.push_back(m);
+			}
+		}
 
 		unsigned FindWaveStart(unsigned beg_start)
 		{
@@ -148,11 +170,12 @@ namespace dfx
 
 				unsigned beg_start = 0;
 
-				for (int i = 0; i < 127; i++)
+				for (int i = 0; i < num_vels; i++)
 				{
 					auto bounds = FindWave(beg_start);
-					std::cout << "i: " << (i + 1) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
-					bounds_map[i] = bounds;
+					std::cout << "v: " << (vel_map[i]) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
+					//bounds_map[i] = bounds;
+					bounds_map.push_back(bounds);
 					unsigned skip_delta = unsigned(sampleRate * period) - slop; // this many samples to skip
 					beg_start = bounds.first + skip_delta; // period secs worth minus some slop
 				}
@@ -165,10 +188,11 @@ namespace dfx
 
 		void ScanForPeaks()
 		{
-			for (int i = 0; i < 127; i++)
+			for (int i = 0; i < num_vels; i++)
 			{
 				int24_t peak = fb.FindMax(bounds_map[i].first, bounds_map[i].second + 1);
-				peaks[i] = peak.asDouble() / 2147483487.0;
+				auto p = peak.asDouble() / 2147483487.0;
+				peaks.push_back(p);
 			}
 		}
 
@@ -209,21 +233,24 @@ namespace dfx
 
 		void ComputeRmss()
 		{
-			for (int i = 0; i < 127; i++)
+			for (int i = 0; i < num_vels; i++)
 			{
 				double peakRms = ComputePeakRms(bounds_map[i].first, bounds_map[i].second + 1);
-				rmss[i] = peakRms;
+				rmss.push_back(peakRms);
 			}
 		}
 
 
+		void SortByPeaks()
+		{
+			//std::sort(bounds_map.begin(), bounds_map.end(), )
+		}
+
 		void CreateVelocityFiles(const std::string &robinBasePath)
 		{
-			// std::string robinBasePath = "W:/Reaper/Robins/Tom4_v";
-
-			for (int i = 0; i < 127; i++)
+			for (int i = 0; i < num_vels; i++)
 			{
-				std::string robinPath = robinBasePath + std::to_string(i + 1) + ".wav";
+				std::string robinPath = robinBasePath + std::to_string(vel_map[i]) + ".wav";
 
 				bool b = wf.OpenForWriting(robinPath, fb);
 
@@ -255,9 +282,9 @@ namespace dfx
 
 				dfxi << "    velocities = " << std::endl;
 				dfxi << "    [" << std::endl;
-				for (int i = 0; i < 127; i++)
+				for (int i = 0; i < num_vels; i++)
 				{
-					auto num_str = std::to_string(i + 1);
+					auto num_str = std::to_string(vel_map[i]);
 					dfxi << "        " << "vr" << num_str << " = { fname = \"";
 					dfxi << robinBase << num_str << ".wav" << "\"";
 					dfxi << ", peak = " << peaks[i];
@@ -282,16 +309,66 @@ namespace dfx
 
 using namespace dfx;
 
+void doit(const std::string_view basePath, const std::string_view drum_name, int num_hits, double period)
+{
+	VelocityLayerSplitter splitter(num_hits, period);
+
+	double w;
+	auto frac = std::modf(period, &w);
+
+	auto x = static_cast<int>(w);
+	auto f = static_cast<int>(frac * 10 + 0.5);
+
+	std::string frog = (f == 0) ? "" : "_" + std::to_string(f);
+
+	std::string period_str = std::to_string(x) + frog + "secs";
+
+	std::filesystem::path fname = basePath;
+	fname /= drum_name;
+	fname += "." + period_str + ".wav";
+
+	std::string robinPartial = drum_name.data();
+	robinPartial += "_v";
+
+	std::filesystem::path wavesDir = basePath;
+	wavesDir /= drum_name;
+	wavesDir += "Robins";
+
+	std::filesystem::path robinBasePath = wavesDir;
+	robinBasePath /= robinPartial;
+
+	std::filesystem::path dfxiPath = wavesDir;
+	dfxiPath /= drum_name;
+	dfxiPath.replace_extension("dfxi");
+
+	std::cout << "Finding wave boundaries" << std::endl;
+	splitter.FindWaves(fname.generic_string());
+	std::cout << "Creating velocity files" << std::endl;
+	splitter.CreateVelocityFiles(robinBasePath.generic_string());
+	std::cout << "Finding waveform peaks" << std::endl;
+	splitter.ScanForPeaks();
+	splitter.ComputeRmss();
+	std::cout << "Creating dfxi file" << std::endl;
+	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+}
+
 int main()
 {
 #if 1
-	VelocityLayerSplitter splitter;
+	//doit("W:/Reaper", "Tabla62", 127, 3.5);
+	//doit("W:/Reaper", "Tabla63", 127, 4);
+	//doit("W:/Reaper", "Tabla65", 127, 1.5);
+	doit("W:/Reaper", "Tabla66", 127, 1);
+#else
+
+	int num_hits = 127;
+
+	VelocityLayerSplitter splitter(num_hits, 3.5);
 
 	std::filesystem::path basePath = "W:/Reaper";
 
 	std::string drum_name = "Tabla62";
 	std::string period_str = "3_5secs";
-	splitter.SetPeriod(3.5);  // @@ DON'T FORGET TO CHANGE THIS TOO!
 
 	std::filesystem::path fname = basePath;
 	fname /= drum_name + "." + period_str + ".wav";
@@ -315,9 +392,12 @@ int main()
 	std::cout << "Finding waveform peaks" << std::endl;
 	splitter.ScanForPeaks();
 	splitter.ComputeRmss();
-	std::cout << "Creating dfxi file" << std::endl;
-	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
-#else
+	//std::cout << "Creating dfxi file" << std::endl;
+	//splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+
+#endif
+
+#if 0
 
 	WavFile ssf;
 
