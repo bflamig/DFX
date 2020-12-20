@@ -44,10 +44,10 @@ namespace dfx
 	class DrumKit {
 	public:
 
-		std::filesystem::path cumulativePath;    // For ease of recursing down
-		std::filesystem::path basePath;          // Usually the path to the sound font file
-		std::filesystem::path includeBasePath;   // Usually equal to sound font location
-		std::filesystem::path kitPath;           // Relative to sound font location
+		std::filesystem::path cumulativePath;   // For ease of recursing down
+		std::filesystem::path basePath;         // Usually the path to the sound font file
+		std::filesystem::path includeBasePath;  // Usually equal to sound font location
+		std::filesystem::path kitPath;          // Relative to sound font location
 		std::string name;
 
 		std::vector<drum_ptr> drums;

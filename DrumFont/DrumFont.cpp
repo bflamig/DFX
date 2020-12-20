@@ -141,6 +141,8 @@ namespace dfx
 
 		auto kitmap_ptr = AsCurlyList(kit_val);
 
+		// See if we have an include base path for all instruments of this kit
+
 		auto include_base_path_opt = GetSimpleProperty(kitmap_ptr, "include_base_path");
 		if (!include_base_path_opt)
 		{
@@ -169,12 +171,10 @@ namespace dfx
 
 		for (auto& drum_nv : *instrument_map_ptr)
 		{
-			//BuildInstrument(kit->drums, kit->cumulativePath, drum_nv);
 			BuildInstrument(kit, drum_nv);
 		}
 	}
 
-	//void DrumFont::BuildInstrument(std::vector<drum_ptr>& drums, std::filesystem::path cumulativePath, const nv_type& drum_nv)
 	void DrumFont::BuildInstrument(std::shared_ptr<DrumKit>& kit, const nv_type& drum_nv)
 	{
 		auto& drum_name = drum_nv.first;
@@ -192,6 +192,8 @@ namespace dfx
 		auto drum_path_opt = GetSimpleProperty(drum_map_ptr, "path");  // @@ TODO: Someday simplify this stuff
 		std::string dpath = drum_path_opt ? *drum_path_opt : "";
 
+		std::filesystem::path cumulativePath = kit->cumulativePath;
+		cumulativePath /= dpath;
 
 		// See if the drum velocity layers are in an include file instead
 		// of being immediate.
@@ -244,7 +246,7 @@ namespace dfx
 					// a complete path specification.) Both are covered
 					// by the /= operator, I believe
 
-					include_path = kit->cumulativePath;
+					include_path = cumulativePath; // NO!:  kit->cumulativePath;
 					include_path /= kit->includeBasePath;
 					include_path /= rel_path;
 				}
@@ -256,7 +258,7 @@ namespace dfx
 				// are thus stored in the same place as the current 
 				// instrument.
 
-				include_path = kit->cumulativePath;
+				include_path = cumulativePath; // NO!: kit->cumulativePath;
 				include_path /= rel_path;
 			}
 

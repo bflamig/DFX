@@ -17,13 +17,13 @@ namespace dfx
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
 		std::vector<double> peaks; // scaled -1 to +1
 		std::vector<double> rmss;  // scaled to -1 to +1
-		FrameBuffer<int24_t> fb;
+		FrameBuffer<int24_t> fb;   // 24-bit only at the moment
 
 		double period;
 		double sampleRate;
 		unsigned slop;
 
-		static constexpr double default_sloppy_seconds = 20e-3; // OMG
+		static constexpr double sloppy_seconds = 20e-3; // OMG
 
 	public:
 
@@ -44,7 +44,7 @@ namespace dfx
 		, fb{}
 		, period{ 4 }
 		, sampleRate{ 48000 }
-		, slop { unsigned(sampleRate * default_sloppy_seconds) } // So many seconds worth of slop
+		, slop { unsigned(sampleRate * sloppy_seconds) } // So many samples worth of slop
 		{
 		}
 
@@ -56,7 +56,7 @@ namespace dfx
 		void SetSampleRate(double sampleRate_)
 		{
 			sampleRate = sampleRate_;
-			slop = unsigned(sampleRate * default_sloppy_seconds); // So many seconds worth of slop
+			slop = unsigned(sampleRate * sloppy_seconds); // So many samples worth of slop
 		}
 
 
@@ -96,7 +96,8 @@ namespace dfx
 			// impossible (so it seems anyway). Anticipate a bit of jitter in the timing.
 			// The code below seems to work -- at least for 4 sec intervals at 48 kHz sampling.
 
-			unsigned f = start + unsigned(sampleRate * period) - slop; // period secs worth minus some slop
+			unsigned skip_delta = unsigned(sampleRate * period) - slop; // number of samples to skip to
+			unsigned f = start + skip_delta;
 
 			// Make sure not to start past the end of the buffer!
 
@@ -153,7 +154,8 @@ namespace dfx
 					auto bounds = FindWave(beg_start);
 					std::cout << "i: " << (i + 1) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
 					bounds_map[i] = bounds;
-					beg_start = bounds.first + unsigned(sampleRate * period) - slop; // period secs worth minus some slop
+					unsigned skip_delta = unsigned(sampleRate * period) - slop; // this many samples to skip
+					beg_start = bounds.first + skip_delta; // period secs worth minus some slop
 				}
 			}
 			else
@@ -288,9 +290,9 @@ int main()
 
 	std::filesystem::path basePath = "W:/Reaper";
 
-	std::string drum_name = "Tabla64";
-	std::string period_str = "3secs";
-	splitter.SetPeriod(3.0);
+	std::string drum_name = "Tabla62";
+	std::string period_str = "3_5secs";
+	splitter.SetPeriod(3.5);  // @@ DON'T FORGET TO CHANGE THIS TOO!
 
 	std::filesystem::path fname = basePath;
 	fname /= drum_name + "." + period_str + ".wav";
@@ -308,7 +310,7 @@ int main()
 	std::cout << "Finding wave boundaries" << std::endl;
 	splitter.FindWaves(fname.generic_string());
 	std::cout << "Creating velocity files" << std::endl;
-	//splitter.CreateVelocityFiles(robinBasePath.generic_string());
+	splitter.CreateVelocityFiles(robinBasePath.generic_string());
 	std::cout << "Finding waveform peaks" << std::endl;
 	splitter.ScanForPeaks();
 	splitter.ComputeRmss();
