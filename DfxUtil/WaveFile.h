@@ -1,7 +1,7 @@
 #pragma once
 
 // 
-// Simple Sound File:
+// Wave File:
 //
 // Simple read/write support for wav files. And that's it!
 //
@@ -54,7 +54,7 @@ namespace dfx
 	// This class ONLY handles wav files. 
 	// It supports writing though, too.
 
-	class WavFile {
+	class WaveFile {
 	public:
 
 		std::vector<AudioResultPkg> errors;
@@ -71,8 +71,8 @@ namespace dfx
 
 	public:
 
-		WavFile();
-		virtual ~WavFile();
+		WaveFile();
+		virtual ~WaveFile();
 
 		//SoundFile(const SoundFile& other);
 		//SoundFile(SoundFile&& other) noexcept;
@@ -239,7 +239,6 @@ namespace dfx
 			p += start_offset;
 
 			// We are ASSUMED to be pointing right where we want to write
-			// if (fseek(fd, dataOffset + (start_offset * sizeof(T)), SEEK_SET) == -1) goto error;
 
 			if (byteswap)
 			{

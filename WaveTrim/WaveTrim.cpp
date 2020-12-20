@@ -2,18 +2,17 @@
 #include <ios>
 #include <fstream>
 #include <filesystem>
-#include "WavFile.h"
+#include "WaveFile.h"
 
 
 namespace dfx
 {
-
-	// Right now, only 24 bit file support
+	// Right now, only 24 bit wave file support
 
 	class VelocityLayerSplitter {
 	public:
 
-		WavFile wf;
+		WaveFile wf;
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
 		std::vector<double> peaks; // scaled -1 to +1
 		std::vector<double> rmss;  // scaled to -1 to +1
@@ -243,11 +242,11 @@ namespace dfx
 			}
 		}
 
-		bool BuildDfxi(const std::string &soundFontPath, const std::string& robinBase)
+		bool BuildDfxi(const std::string &dfxiPath, const std::string& robinBase)
 		{
 			// Nice utility to create a dfxi file, (dfx include file)
 
-			std::fstream dfxi(soundFontPath, std::ios::out);
+			std::fstream dfxi(dfxiPath, std::ios::out);
 
 			if (dfxi.is_open())
 			{
@@ -299,18 +298,20 @@ int main()
 
 	std::string robinPartial = drum_name + "_v";
 
-	std::filesystem::path robinBasePath = basePath;
-	robinBasePath /= drum_name + "Robins";
+	std::filesystem::path wavesDir = basePath;
+	wavesDir /= drum_name + "Robins";
+
+	std::filesystem::path robinBasePath = wavesDir;
 	robinBasePath /= robinPartial;
 
-	std::filesystem::path dfxiPath = basePath;
+	std::filesystem::path dfxiPath = wavesDir;
 	dfxiPath /= drum_name;
 	dfxiPath.replace_extension("dfxi");
 
 	std::cout << "Finding wave boundaries" << std::endl;
 	splitter.FindWaves(fname.generic_string());
-	std::cout << "Creating velocity files" << std::endl;
-	splitter.CreateVelocityFiles(robinBasePath.generic_string());
+	//std::cout << "Creating velocity files" << std::endl;
+	//splitter.CreateVelocityFiles(robinBasePath.generic_string());
 	std::cout << "Finding waveform peaks" << std::endl;
 	splitter.ScanForPeaks();
 	splitter.ComputeRmss();

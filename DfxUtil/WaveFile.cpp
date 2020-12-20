@@ -32,22 +32,22 @@
  *
 \******************************************************************************/
 
-#include "WavFile.h"
+#include "WaveFile.h"
 
 namespace dfx
 {
-	WavFile::WavFile()
+	WaveFile::WaveFile()
 	: errors()
 	{
 		Clear();
 	}
 
-	WavFile::~WavFile()
+	WaveFile::~WaveFile()
 	{
 		Close();
 	}
 
-	void WavFile::Clear(bool but_not_errors)
+	void WaveFile::Clear(bool but_not_errors)
 	{
 		if (!but_not_errors)
 		{
@@ -65,17 +65,17 @@ namespace dfx
 		fileRate = 0.0;
 	}
 
-	void WavFile::LogError(AudioResult err, const std::string_view& msg)
+	void WaveFile::LogError(AudioResult err, const std::string_view& msg)
 	{
 		errors.push_back(AudioResultPkg(msg, err));
 	}
 
-	void WavFile::LogError(AudioResult err, const std::stringstream& msg)
+	void WaveFile::LogError(AudioResult err, const std::stringstream& msg)
 	{
 		errors.push_back(AudioResultPkg(msg.str(), err));
 	}
 
-	const AudioResultPkg WavFile::LastError() const
+	const AudioResultPkg WaveFile::LastError() const
 	{
 		auto n = errors.size();
 
@@ -89,7 +89,7 @@ namespace dfx
 		}
 	}
 
-	void WavFile::Close()
+	void WaveFile::Close()
 	{
 		if (fd)
 		{
@@ -100,7 +100,7 @@ namespace dfx
 		Clear(but_not_errors);
 	}
 
-	bool WavFile::CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame)
+	bool WaveFile::CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame)
 	{
 		if (proposedEndFrame >= fileFrames)
 		{
@@ -125,7 +125,7 @@ namespace dfx
 		return true;
 	}
 
-	bool WavFile::OpenForReading(const std::string_view& fileName_)
+	bool WaveFile::OpenForReading(const std::string_view& fileName_)
 	{
 		// WARNING! Do not use for StkRaw files.
 
@@ -183,7 +183,7 @@ namespace dfx
 
 	}
 
-	bool WavFile::getWavInfo()
+	bool WaveFile::getWavInfo()
 	{
 		bool good_tag = false; // Used later
 
@@ -424,7 +424,7 @@ namespace dfx
 		return fwrite(&v, sizeof(v), 1, fd) == 1;
 	}
 
-	bool WavFile::OpenForWriting(const std::string_view& fileName_, SampleFormat dataType_, int nChannels_, int sampleRate_)
+	bool WaveFile::OpenForWriting(const std::string_view& fileName_, SampleFormat dataType_, int nChannels_, int sampleRate_)
 	{
 		// WARNING! Do not use for StkRaw files.
 
@@ -554,7 +554,7 @@ namespace dfx
 	}
 
 
-	bool WavFile::BackPatchAfterWrite(SampleFormat dataType, unsigned frameCounter)
+	bool WaveFile::BackPatchAfterWrite(SampleFormat dataType, unsigned frameCounter)
 	{
 		int bytesPerSample = 0;
 
