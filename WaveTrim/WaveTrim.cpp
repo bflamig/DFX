@@ -23,6 +23,8 @@ namespace dfx
 		double sampleRate;
 		unsigned slop;
 
+		static constexpr double default_sloppy_seconds = 20e-3; // OMG
+
 	public:
 
 		// It's useful to have the start threshold to be bigger than the ending one.
@@ -42,7 +44,7 @@ namespace dfx
 		, fb{}
 		, period{ 4 }
 		, sampleRate{ 48000 }
-		, slop { unsigned(sampleRate * 20e-3) } // 20 ms worth of slop
+		, slop { unsigned(sampleRate * default_sloppy_seconds) } // So many seconds worth of slop
 		{
 		}
 
@@ -54,20 +56,21 @@ namespace dfx
 		void SetSampleRate(double sampleRate_)
 		{
 			sampleRate = sampleRate_;
-			slop = unsigned(sampleRate * 20e-3); // 20 ms worth of slop
+			slop = unsigned(sampleRate * default_sloppy_seconds); // So many seconds worth of slop
 		}
 
-		// Right now, only 24 bit file support
 
 		unsigned FindWaveStart(unsigned beg_start)
 		{
+			// REMINDER: Right now, only 24 bit file support
+
 			unsigned f = beg_start;
 			for (; f < fb.nFrames; f++)
 			{
 				auto x = fb.GetStereoFrame(f);
 				//auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
 				auto maxxie = fb.GetAbsMaxOfFrame(f).asDouble();
-				// Need to scale to our 24 bit world. The 24 bits are in the high three bytes
+				// Need to scale to our 24 bit world. The 24 bits are moved into the high three bytes
 				// of a 32 bit integer, and then we convert straight to double from there, so ...
 				const double scaled_thold = start_wave_thold * 2147483647.0; 
 				//if (avg > scaled_thold) break;
@@ -78,18 +81,31 @@ namespace dfx
 
 		unsigned FindWaveEnd(unsigned start)
 		{
+			// REMINDER: Right now, only 24 bit file support
+
 			// @@ Value returned is *right* at the end, not one past it.
 
-			// We skip to near the start of the next wave, and then scan backwards
-			// We need some "slop" so that we don't land on top of the next wave
-			// and cause all sorts of problems. The reason we need slop? It's because
-			// we can't guarantee the waves are the same number of samples apart
-			// each time. They would be, but there are vagaries in sending midi commands
-			// (how we generate the waves) and DAW processing, etc. There is a bit of
-			// jitter in the timing. The below seems to work at least for 4 sec intervals
-			// at 48 kHz sampling.
+			// The "start" argument coming in is the start of the wave we are
+			// currently on. 
+
+			// We skip to the vicinity right before the start of the *next* wave, and then
+			// scan backwards. We need some "slop" so that we don't land on top of the
+			// next wave and cause all sorts of problems. The reason we need slop? It's
+			// because we can't guarantee the waves are the same number of samples apart
+			// each time. The vagaries of midi timing and DAW audio processing make this
+			// impossible (so it seems anyway). Anticipate a bit of jitter in the timing.
+			// The code below seems to work -- at least for 4 sec intervals at 48 kHz sampling.
 
 			unsigned f = start + unsigned(sampleRate * period) - slop; // period secs worth minus some slop
+
+			// Make sure not to start past the end of the buffer!
+
+			if (f >= fb.nFrames)
+			{
+				// @@ TODO: Really, should we just get out? It means we didn't run the wave sampling
+				// long enough during recording. Hmmmm... 
+				f = fb.nFrames;
+			}
 
 			for (; f > 0; --f)
 			{
@@ -213,8 +229,10 @@ namespace dfx
 				if (b)
 				{
 					// NOTE: In the writing here, we set the end to be *one past the end*.
-					// This is to keep the semantics the same as if we were to use an iterator.
+					// This is to keep the semantics the same as if we were to use it in
+					// an iterator setting.
 					// It keeps me sane!
+
 					unsigned hacked_first = bounds_map[i].first;
 					if (hacked_first > 16) hacked_first -= 16;
 					ssf.Write(fb, bounds_map[i].first, bounds_map[i].second + 1);

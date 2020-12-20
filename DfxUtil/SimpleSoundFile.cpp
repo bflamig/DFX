@@ -322,8 +322,6 @@ namespace dfx
 			msg << temp << "bits per sample with data format tag " << format_tag << " not supported in getWavInfo() for (" << fileName << ")";
 			LogError(AudioResult::FILE_ERROR, msg);
 			return false;
-
-			return false;
 		}
 
 		// Jump over any remaining part of the "fmt" chunk.
@@ -404,22 +402,24 @@ namespace dfx
 	};
 
 
-	inline bool alrighty(FILE* fd, const std::string_view& txt)
+	// These return true if they succeed
+
+	inline bool parm_write(FILE* fd, const std::string_view& txt)
 	{
 		return fwrite(txt.data(), txt.size(), 1, fd) == 1;
 	}
 
-	inline bool alrighty(FILE* fd, uint32_t v)
+	inline bool parm_write(FILE* fd, uint32_t v)
 	{
 		return fwrite(&v, sizeof(v), 1, fd) == 1;  
 	}
 
-	inline bool alrighty(FILE* fd, int32_t v)
+	inline bool parm_write(FILE* fd, int32_t v)
 	{
 		return fwrite(&v, sizeof(v), 1, fd) == 1;
 	}
 
-	inline bool alrighty(FILE* fd, int16_t v)
+	inline bool parm_write(FILE* fd, int16_t v)
 	{
 		return fwrite(&v, sizeof(v), 1, fd) == 1;
 	}
@@ -523,6 +523,7 @@ namespace dfx
 		}
 
 		byteswap = false;
+
 #ifndef __LITTLE_ENDIAN__
 		byteswap = true;
 		swap(&hdr.chunkSize);
@@ -540,34 +541,8 @@ namespace dfx
 
 		if (fwrite(&hdr, 1, bytesToWrite, fd) != bytesToWrite) goto error;
 
-		if (alrighty(fd, "data") == false) goto error;
-		if (alrighty(fd, (int32_t)0) == false) goto error;
-
-#if 0
-		uint32_t fileSize = nSamples * sampleSize + 44;
-
-		// header:
-
-		if (alrighty(fd, "RIFF") == false) goto error;
-		if (alrighty(fd, fileSize) == false) goto error;
-		if (alrighty(fd, "WAVE") == false) goto error;
-
-		// chunk 1:
-
-		if (alrighty(fd, "fmt ") == false) goto error;
-		if (alrighty(fd, (int32_t)16) == false) goto error;                                     // size of chunk in bytes (16 for PCM)
-		if (alrighty(fd, (int16_t)1) == false) goto error;                                      // 1 - for PCM
-		if (alrighty(fd, (int16_t)nChannels) == false) goto error;                              // 
-		if (alrighty(fd, (int32_t)sampleRate) == false) goto error;                             // sample rate per second (usually 44100)
-		if (alrighty(fd, (int32_t)(sampleSize * nChannels * sampleRate)) == false) goto error;  // bytes per second (usualy 176400 for 16 bit)
-		if (alrighty(fd, (int16_t)4) == false) goto error;				                        // bytes per sample data align 4 bytes (2 bytes sample stereo)
-		if (alrighty(fd, (int16_t)sampleSize*8) == false) goto error;	                        // bits per sample
-
-		// chunk 2:
-
-		if (alrighty(fd, "data") == false) goto error;                             // "data"
-		if (alrighty(fd, (uint32_t)(nSamples * sampleSize)) == false) goto error;  // size of audio data n-bit
-#endif
+		if (!parm_write(fd, "data")) goto error;
+		if (!parm_write(fd, (int32_t)0)) goto error;
 
 		return true;
 
@@ -581,16 +556,40 @@ namespace dfx
 
 	bool SimpleSoundFile::BackPatchAfterWrite(SampleFormat dataType, unsigned frameCounter)
 	{
-		int bytesPerSample = 1;
+		int bytesPerSample = 0;
 
-		if (dataType == SampleFormat::SINT16)
-			bytesPerSample = 2;
-		else if (dataType == SampleFormat::SINT24)
-			bytesPerSample = 3;
-		else if (dataType == SampleFormat::SINT32 || dataType == SampleFormat::FLOAT32)
-			bytesPerSample = 4;
-		else if (dataType == SampleFormat::FLOAT64)
-			bytesPerSample = 8;
+		switch (dataType)
+		{
+			case SampleFormat::SINT16:
+			{
+				bytesPerSample = 2;
+			}
+			break;
+			case SampleFormat::SINT24:
+			{
+				bytesPerSample = 3;
+			}
+			break;
+			case SampleFormat::SINT32:
+			case SampleFormat::FLOAT32:
+			{
+				bytesPerSample = 4;
+			}
+			break;
+			case SampleFormat::FLOAT64:
+			{
+				bytesPerSample = 8;
+			}
+			break;
+		}
+
+		if (bytesPerSample == 0)
+		{
+			std::stringstream msg;
+			msg << "Unsupported data type in BackPatchAfterWrite() for (" << fileName << ")";
+			LogError(AudioResult::FILE_ERROR, msg);
+			return false;
+		}
 
 		bool useExtensible = false;
 		int dataLocation = 40;
@@ -601,43 +600,49 @@ namespace dfx
 			dataLocation = 76;
 		}
 
-		uint32_t bytes = (uint32_t)(frameCounter * nChannels * bytesPerSample);
+		uint32_t nbytes = (uint32_t)(frameCounter * nChannels * bytesPerSample);
 
-		if (bytes % 2) // pad extra byte if odd
+		if (nbytes % 2) // pad extra byte if odd
 		{ 
-			signed char sample = 0;
-			fwrite(&sample, 1, 1, fd);
+			char sample = 0;
+			if (fwrite(&sample, sizeof(sample), 1, fd) != 1) goto error;
 		}
 
 #ifndef __LITTLE_ENDIAN__
-		swap(&bytes);
+		swap(&nbytes);
 #endif
 		fseek(fd, dataLocation, SEEK_SET); // jump to data length
-		fwrite(&bytes, 4, 1, fd);
+		if (fwrite(&nbytes, sizeof(nbytes), 1, fd) != 1) goto error;
 
-		bytes = (uint32_t)(frameCounter * nChannels * bytesPerSample + 44);
+		nbytes += 44;
 
-		if (useExtensible) bytes += 36;
+		if (useExtensible) nbytes += 36;
 
 #ifndef __LITTLE_ENDIAN__
-		swap(&bytes);
+		swap(&nbytes);
 #endif
 		fseek(fd, 4, SEEK_SET); // jump to file size
-		fwrite(&bytes, 4, 1, fd);
+		if (fwrite(&nbytes, sizeof(nbytes), 1, fd) != 1) goto error;
 
 		if (useExtensible) 
 		{ 
 			// fill in the "fact" chunk frames value
-			bytes = (uint32_t)frameCounter;
+			nbytes = (uint32_t)frameCounter;
 
 #ifndef __LITTLE_ENDIAN__
-			swap(&bytes);
+			swap(&nbytes);
 #endif
 			fseek(fd, 68, SEEK_SET);
-			fwrite(&bytes, 4, 1, fd);
+			if (fwrite(&nbytes, sizeof(nbytes), 1, fd) != 1) goto error;
 		}
 
 		return true;
+
+	error:
+		std::stringstream msg;
+		msg << "problem backpatching wav file (" << fileName << ")";
+		LogError(AudioResult::FILE_ERROR, msg);
+		return false;
 	}
 
 } // end of namespace

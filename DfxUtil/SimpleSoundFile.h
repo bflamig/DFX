@@ -117,11 +117,17 @@ namespace dfx
 
 		bool CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame);
 
-		// Unlike SoundFile::Read(), this version reads the data as is, does not try to rescale.
-
 		template<class T> bool Read(FrameBuffer<T>& buffer, unsigned startFrame = 0, unsigned endFrame = 0)
 		{
+			// Unlike SoundFile::Read(), this version reads the data as is, does not try to retype or rescale.
+
 			// Buffer is auto-sized here.
+
+			// @@ NOTE: endFrame is *one past the end* of where we want. Don't forget this!
+			// However, if endFrame comes in 0, it means to read from the start frame to the
+			// end of the buffer, that is, all the frames that are available, starting with
+			// the start frame. Since we are using base 0, then endFrame = fileFrames is by
+			// defn one past the end of the last frame we'd like to read.
 
 			// Make sure we have an open file.
 			if (fd == 0)
@@ -132,12 +138,12 @@ namespace dfx
 				return false;
 			}
 
-			bool sane = CheckBoundarySanity(startFrame, endFrame);
-
-			if (!sane)
+			if (!CheckBoundarySanity(startFrame, endFrame))
 			{
 				return false;
 			}
+
+			// endFrame == 0 is code for "to the end of the file"
 
 			unsigned buffEnd = endFrame > 0 ? endFrame : fileFrames;
 
@@ -151,6 +157,7 @@ namespace dfx
 			T* dest_buffer = buffer.samples.get();
 
 			if (fseek(fd, dataOffset + (offset * sizeof(T)), SEEK_SET) == -1) goto error;
+
 			if (fread(dest_buffer, sizeof(T), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap)
@@ -172,10 +179,13 @@ namespace dfx
 		template<class T> 
 		bool Write(FrameBuffer<T>& buffer, unsigned startFrame = 0, unsigned endFrame = 0)
 		{
+			// @@ ASSUMES the file pointer is right where we want to start writing samples.
+
 			// @@ NOTE: endFrame is *one past the end* of where we want. Don't forget this!
 			// However, if endFrame comes in 0, it means to write from the start frame to the
 			// end of the buffer, that is, all the frames that are available, starting with
-			// the start frame.
+			// the start frame. Since we are using base 0, then endFrame = fileFrames is by
+			// defn one past the end of the last frame we'd like to write.
 
 			if (buffer.nFrames == 0)
 			{
@@ -184,10 +194,6 @@ namespace dfx
 				LogError(AudioResult::FUNCTION_ARGUMENT, msg);
 				return false;
 			}
-
-			// We point buffEnd to one past the end of the last frame we'd like to write.
-			// But remember, we are using base 0 here, buffer.nFrames, for example, is 
-			// one past the last frame.
 
 			unsigned buffEnd = endFrame > 0 ? endFrame : buffer.nFrames;
 
