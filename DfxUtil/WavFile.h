@@ -54,7 +54,7 @@ namespace dfx
 	// This class ONLY handles wav files. 
 	// It supports writing though, too.
 
-	class SimpleSoundFile {
+	class WavFile {
 	public:
 
 		std::vector<AudioResultPkg> errors;
@@ -71,8 +71,8 @@ namespace dfx
 
 	public:
 
-		SimpleSoundFile();
-		virtual ~SimpleSoundFile();
+		WavFile();
+		virtual ~WavFile();
 
 		//SoundFile(const SoundFile& other);
 		//SoundFile(SoundFile&& other) noexcept;

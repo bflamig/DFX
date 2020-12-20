@@ -32,22 +32,22 @@
  *
 \******************************************************************************/
 
-#include "SimpleSoundFile.h"
+#include "WavFile.h"
 
 namespace dfx
 {
-	SimpleSoundFile::SimpleSoundFile()
+	WavFile::WavFile()
 	: errors()
 	{
 		Clear();
 	}
 
-	SimpleSoundFile::~SimpleSoundFile()
+	WavFile::~WavFile()
 	{
 		Close();
 	}
 
-	void SimpleSoundFile::Clear(bool but_not_errors)
+	void WavFile::Clear(bool but_not_errors)
 	{
 		if (!but_not_errors)
 		{
@@ -65,17 +65,17 @@ namespace dfx
 		fileRate = 0.0;
 	}
 
-	void SimpleSoundFile::LogError(AudioResult err, const std::string_view& msg)
+	void WavFile::LogError(AudioResult err, const std::string_view& msg)
 	{
 		errors.push_back(AudioResultPkg(msg, err));
 	}
 
-	void SimpleSoundFile::LogError(AudioResult err, const std::stringstream& msg)
+	void WavFile::LogError(AudioResult err, const std::stringstream& msg)
 	{
 		errors.push_back(AudioResultPkg(msg.str(), err));
 	}
 
-	const AudioResultPkg SimpleSoundFile::LastError() const
+	const AudioResultPkg WavFile::LastError() const
 	{
 		auto n = errors.size();
 
@@ -89,7 +89,7 @@ namespace dfx
 		}
 	}
 
-	void SimpleSoundFile::Close()
+	void WavFile::Close()
 	{
 		if (fd)
 		{
@@ -100,7 +100,7 @@ namespace dfx
 		Clear(but_not_errors);
 	}
 
-	bool SimpleSoundFile::CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame)
+	bool WavFile::CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame)
 	{
 		if (proposedEndFrame >= fileFrames)
 		{
@@ -125,7 +125,7 @@ namespace dfx
 		return true;
 	}
 
-	bool SimpleSoundFile::OpenForReading(const std::string_view& fileName_)
+	bool WavFile::OpenForReading(const std::string_view& fileName_)
 	{
 		// WARNING! Do not use for StkRaw files.
 
@@ -157,7 +157,7 @@ namespace dfx
 		bool result = false;
 
 		char header[12];
-		if (fread(&header, 4, 3, fd) != 3)
+		if (fread(&header, sizeof(header), 1, fd) != 1)
 		{
 			std::stringstream msg;
 			msg << "problem reading header for file (" << fileName << ") on open";
@@ -183,7 +183,7 @@ namespace dfx
 
 	}
 
-	bool SimpleSoundFile::getWavInfo()
+	bool WavFile::getWavInfo()
 	{
 		bool good_tag = false; // Used later
 
@@ -424,7 +424,7 @@ namespace dfx
 		return fwrite(&v, sizeof(v), 1, fd) == 1;
 	}
 
-	bool SimpleSoundFile::OpenForWriting(const std::string_view& fileName_, SampleFormat dataType_, int nChannels_, int sampleRate_)
+	bool WavFile::OpenForWriting(const std::string_view& fileName_, SampleFormat dataType_, int nChannels_, int sampleRate_)
 	{
 		// WARNING! Do not use for StkRaw files.
 
@@ -554,7 +554,7 @@ namespace dfx
 	}
 
 
-	bool SimpleSoundFile::BackPatchAfterWrite(SampleFormat dataType, unsigned frameCounter)
+	bool WavFile::BackPatchAfterWrite(SampleFormat dataType, unsigned frameCounter)
 	{
 		int bytesPerSample = 0;
 

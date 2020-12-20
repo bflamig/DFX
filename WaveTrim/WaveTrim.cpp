@@ -2,7 +2,7 @@
 #include <ios>
 #include <fstream>
 #include <filesystem>
-#include "SimpleSoundFile.h"
+#include "WavFile.h"
 
 
 namespace dfx
@@ -13,7 +13,7 @@ namespace dfx
 	class VelocityLayerSplitter {
 	public:
 
-		SimpleSoundFile ssf;
+		WavFile wf;
 		std::vector<std::pair<unsigned, unsigned>> bounds_map;
 		std::vector<double> peaks; // scaled -1 to +1
 		std::vector<double> rmss;  // scaled to -1 to +1
@@ -37,7 +37,7 @@ namespace dfx
 	public:
 
 		VelocityLayerSplitter()
-		: ssf{}
+		: wf{}
 		, bounds_map(127)
 		, peaks(127)
 		, rmss(127)
@@ -136,16 +136,16 @@ namespace dfx
 			//std::string fname = "W:\\TestSample.wav";
 			//std::string fname = "W:\\Reaper\\Tom4.wav";
 
-			//SimpleSoundFile ssf;
+			//WavFile ssf;
 
 			std::cout << "Reading wave file: " << fname << std::endl;
 
-			bool b = ssf.OpenForReading(fname);
+			bool b = wf.OpenForReading(fname);
 
 			if (b)
 			{
-				b = ssf.Read(fb);
-				ssf.Close();
+				b = wf.Read(fb);
+				wf.Close();
 
 				unsigned beg_start = 0;
 
@@ -226,7 +226,7 @@ namespace dfx
 			{
 				std::string robinPath = robinBasePath + std::to_string(i + 1) + ".wav";
 
-				bool b = ssf.OpenForWriting(robinPath, fb);
+				bool b = wf.OpenForWriting(robinPath, fb);
 
 				if (b)
 				{
@@ -237,8 +237,8 @@ namespace dfx
 
 					unsigned hacked_first = bounds_map[i].first;
 					if (hacked_first > 16) hacked_first -= 16;
-					ssf.Write(fb, bounds_map[i].first, bounds_map[i].second + 1);
-					ssf.Close();
+					wf.Write(fb, bounds_map[i].first, bounds_map[i].second + 1);
+					wf.Close();
 				}
 			}
 		}
@@ -318,7 +318,7 @@ int main()
 	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
 #else
 
-	SimpleSoundFile ssf;
+	WavFile ssf;
 
 	//bool b = ssf.OpenForReading("w:/reaper/02-201217_1814.wav");
 	bool b = ssf.OpenForReading("w:/reaper/Tabla65.1_5secs.wav");
