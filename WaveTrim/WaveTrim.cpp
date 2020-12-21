@@ -9,16 +9,43 @@
 
 namespace dfx
 {
+	struct FrameExtent
+	{
+		unsigned startFrame;   // To first frame of extent.
+		unsigned endFrame;     // To last frame of extent. NOT one past it.
+		double peak;           // (abs) max sample seen in the extent. Scaled -1 to +1
+		double rms;            // rms of the extent. Scaled -1 to +1
+
+		FrameExtent() = default;
+		//: startFrame{}
+		//, endFrame{}
+		//, peak{}
+		//, rms{}
+		//{
+		//}
+
+		FrameExtent(unsigned startFrame_, unsigned endFrame_)
+		: startFrame{ startFrame_ }
+		, endFrame{ endFrame_ }
+		, peak{}
+		, rms{}
+		{	
+			
+		}
+
+	};
+
+
+
+
 	// Right now, only 24 bit wave file support
 
 	class VelocityLayerSplitter {
 	public:
 
 		WaveFile wf;
-		std::vector<std::pair<unsigned, unsigned>> bounds_map;
+		std::vector<FrameExtent> wave_map;
 		std::vector<int> vel_map;  // max velocity of each range
-		std::vector<double> peaks; // scaled -1 to +1
-		std::vector<double> rmss;  // scaled to -1 to +1
 		FrameBuffer<int24_t> fb;   // 24-bit only at the moment
 
 		double period;
@@ -42,20 +69,16 @@ namespace dfx
 
 		VelocityLayerSplitter(int num_vels_, double period_)
 		: wf{}
-		, bounds_map{}
+		, wave_map{}
 		, vel_map{}
-		, peaks{}
-		, rmss{}
 		, fb{}
 		, period{ period_ }
 		, sampleRate{ 48000 }
 		, slop { unsigned(sampleRate * sloppy_seconds) } // So many samples worth of slop
 		, num_vels { num_vels_ }
 		{
-			bounds_map.reserve(num_vels);
+			wave_map.reserve(num_vels);
 			vel_map.reserve(num_vels);
-			peaks.reserve(num_vels);
-			rmss.reserve(num_vels);
 			CreateVelMap();
 		}
 
@@ -91,11 +114,7 @@ namespace dfx
 				auto x = fb.GetStereoFrame(f);
 				//auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
 				auto maxxie = fb.GetAbsMaxOfFrame(f).asDouble();
-				// Need to scale to our 24 bit world. The 24 bits are moved into the high three bytes
-				// of a 32 bit integer, and then we convert straight to double from there, so ...
-				const double scaled_thold = start_wave_thold * 2147483647.0; 
-				//if (avg > scaled_thold) break;
-				if (maxxie > scaled_thold) break;
+				if (maxxie > start_wave_thold) break;
 			}
 			return f;
 		}
@@ -134,17 +153,13 @@ namespace dfx
 				auto x = fb.GetStereoFrame(f);
 				//auto avg = (std::abs(x.left.asDouble()) + std::abs(x.right.asDouble())) / 2.0;
 				auto maxxie = fb.GetAbsMaxOfFrame(f).asDouble();
-				// Need to scale to our 24 bit world. The 24 bits are in the high three bytes
-				// of a 32 bit integer, and then we convert straight to double from there, so ...
-				const double scaled_thold = end_wave_thold * 2147483647.0;
-				//if (avg > scaled_thold) break; // because 24 bit in high three bytes
-				if (maxxie > scaled_thold) break; // because 24 bit in high three bytes
+				if (maxxie > end_wave_thold) break; 
 			}
 
 			return f;
 		}
 
-		std::pair<unsigned, unsigned> FindWave(unsigned beg_start)
+		FrameExtent FindWave(unsigned beg_start)
 		{
 			// Finds the bounds of one wave, given an initial guess for the start.
 			auto start = FindWaveStart(beg_start);
@@ -152,7 +167,7 @@ namespace dfx
 			return { start, end };
 		}
 
-		void FindWaves(const std::string &fname)
+		bool FindWaves(const std::string &fname)
 		{
 			//std::string fname = "W:\\TestSample.wav";
 			//std::string fname = "W:\\Reaper\\Tom4.wav";
@@ -173,26 +188,28 @@ namespace dfx
 				for (int i = 0; i < num_vels; i++)
 				{
 					auto bounds = FindWave(beg_start);
-					std::cout << "v: " << (vel_map[i]) << " start = " << bounds.first << " end = " << bounds.second << std::endl;
-					//bounds_map[i] = bounds;
-					bounds_map.push_back(bounds);
+					std::cout << "v: " << (vel_map[i]) << " start = " << bounds.startFrame << " end = " << bounds.endFrame << std::endl;
+					wave_map.push_back(bounds);
 					unsigned skip_delta = unsigned(sampleRate * period) - slop; // this many samples to skip
-					beg_start = bounds.first + skip_delta; // period secs worth minus some slop
+					beg_start = bounds.startFrame + skip_delta; // period secs worth minus some slop
 				}
 			}
 			else
 			{
 				std::cout << "Problemo" << std::endl;
 			}
+
+			return b;
 		}
 
 		void ScanForPeaks()
 		{
 			for (int i = 0; i < num_vels; i++)
 			{
-				int24_t peak = fb.FindMax(bounds_map[i].first, bounds_map[i].second + 1);
-				auto p = peak.asDouble() / 2147483487.0;
-				peaks.push_back(p);
+				auto& wv = wave_map[i];
+				int24_t peak = fb.FindMax(wv.startFrame, wv.endFrame + 1); // Note the +1 here
+				auto p = peak.asDouble();
+				wv.peak = p;
 			}
 		}
 
@@ -217,7 +234,7 @@ namespace dfx
 
 					if (k < extent)
 					{
-						double W = fb.GetAbsMaxOfFrame(k + startFrame).asDouble() / 2147483647.0;
+						double W = fb.GetAbsMaxOfFrame(k + startFrame).asDouble();
 						W = W * W / wd;
 						S += W;
 					}
@@ -235,18 +252,36 @@ namespace dfx
 		{
 			for (int i = 0; i < num_vels; i++)
 			{
-				double peakRms = ComputePeakRms(bounds_map[i].first, bounds_map[i].second + 1);
-				rmss.push_back(peakRms);
+				auto& wv = wave_map[i];
+				double peakRms = ComputePeakRms(wv.startFrame, wv.endFrame + 1); // Notice the +1 here
+				wv.rms = peakRms;
 			}
 		}
 
 
 		void SortByPeaks()
 		{
-			//std::sort(bounds_map.begin(), bounds_map.end(), )
+			std::sort
+			(
+				wave_map.begin(), wave_map.end(), [](const FrameExtent& a, const FrameExtent& b)
+				{
+					return a.peak < b.peak;
+				}
+			);
 		}
 
-		void CreateVelocityFiles(const std::string &robinBasePath)
+		void SortByRms()
+		{
+			std::sort
+			(
+				wave_map.begin(), wave_map.end(), [](const FrameExtent& a, const FrameExtent& b)
+				{
+					return a.rms < b.rms;
+				}
+			);
+		}
+
+		bool CreateVelocityFiles(const std::string &robinBasePath)
 		{
 			for (int i = 0; i < num_vels; i++)
 			{
@@ -259,14 +294,20 @@ namespace dfx
 					// NOTE: In the writing here, we set the end to be *one past the end*.
 					// This is to keep the semantics the same as if we were to use it in
 					// an iterator setting.
-					// It keeps me sane!
 
-					unsigned hacked_first = bounds_map[i].first;
+					unsigned hacked_first = wave_map[i].startFrame; // @@ Don't remember why I do this
 					if (hacked_first > 16) hacked_first -= 16;
-					wf.Write(fb, bounds_map[i].first, bounds_map[i].second + 1);
+					wf.Write(fb, wave_map[i].startFrame, wave_map[i].endFrame + 1); // Notice the +1 here
 					wf.Close();
 				}
+				else
+				{
+					std::cout << "Error creating file \"" << robinPath << "\"" << std::endl;
+					return false;
+				}
 			}
+
+			return true;
 		}
 
 		bool BuildDfxi(const std::string &dfxiPath, const std::string& robinBase)
@@ -287,8 +328,8 @@ namespace dfx
 					auto num_str = std::to_string(vel_map[i]);
 					dfxi << "        " << "vr" << num_str << " = { fname = \"";
 					dfxi << robinBase << num_str << ".wav" << "\"";
-					dfxi << ", peak = " << peaks[i];
-					dfxi << ", rms = " << rmss[i];
+					dfxi << ", peak = " << wave_map[i].peak;
+					dfxi << ", rms = " << wave_map[i].rms;
 					dfxi << " }" << std::endl;
 				}
 
@@ -299,6 +340,7 @@ namespace dfx
 			}
 			else
 			{
+				std::cout << "Error creating dfxi file \"" << dfxiPath << "\"" << std::endl;
 				return false;
 			}
 		}
@@ -334,66 +376,78 @@ void doit(const std::string_view basePath, const std::string_view drum_name, int
 	wavesDir /= drum_name;
 	wavesDir += "Robins";
 
+	std::error_code ec;
+	auto rv = std::filesystem::create_directory(wavesDir, ec);
+
+	if (!rv && ec)
+	{
+		std::cout << "Error creating directory \"" << wavesDir << "\"" << std::endl;
+		return;
+	}
+
 	std::filesystem::path robinBasePath = wavesDir;
 	robinBasePath /= robinPartial;
+
 
 	std::filesystem::path dfxiPath = wavesDir;
 	dfxiPath /= drum_name;
 	dfxiPath.replace_extension("dfxi");
 
 	std::cout << "Finding wave boundaries" << std::endl;
-	splitter.FindWaves(fname.generic_string());
-	std::cout << "Creating velocity files" << std::endl;
-	splitter.CreateVelocityFiles(robinBasePath.generic_string());
-	std::cout << "Finding waveform peaks" << std::endl;
+	bool b = splitter.FindWaves(fname.generic_string());
+
+	if (!b)
+	{
+		return;
+	}
+
+	std::cout << "Finding waveform peaks and rmss" << std::endl;
 	splitter.ScanForPeaks();
 	splitter.ComputeRmss();
+
+	//std::cout << "Sorting by peaks" << std::endl;
+	//splitter.SortByPeaks();
+	std::cout << "Sorting by rms" << std::endl;
+	splitter.SortByRms();
+
 	std::cout << "Creating dfxi file" << std::endl;
-	splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+	b = splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+
+	if (!b)
+	{
+	}
+
+	std::cout << "Creating velocity files" << std::endl;
+	b = splitter.CreateVelocityFiles(robinBasePath.generic_string());
+
+	if (!b)
+	{
+	}
 }
 
 int main()
 {
-#if 1
-	//doit("W:/Reaper", "Tabla62", 127, 3.5);
-	//doit("W:/Reaper", "Tabla63", 127, 4);
-	//doit("W:/Reaper", "Tabla65", 127, 1.5);
-	doit("W:/Reaper", "Tabla66", 127, 1);
+#if 0
+	const std::string tablaBasePath = "W:/Reaper/Tabla";
+
+	//doit(tablaBasePath, "Tabla60", 127, 3);
+	//doit(tablaBasePath, "Tabla61", 127, 1);
+	//doit(tablaBasePath, "Tabla62", 127, 3.5);
+	//doit(tablaBasePath, "Tabla63", 127, 4);
+	//doit(tablaBasePath, "Tabla64", 127, 3);
+	//doit(tablaBasePath, "Tabla65", 127, 1.5);
+
+	//doit(tablaBasePath, "Tabla66", 127, 1);
+	//doit(tablaBasePath, "Tabla67", 127, 1);
+	//doit(tablaBasePath, "Tabla68", 127, 4);
+	//doit(tablaBasePath, "Tabla69", 127, 4);
+	doit(tablaBasePath, "Tabla87", 127, 1);
 #else
-
-	int num_hits = 127;
-
-	VelocityLayerSplitter splitter(num_hits, 3.5);
-
-	std::filesystem::path basePath = "W:/Reaper";
-
-	std::string drum_name = "Tabla62";
-	std::string period_str = "3_5secs";
-
-	std::filesystem::path fname = basePath;
-	fname /= drum_name + "." + period_str + ".wav";
-
-	std::string robinPartial = drum_name + "_v";
-
-	std::filesystem::path wavesDir = basePath;
-	wavesDir /= drum_name + "Robins";
-
-	std::filesystem::path robinBasePath = wavesDir;
-	robinBasePath /= robinPartial;
-
-	std::filesystem::path dfxiPath = wavesDir;
-	dfxiPath /= drum_name;
-	dfxiPath.replace_extension("dfxi");
-
-	std::cout << "Finding wave boundaries" << std::endl;
-	splitter.FindWaves(fname.generic_string());
-	//std::cout << "Creating velocity files" << std::endl;
-	//splitter.CreateVelocityFiles(robinBasePath.generic_string());
-	std::cout << "Finding waveform peaks" << std::endl;
-	splitter.ScanForPeaks();
-	splitter.ComputeRmss();
-	//std::cout << "Creating dfxi file" << std::endl;
-	//splitter.BuildDfxi(dfxiPath.generic_string(), robinPartial);
+	const std::string kitBasePath = "W:/Reaper/Jungle";
+	//doit(kitBasePath, "Kick", 127, 1.5);
+	//doit(kitBasePath, "Snare", 127, 2);
+	//doit(kitBasePath, "Timbau_kick", 127, 2);
+	doit(kitBasePath, "Conga_11_A", 127, 2.5);
 
 #endif
 

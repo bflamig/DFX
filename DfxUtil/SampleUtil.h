@@ -133,7 +133,8 @@ namespace dfx
 
         inline double asDouble()
         {
-            return (double)asInt();
+            static constexpr double scale = 1.0 / 2147483648.0;
+            return (double)asInt() * scale;
         }
 
         // Does work, but let's not right now
@@ -146,7 +147,7 @@ namespace dfx
         {
             // @@ WARNING: Convert to double first before going to float. 
             // This prevents possible overflow problems.
-            return (float)(double)asInt(); 
+            return (float)asDouble(); 
         }
 
         int24_t *ByteSwap()

@@ -944,7 +944,7 @@ namespace dfx
                     for (int j = 0; j < nChannels; j++)
                     {
                         auto& d = out[j];
-                        d = in[j].asDouble();
+                        d = double(in[j].asInt());
                         d += 0.5;
                         d *= scale;
                     }
@@ -1429,7 +1429,7 @@ namespace dfx
                     for (int j = 0; j < nChannels; j++)
                     {
                         auto& d = out[info.outOffset[j]];
-                        d = in[info.inOffset[j]].asDouble();
+                        d = double(in[info.inOffset[j]].asInt());
                         d += 0.5;
                         d *= scale;
                     }
