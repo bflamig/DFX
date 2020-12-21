@@ -92,8 +92,14 @@ namespace dfx
 
 		// Select a drum. If no mapping for the note to a drum, then we're outta here!
 
+#if PIANO_KEY
+
 		int mapped_note = pianoKeyToDrumMap[noteNumber]; // temporary kludge
 		auto& drum = drumKit->noteMap[mapped_note];
+
+#else
+		auto& drum = drumKit->noteMap[noteNumber];
+#endif
 
 		if (!drum)
 		{

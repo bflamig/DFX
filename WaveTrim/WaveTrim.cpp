@@ -63,7 +63,8 @@ namespace dfx
 		// for start.
 
 		double start_wave_thold = 0.005;   // Roughly -46dB // Roughly -66dB, where 1.0 is max sample value
-		double end_wave_thold   = 0.0001;  // Roughly -80dB, where 1.0 is max sample value
+		//double end_wave_thold   = 0.0001;  // Roughly -80dB, where 1.0 is max sample value
+		double end_wave_thold = 0.00005;  // Roughly -86dB, where 1.0 is max sample value
 
 	public:
 
@@ -447,7 +448,9 @@ int main()
 	//doit(kitBasePath, "Kick", 127, 1.5);
 	//doit(kitBasePath, "Snare", 127, 2);
 	//doit(kitBasePath, "Timbau_kick", 127, 2);
-	doit(kitBasePath, "Conga_11_A", 127, 2.5);
+	//doit(kitBasePath, "Conga_11_A", 127, 2.5);
+	//doit(kitBasePath, "Crash_20", 63, 9);
+	doit(kitBasePath, "Crash_18", 63, 9);
 
 #endif
 

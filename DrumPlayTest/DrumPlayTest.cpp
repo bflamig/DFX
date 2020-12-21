@@ -172,7 +172,8 @@ int main()
 
 	// For our test we'll use a small midi keyboard
 
-	bool b1 = inMidi->OpenPort("AKM320");
+	//bool b1 = inMidi->OpenPort("AKM320");
+	bool b1 = inMidi->OpenPort("UMC404HD 192k MIDI In");
 
 	if (b1)
 	{
@@ -190,7 +191,8 @@ int main()
 
 	//std::string_view dfxile = "../TestFiles/TestKit.dfx";
 	//std::string_view dfxFile = "../TestFiles/Tabla.dfx";
-	std::string_view dfxFile = "W:/reaper/ExpDrum.dfx";
+	//std::string_view dfxFile = "W:/reaper/ExpDrum.dfx";
+	std::string_view dfxFile = "W:/reaper/Jungle/JungleDrums.dfx";
 
 	auto df = std::make_unique<DrumFont>();
 
