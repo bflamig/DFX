@@ -193,6 +193,7 @@ int main()
 	//std::string_view dfxFile = "../TestFiles/Tabla.dfx";
 	//std::string_view dfxFile = "W:/reaper/ExpDrum.dfx";
 	std::string_view dfxFile = "W:/reaper/Jungle/JungleDrums.dfx";
+	//std::string_view dfxFile = "W:/reaper/Tabla/TablaDrums.dfx";
 
 	auto df = std::make_unique<DrumFont>();
 

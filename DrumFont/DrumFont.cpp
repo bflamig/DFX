@@ -189,6 +189,8 @@ namespace dfx
 
 		int midi_note = static_cast<int>(nt->engr_num.X());
 
+		// Update the cumulative path to include this drum's directory
+
 		auto drum_path_opt = GetSimpleProperty(drum_map_ptr, "path");  // @@ TODO: Someday simplify this stuff
 		std::string dpath = drum_path_opt ? *drum_path_opt : "";
 
@@ -215,29 +217,31 @@ namespace dfx
 			// make them relative to the sound font path.
 
 			auto valptr = AsSimpleValue(ip);
-			auto rel_path = valptr->tkn->to_string();
+			auto rel_include_path = valptr->tkn->to_string();
 
-			std::filesystem::path include_path;
+			std::filesystem::path full_path_to_include_file;
 
-			if (rel_path.find("$fontbase/") == 0)
+			if (rel_include_path.find("$fontbase/") == 0)
 			{
 				// local override of include base path
-				include_path = sound_font_path;
-				include_path.remove_filename();
-				include_path /= rel_path.erase(0, 10);
+				full_path_to_include_file = sound_font_path;
+				full_path_to_include_file.remove_filename();
+				full_path_to_include_file /= rel_include_path.erase(0, 10); // minus the "$fontbase/"
 			}
 			else if (!kit->includeBasePath.empty())
 			{
 				// We have a file-wide include file base path specified.
+				// See if its one of our path vars. (Right now, that's only
+				// "$fontbase"
 
 				if (kit->includeBasePath == "$fontbase")
 				{
 					// So we should use the sound font path as the
 					// include path for this instrument file
 
-					include_path = sound_font_path;
-					include_path.remove_filename();
-					include_path /= rel_path;
+					full_path_to_include_file = sound_font_path;
+					full_path_to_include_file.remove_filename();
+					full_path_to_include_file /= rel_include_path;
 				}
 				else
 				{
@@ -246,23 +250,58 @@ namespace dfx
 					// a complete path specification.) Both are covered
 					// by the /= operator, I believe
 
-					include_path = cumulativePath; // NO!:  kit->cumulativePath;
-					include_path /= kit->includeBasePath;
-					include_path /= rel_path;
+					full_path_to_include_file = cumulativePath; // NOT kit->cumulativePath;
+					full_path_to_include_file /= kit->includeBasePath;
+					full_path_to_include_file /= rel_include_path;
 				}
 			}
 			else
 			{
-				// Unless otherwise specified, the include path defaults
-				// to the current cumulative path (so the include files
-				// are thus stored in the same place as the current 
-				// instrument.
+				// If there is no includeBasePath specified, then the
+				// the include path defaults to the current cumulative path,
+				// which is the path to the drum instrument's directory.
+				// When then add the rel_path as specified by the include
+				// directive.
 
-				include_path = cumulativePath; // NO!: kit->cumulativePath;
-				include_path /= rel_path;
+				// @@ TOOD: BUG. At the moment, you MUST specify the path for the drum
+				// if the include file is not in the same directory as the sound fount.
+
+				// For example, the following works:
+
+				//conga_11A =
+				//{
+				//	note = 96,
+				//  path = "Conga_11_ARobins";
+				//	include = "Conga_11_A.dfxi"
+				//},
+
+				// But not the following:
+
+				//conga_11A =
+				//{
+				//	note = 96,
+				//	include = "Conga_11_ARobins/Conga_11_A.dfxi"
+				//},
+
+				// In the latter, cumulativePath below is right, but
+				// kit->cumulative_path + dpath as used in the make_instrument]
+				// call below does not mention Conga_11_ARobins anywhere.
+
+				full_path_to_include_file = cumulativePath; // NO!: kit->cumulativePath;
+				full_path_to_include_file /= rel_include_path;
+
+				// @@ TODO: Perhaps: fix dpath so that it has all of the directories in
+				// rel_include_path. It would be empty below otherise and thus wrong
+				// here.
+
+				std::filesystem::path rip = dpath;
+				rip /= rel_include_path;
+				rip.remove_filename();
+
+				dpath = rip.generic_string();
 			}
 
-			auto pstring = include_path.generic_string();
+			auto pstring = full_path_to_include_file.generic_string();
 			auto psview = std::string_view(pstring.c_str());
 
 			auto dp = std::make_unique<DfxParser>();
