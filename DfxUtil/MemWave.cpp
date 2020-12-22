@@ -149,8 +149,7 @@ namespace dfx
 				buff.dataRate = sound_file.fileRate;
 				//buff.Resize(nFrames, nChannels);
 
-				bool doNormalize = true;
-				b = sound_file.Read(buff, start_frame, end_frame, doNormalize);
+				b = sound_file.Read(buff, start_frame, end_frame);
 			}
 
 			sound_file.Close();
@@ -172,8 +171,7 @@ namespace dfx
 			buff.dataRate = sound_file.fileRate;
 			//buff.Resize(nFrames, nChannels);
 
-			bool doNormalize = true;
-			bool b = sound_file.Read(buff, 0, 0, doNormalize);
+			bool b = sound_file.Read(buff, 0, 0);
 
 			sound_file.Close();
 

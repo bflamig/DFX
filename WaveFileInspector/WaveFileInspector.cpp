@@ -42,8 +42,7 @@ void ScanFile(const std::string_view& fname, bool raw)
 
 	buffer.SetDataRate(f.fileRate);
 
-	bool doNormalize = true;
-	f.Read(buffer, 0, 0, doNormalize);
+	f.Read(buffer, 0, 0);
 
 	double window = 0; //  0.100; // in seconds
 	double fileRate = f.fileRate;

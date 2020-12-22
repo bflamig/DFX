@@ -1004,10 +1004,32 @@ namespace dfx
 	// ////////////////////////////////////////////////////////////////////////
 
 
-	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool use_1_fullscale)
+	bool SoundFile::Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame,  double scale_factor_code)
 	{
-		// @@ We've changed the logic. Now, we auto-resize the buffer here if need be. That's so we can keep
-		// the boundary checking logic in one place.
+		// We only support the returning of values as doubles.
+
+		// If scale_factor_code = 0, then the values are left as is,
+		// to reflect the true values of the samples. It's just that
+		// the samples are converted to double. For example, if a 16 bit
+		// sample is equal to 12473, then it would come back back as
+		// 12473.0. Ditto for all the other types. This mode is used
+		// mostly for debugging purposes, when we want to see what
+		// values are actually in the file.
+
+		// If scale_factor_code = 1, then an internal scale factor is applied to each
+		// sample, such that the max sample value represented by the sample type of
+		// the file would result in a double value of 1.0. For example, in 16-bit world,
+		// a sample value of 32767 would get scaled to 32767 / 32768.
+
+		// If scale_factor_code != (0 or 1), then each sample is first converted as though
+		// the scale factor were 1, (as in previous paragraph), and then multiplied by the
+		// scale_factor_code. For example, if that factor just happened to be equal to the
+		// multiplicative inverse of the peak value seen in the file, that peak value would
+		// be scaled to be 1.0. We use this when loading samples for each robin. We know ahead 
+		// of time, via the drum font, what that peak value is, and so we can set the 
+		// scale_factor_code to 1.0 / peak.
+
+		// Buffer gets auto-sized to cover the samples desired.
 
 		// Make sure we have an open file.
 		if (fd == 0) 
@@ -1049,30 +1071,30 @@ namespace dfx
 		{
 			auto read_buf = reinterpret_cast<int16_t *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(int16_t)), SEEK_SET) == -1) goto error;
-
 			if (fread(read_buf, sizeof(int16_t), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
-				//endian_swap_16(read_buf, nSamples);
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
-			if (use_1_fullscale) 
-			{
-				static constexpr double scale = 1.0 / 32768.0;
 
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = read_buf[i] * scale;
-				}
-			}
-			else 
+			if (scale_factor_code == 0) // aka raw values
 			{
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
 				{
 					dest_buffer[i] = read_buf[i];
+				}
+			}
+			else
+			{
+				static constexpr double base_scale = 1.0 / 32768.0;
+				const double scale = base_scale * scale_factor_code;
+
+				// There are aliasing / spacing tricks going on here
+				for (i = nSamples - 1; i >= 0; i--)
+				{
+					dest_buffer[i] = read_buf[i] * scale;
 				}
 			}
 		}
@@ -1089,9 +1111,18 @@ namespace dfx
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
-			if (use_1_fullscale)
+			if (scale_factor_code == 0) // aka raw values
 			{
-				static constexpr double scale = 1.0 / 2147483648.0;
+				// There are aliasing / spacing tricks going on here
+				for (i = nSamples - 1; i >= 0; i--)
+				{
+					dest_buffer[i] = read_buf[i];
+				}
+			}
+			else
+			{
+				static constexpr double base_scale = 1.0 / 2147483648.0;
+				const double scale = base_scale * scale_factor_code;
 
 				// There are aliasing / spacing tricks going on here
 				for (i = nSamples - 1; i >= 0; i--)
@@ -1099,20 +1130,9 @@ namespace dfx
 					dest_buffer[i] = read_buf[i] * scale;
 				}
 			}
-			else 
-			{
-
-				// There are aliasing / spacing tricks going on here
-				for (i = nSamples - 1; i >= 0; i--)
-				{
-					dest_buffer[i] = read_buf[i];
-				}
-			}
 		}
 		else if (dataType == SampleFormat::FLOAT32) 
 		{
-			// full scale ASSUMED to be 1
-
 			auto read_buf = reinterpret_cast<float*>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(float)), SEEK_SET) == -1) goto error;
 
@@ -1124,35 +1144,54 @@ namespace dfx
 				byteSwapBuffer(dataType, read_buf, nSamples);
 			}
 
-			// There are aliasing / spacing tricks going on here
-			for (i = nSamples - 1; i >= 0; i--)
+			// raw values scale ASSUMED to be -1 to +1 in the file
+
+			if (scale_factor_code == 0 || scale_factor_code == 1.0)
 			{
-				dest_buffer[i] = read_buf[i];
+				// Leave values as is.
+
+				// There are aliasing / spacing tricks going on here
+				for (i = nSamples - 1; i >= 0; i--)
+				{
+					dest_buffer[i] = read_buf[i];
+				}
+			}
+			else
+			{
+				const double scale = scale_factor_code;
+
+				// There are aliasing / spacing tricks going on here
+				for (i = nSamples - 1; i >= 0; i--)
+				{
+					dest_buffer[i] = read_buf[i] * scale;
+				}
 			}
 		}
 		else if (dataType == SampleFormat::FLOAT64) 
 		{
-			// full scale ASSUMED to be 1
-
-			auto read_buf = reinterpret_cast<double *>(dest_buffer); // Aliasing!
 			if (fseek(fd, dataOffset + (offset * sizeof(double)), SEEK_SET) == -1) goto error;
-
-			if (fread(read_buf, sizeof(double), nSamples, fd) != nSamples) goto error;
+			if (fread(dest_buffer, sizeof(double), nSamples, fd) != nSamples) goto error;
 
 			if (byteswap) 
 			{
-			    //endian_swap_64(read_buf, nSamples);
-				byteSwapBuffer(dataType, read_buf, nSamples);
+				byteSwapBuffer(dataType, dest_buffer, nSamples);
 			}
 
-#if 0
-			// Umm, no reason to do this. They point to the same
-			// place and have same types.
-			for (i = nSamples - 1; i >= 0; i--)
+			// raw_values scale ASSUMED to be -1 to +1 in the file
+
+			if (scale_factor_code == 0 || scale_factor_code == 1.0)
 			{
-				dest_buffer[i] = read_buf[i];
+				// Nothing to do. We are good to go.
 			}
-#endif
+			else
+			{
+				const double scale = scale_factor_code;
+
+				for (i = nSamples - 1; i >= 0; i--)
+				{
+					dest_buffer[i] = dest_buffer[i] * scale;
+				}
+			}
 		}
 		else if (dataType == SampleFormat::SINT24) 
 		{
@@ -1167,25 +1206,26 @@ namespace dfx
 			}
 
 			// Determine the scale to use. Now, in the course of processing below, each 24-bit sample gets
-			// stored momentarily into an int32_t, and then into a double. At that point, it has a scale
+			// stored momentarily into an int32_t, and then cast into a double. At that point, it has a scale
 			// that reflects 24 bits. If we are going to do rescaling, we divde by that scale to get a
 			// number between -1.0 to 1.0.
 
 			// At the point in time when the sample is in a 32 bit integer, the question becomes, what part of
 			// that 32 bits is the 24 bit number stored? The upper three bytes, or lower three bytes? Right now,
-			// I believe we always store it in the upper three bytes, so the number can take on the full range
-			// of a 32-bit number. Otherwise, its range would be 256 times smaller.
+			// we always store it in the upper three bytes, so the number can take on the full range of a 32-bit
+			// number. Otherwise, its range would be 256 times smaller.
 
-			static constexpr double scale_factor = 1.0 / 2147483648.0; // If in upper three bytes.
-			//static constexpr double scale_factor = 256.0 / 2147483648.0; // If in lower three bytes.
+			static constexpr double usual_scale_factor = 1.0 / 2147483648.0; // If in upper three bytes.
+			//static constexpr double usual_scale_factor = 256.0 / 2147483648.0; // If in lower three bytes.
 
-			const double normal_scale_factor = use_1_fullscale ? scale_factor : 1.0;
+			const double base_scale_factor = scale_factor_code == 0 ? 1.0 : usual_scale_factor;
+			const double scale = base_scale_factor * scale_factor_code;
 
 			// There are aliasing / spacing tricks going on here
 			for (i = nSamples - 1; i >= 0; i--)
 			{
 				auto temp = double(read_buf[i].asInt());
-				auto x = temp * normal_scale_factor;
+				auto x = temp * scale;
 				dest_buffer[i] = x;
 			}
 		}

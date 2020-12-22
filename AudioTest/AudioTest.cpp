@@ -294,7 +294,7 @@ void testWave(const std::string_view waveFile)
 
 	frames.SetDataRate(48000);
 
-	rv = sf.Read(frames, 0, 0, true);
+	rv = sf.Read(frames, 0, 0);
 	if (!rv)
 	{
 		auto& last_err = sf.LastError();

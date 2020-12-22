@@ -104,8 +104,12 @@ namespace dfx
 
 		bool CheckBoundarySanity(unsigned proposedStartFrame, unsigned proposedEndFrame);
 
-		// This version always converts to double, and maybe rescales so that 1 is full scale.
-		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, bool use_1_fullscale);
+		// This version always converts to double.
+		// extra_scale_factor = 0 means use raw value
+		// extra_scale_factor = 1 means use a range of -1 to +1
+		// extra_scale_factor = 1 / peak means scale so that peak value is 1.0
+
+		bool Read(FrameBuffer<double>& buffer, unsigned startFrame, unsigned endFrame, double scale_factor_code = 1.0);
 
 		void Close();
 
