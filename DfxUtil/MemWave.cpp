@@ -133,7 +133,7 @@ namespace dfx
 		finished = false;
 	}
 
-	bool MemWave::Load(const std::filesystem::path& path_, unsigned start_frame, unsigned end_frame)
+	bool MemWave::Load(const std::filesystem::path& path_, unsigned start_frame, unsigned end_frame, double scale_factor_code)
 	{
 		path = path_;
 
@@ -149,7 +149,7 @@ namespace dfx
 				buff.dataRate = sound_file.fileRate;
 				//buff.Resize(nFrames, nChannels);
 
-				b = sound_file.Read(buff, start_frame, end_frame);
+				b = sound_file.Read(buff, start_frame, end_frame, scale_factor_code);
 			}
 
 			sound_file.Close();

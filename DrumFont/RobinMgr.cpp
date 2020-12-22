@@ -127,7 +127,10 @@ namespace dfx
 
 	bool Robin::LoadWave(std::ostream &serr)
 	{
-		bool b = wave.Load(fullPath, start_frame, end_frame);
+		bool au_naturale = true;  // @@ for now!
+		double scale_factor_code = au_naturale ? 1.0 : 1.0 / peak;
+
+		bool b = wave.Load(fullPath, start_frame, end_frame, scale_factor_code);
 		if (!b)
 		{
 			serr << "Error loading file: " << fullPath << std::endl;
