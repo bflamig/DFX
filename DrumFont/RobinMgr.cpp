@@ -127,6 +127,22 @@ namespace dfx
 
 	bool Robin::LoadWave(std::ostream &serr)
 	{
+		// NOTE: My jungle drums already have their dynamics tuned
+		// just right. And the robin files are already scaled with
+		// that in mind. So we don't want to do anything else here.
+		// @@ TODO: We need a sound font option that says leave 
+		// this as is. Or, we always do this peak scaling, but 
+		// we need knee curves instead dyn range curves for
+		// this drum, and then just replicate what's in the drum (?)
+		// Subtle effects on wave choices though, aren't there?
+		// We really have two velocity curves per instrument. One
+		// helps select the velocity layer (and depending on how it
+		// was recorded, also it's "volume"), the other, the actual
+		// amplitude played. The 1 / peak below normalizes out the
+		// "volume" the wave was recorded at, but we still have
+		// its seleciton of layer intact, implied in the velocity
+		// code sent.
+
 		bool au_naturale = true;  // @@ for now!
 		double scale_factor_code = au_naturale ? 1.0 : 1.0 / peak;
 

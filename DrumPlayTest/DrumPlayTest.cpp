@@ -67,7 +67,7 @@ int ProcessMidi(DfxMidi* midi_input, PolyDrummer* poly_drummer)
 		if (tag == NoteOnMessage::tag)
 		{
 			auto n_on = midi_input->ParseNoteOn(*m);
-			poly_drummer->noteOnDirect(n_on->note, n_on->velocity / 127.0);
+			poly_drummer->noteOnDirect(n_on->note, n_on->velocity); // / 127.0);
 			//std::cout << '+' << std::flush;
 			std::cout << int(n_on->velocity) << ' ' << std::flush;
 		}

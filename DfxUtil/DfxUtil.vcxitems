@@ -18,6 +18,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)FrameBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MemWave.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SampleUtil.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VelocityCurves.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WaveFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SoundFile.cpp" />
   </ItemGroup>
@@ -26,6 +27,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)FrameBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MemWave.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SampleUtil.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VelocityCurves.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WaveFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SoundFile.h" />
   </ItemGroup>

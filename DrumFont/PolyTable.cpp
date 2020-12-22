@@ -42,7 +42,7 @@ namespace dfx
 	PolyTableElem::PolyTableElem()
 	: wave()
 	//, filter()
-	, gain(0)
+	, gain(1.0)
 	, soundNumber(0)
 	, younger(-1)
 	, older(-1)

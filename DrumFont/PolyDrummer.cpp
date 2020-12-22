@@ -33,6 +33,7 @@
 \******************************************************************************/
 
 #include "PolyDrummer.h"
+#include "VelocityCurves.h"
 
 namespace dfx
 {
@@ -81,8 +82,14 @@ namespace dfx
 		return i != -1;
 	}
 
-	void PolyDrummer::noteOnDirect(int noteNumber, double amplitude)
+	// @@ TOTAL EXPERIMENT
+	//DynRangeCurve vel_curve(50.0, 127);
+	//KneeCurve vel_curve(127, double outputOffset_, double outputFullScale_, double kneePos_);
+
+	void PolyDrummer::noteOnDirect(int noteNumber, int velCode) // double amplitude)
 	{
+		double amplitude = velCode / 127.0;
+
 #ifdef DFX_DEBUG
 		if (amplitude < 0.0 || amplitude > 1.0)
 		{
@@ -161,7 +168,7 @@ namespace dfx
 		}
 
 		auto& e = polyTable.elems[slot];
-		e.gain = amplitude; // experiment
+		//e.gain = vel_curve.pts[velCode - 1];
 
 #if 0
 		e.filter.setPole(0.999 - (amplitude * 0.6));
@@ -194,6 +201,8 @@ namespace dfx
 		}
 	}
 
+	// @@ TODO: Someday MonoTick()
+
 
 	StereoFrame<double> PolyDrummer::StereoTick()
 	{
@@ -218,8 +227,8 @@ namespace dfx
 			{
 				auto& e = polyTable.elems[i];
 				auto rv = e.wave.StereoTick();
-				left += rv.left;   // @@ TODO: l * e.gain?
-				right += rv.right;  // @@ TODO: r * e.gain?
+				left += rv.left * e.gain;   // @@ TODO: l * e.gain?
+				right += rv.right * e.gain;  // @@ TODO: r * e.gain?
 			}
 
 			i = nxt;
