@@ -531,5 +531,8 @@ namespace dfx
 
 	WaveStats ComputeStatsII(FrameBuffer<double>& buffer, SampleFormat data_type, double file_rate, double duration);
 
+	extern double ComputePeakRms(FrameBuffer<double>& fb, double duration);
+
+	extern double ComputePeakRms(FrameBuffer<double>& fb, unsigned startFrame, unsigned endFrame);
 
 } // End of namespace

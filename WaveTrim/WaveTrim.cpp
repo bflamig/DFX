@@ -346,6 +346,31 @@ namespace dfx
 			}
 		}
 
+		bool BuildCSV(const std::string& csvPath)
+		{
+			// So we can plot these in excel
+
+			std::fstream csv(csvPath, std::ios::out);
+
+			if (csv.is_open())
+			{
+				for (int i = 0; i < num_vels; i++)
+				{
+					csv << wave_map[i].peak;
+					csv << ", ";
+					csv << wave_map[i].rms;
+					csv << std::endl;
+				}
+
+				return true;
+			}
+			else
+			{
+				std::cout << "Error creating csv file \"" << csvPath << "\"" << std::endl;
+				return false;
+			}
+		}
+
 	};
 
 } // End of namespace
@@ -418,23 +443,35 @@ void doit(const std::string_view basePath, const std::string_view drum_name, int
 	{
 	}
 
+	std::cout << "Creating csv file" << std::endl;
+
+	std::filesystem::path csvPath = dfxiPath;
+	csvPath.replace_extension("csv");
+
+	b = splitter.BuildCSV(csvPath.generic_string());
+
+	if (!b)
+	{
+	}
+
 	std::cout << "Creating velocity files" << std::endl;
 	b = splitter.CreateVelocityFiles(robinBasePath.generic_string());
 
 	if (!b)
 	{
 	}
+
 }
 
 int main()
 {
-#if 0
+#if 1
 	const std::string tablaBasePath = "W:/Reaper/Tabla";
 
 	//doit(tablaBasePath, "Tabla60", 127, 3);
 	//doit(tablaBasePath, "Tabla61", 127, 1);
 	//doit(tablaBasePath, "Tabla62", 127, 3.5);
-	//doit(tablaBasePath, "Tabla63", 127, 4);
+	doit(tablaBasePath, "Tabla63", 127, 4);
 	//doit(tablaBasePath, "Tabla64", 127, 3);
 	//doit(tablaBasePath, "Tabla65", 127, 1.5);
 
@@ -442,7 +479,7 @@ int main()
 	//doit(tablaBasePath, "Tabla67", 127, 1);
 	//doit(tablaBasePath, "Tabla68", 127, 4);
 	//doit(tablaBasePath, "Tabla69", 127, 4);
-	doit(tablaBasePath, "Tabla87", 127, 1);
+	//doit(tablaBasePath, "Tabla87", 127, 1);
 #else
 	const std::string kitBasePath = "W:/Reaper/Jungle";
 	//doit(kitBasePath, "Kick", 127, 1.5);

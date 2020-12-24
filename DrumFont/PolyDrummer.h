@@ -77,8 +77,6 @@ namespace dfx
 
 		//! Start a note with the given drum type and amplitude.
 
-		//void noteOnDirect(int number, double amplitude);
-
 		void noteOnDirect(int number, int velCode); 
 
 		//! Start a note with the given drum type and amplitude.

@@ -322,6 +322,7 @@ namespace dfx
 
 		const double threshold = peak / 100.0;
 
+#if 0
 		// Accumulate sum squares statistics
 
 		int accum_k = 0;
@@ -375,9 +376,61 @@ namespace dfx
 
 		rms = sqrt(rms);
 
+#else
+		double rms;
+		rms = ComputePeakRms(buffer, 2.0); // @@ TODO HACK FIXE ASAP// duration);
+#endif
+
 		int effective_bits = EffectiveBits(peak, data_type);
 		return WaveStats(startFrame, endFrame, neg_max, pos_max, peak, rms, effective_bits);
 	}
 
+
+	//
+	// ////////////////////////////////////////////////////////
+	// From WaveSplitter work
+
+	double ComputePeakRms(FrameBuffer<double>& fb, double duration)
+	{
+		unsigned startFrame = 0;
+		unsigned endFrame = startFrame + unsigned(fb.dataRate * duration);
+		if (endFrame >= fb.nFrames) endFrame = fb.nFrames - 1;
+		return ComputePeakRms(fb, startFrame, endFrame);
+	}
+
+	double ComputePeakRms(FrameBuffer<double> &fb, unsigned startFrame, unsigned endFrame)
+	{
+		// endFrame should be one past last frame of interest
+		// Right now, 24 bit only
+
+		unsigned extent = endFrame - startFrame; // @@ TODO: bounds check!
+
+		unsigned wd = unsigned(fb.dataRate * 20e-3); // roughly a 20 ms window
+
+		double peakRms = 0.0;
+
+		for (unsigned j = 0; j < extent; j++)
+		{
+			double S = 0.0;
+
+			for (unsigned i = 0; i < wd; i++)
+			{
+				unsigned k = i + wd * j;
+
+				if (k < extent)
+				{
+					double W = fb.GetAbsMaxOfFrame(k + startFrame);
+					W = W * W / wd;
+					S += W;
+				}
+				else break;
+			}
+
+			double Rms = sqrt(S);
+			if (Rms > peakRms) peakRms = Rms;
+		}
+
+		return peakRms;
+	}
 
 } // End of namespace

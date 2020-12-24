@@ -186,7 +186,6 @@ namespace dfx
 
 		//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Couldn't find a range for velocity " << vel << "\n";
 		//handleError(UNSPECIFIED);
-		//return -1; // Won't get here, but whatever
 
 		return idx;
 	}
@@ -211,7 +210,6 @@ namespace dfx
 
 		//oStream_ << "MultiLayeredDrum::SelectVelocityLayer(): Couldn't find a range for velocity " << vel << "\n";
 		//handleError(UNSPECIFIED);
-		//return -1; // Won't get here, but whatever
 
 		return idx;
 	}
@@ -231,20 +229,17 @@ namespace dfx
 
 	MemWave& MultiLayeredDrum::ChooseWave(int vel) // Mostly for debugging
 	{
-		auto& rm = SelectVelocityLayer(vel);
-		auto& mw = rm.ChooseWave();
+		auto& rmgr = SelectVelocityLayer(vel);
+		auto& mw = rmgr.ChooseWave();
 		return mw;
 	}
-
-
 
 	MemWave& MultiLayeredDrum::ChooseWave(double vel)
 	{
-		auto& rm = SelectVelocityLayer(vel);
-		auto& mw = rm.ChooseWave();
+		auto& rmgr = SelectVelocityLayer(vel);
+		auto& mw = rmgr.ChooseWave();
 		return mw;
 	}
-
 
 	int MultiLayeredDrum::LoadWaves(std::ostream &serr)
 	{
