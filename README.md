@@ -5,7 +5,7 @@ DFX is a new exchange format for "drum fonts", inspired in part by the "sound fo
 
 The basis of this Json-like syntax is a language I call "Bryx" which stands for "Bryan Exchange Format". This format is general and can (and will) be used for applications besides just drum fonts. So it is designed to be general purpose. The DFX language sits on top of Bryx, and can be thought of as a schema specifically for drum fonts.
 
-Due to the one-to-one mapping with Json, Bryx files can be easily translated into Json, and vice versa. That's for ease of use down the road where applications may have access to a ready-to-go Json parser, but not a Bryx parser. I plan on keeping my DFX files in Brynx format because they are simply easier to read and write.
+Due to the one-to-one mapping with Json, Bryx files can be easily translated into Json, and vice versa. That's for ease of use down the road where applications may have access to a ready-to-go Json parser, but not a Bryx parser. I plan on keeping my DFX files in Bryx format because they are simply easier to read and write.
 
 Right now, this code is being developed in Visual Studio, my IDE of choice. As such, it uses Visual Studio project files, not make files. That may change in the future. It is written to the C++ 17 standard, and strives to fully utilize the new features of that standard to their advantage.
 
